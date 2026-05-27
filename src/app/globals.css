@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CODEIIEST CP BOOTCAMP — GLOBAL STYLES
+   All custom utilities, design tokens, and component styles live here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── DESIGN TOKENS ─────────────────────────────────────────────────────── */
+:root {
+  --bg-base:     #09090b;
+  --bg-surface:  #111113;
+  --bg-elevated: #18181b;
+  --border:      rgba(255,255,255,0.08);
+  --border-md:   rgba(255,255,255,0.12);
+  --border-lg:   rgba(255,255,255,0.20);
+  --radius:      0.75rem;
+  /* shadcn compat */
+  --background:          9 9% 4%;
+  --foreground:          0 0% 100%;
+  --card:                0 0% 7%;
+  --card-foreground:     0 0% 100%;
+  --popover:             0 0% 10%;
+  --popover-foreground:  0 0% 100%;
+  --primary:             217 91% 60%;
+  --primary-foreground:  0 0% 100%;
+  --secondary:           215 28% 17%;
+  --secondary-foreground:0 0% 100%;
+  --muted:               215 20% 15%;
+  --muted-foreground:    215 20% 65%;
+  --accent:              217 91% 60%;
+  --accent-foreground:   0 0% 100%;
+  --destructive:         0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --input:               215 28% 17%;
+  --ring:                217 91% 60%;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ─── SELECTION ──────────────────────────────────────────────────────────── */
+::selection { background: rgba(220,38,38,0.25); color: #fff; }
+
+/* ─── FOCUS ──────────────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; border-radius: 6px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.glass-strong {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* Surface cards */
+.surface {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.surface-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+/* Gradient texts */
+.text-gradient-red {
+  background: linear-gradient(135deg, #f87171, #dc2626, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-white {
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grid background */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─── GLOW EFFECTS ───────────────────────────────────────────────────────── */
+.glow-red    { box-shadow: 0 0 40px rgba(220,38,38,0.20); }
+.glow-blue   { box-shadow: 0 0 40px rgba(59,130,246,0.20); }
+.glow-violet { box-shadow: 0 0 40px rgba(139,92,246,0.20); }
+.glow-gold   { box-shadow: 0 0 40px rgba(245,158,11,0.25); }
+
+/* ─── TERMINAL ───────────────────────────────────────────────────────────── */
+.terminal {
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  font-family: var(--font-geist-mono), 'Courier New', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.terminal-line         { color: #4ade80; white-space: pre-wrap; word-break: break-all; }
+.terminal-line.error   { color: #f87171; }
+.terminal-line.success { color: #34d399; }
+.terminal-line.warning { color: #fbbf24; }
+
+/* ─── PODIUM ─────────────────────────────────────────────────────────────── */
+.podium-gold   { background: linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05)); border:1px solid rgba(245,158,11,.30); box-shadow:0 0 40px rgba(245,158,11,.10); }
+.podium-silver { background: linear-gradient(135deg,rgba(148,163,184,.10),rgba(148,163,184,.03)); border:1px solid rgba(148,163,184,.20); }
+.podium-bronze { background: linear-gradient(135deg,rgba(180,83,9,.10),rgba(180,83,9,.03)); border:1px solid rgba(180,83,9,.20); }
+
+/* ─── ANIMATIONS ─────────────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.5s ease both; }
+
+@keyframes pulse-slow {
+  0%,100% { opacity: 0.5; transform: scale(1); }
+  50%     { opacity: 0.9; transform: scale(1.1); }
+}
+.animate-pulse-slow { animation: pulse-slow 5s ease-in-out infinite; }
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-10px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes bounce-dot {
+  0%,80%,100% { transform: translateY(0); }
+  40%         { transform: translateY(-6px); }
+}
+
+/* ─── PULSE DOT ──────────────────────────────────────────────────────────── */
+.pulse-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%     { transform: scale(1.4); opacity: 0.7; }
+}
+
+/* ─── TRANSITION CARD ────────────────────────────────────────────────────── */
+.transition-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.transition-card:hover { transform: translateY(-2px); }
+
+/* ─── WEEK CARD COLORS (static so Tailwind/CSS can resolve them) ─────────── */
+.week-color-1 { color: #60a5fa; }   /* blue-400   */
+.week-color-2 { color: #a78bfa; }   /* violet-400 */
+.week-color-3 { color: #34d399; }   /* emerald-400*/
+.week-color-4 { color: #fb923c; }   /* orange-400 */
+.week-color-5 { color: #f472b6; }   /* pink-400   */
+.week-color-6 { color: #22d3ee; }   /* cyan-400   */
+.week-color-7 { color: #facc15; }   /* yellow-400 */
+.week-color-8 { color: #f87171; }   /* red-400    */
+
+.week-border-1 { border-color: rgba(96,165,250,.25); }
+.week-border-2 { border-color: rgba(167,139,250,.25); }
+.week-border-3 { border-color: rgba(52,211,153,.25); }
+.week-border-4 { border-color: rgba(251,146,60,.25); }
+.week-border-5 { border-color: rgba(244,114,182,.25); }
+.week-border-6 { border-color: rgba(34,211,238,.25); }
+.week-border-7 { border-color: rgba(250,204,21,.25); }
+.week-border-8 { border-color: rgba(248,113,113,.25); }
+
+/* ─── NAV UTILITIES ──────────────────────────────────────────────────────── */
+.nav-link-active { color: #fff; }
+.nav-link-active::after {
+  content: '';
+  display: block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #dc2626;
+  margin: 2px auto 0;
+}
