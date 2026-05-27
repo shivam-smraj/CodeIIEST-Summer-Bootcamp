@@ -7,9 +7,6 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -17,447 +14,635 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
-  User,
-  Zap,
-  CheckCircle2,
-  ChevronRight,
-  Loader2,
-  ExternalLink,
-  AlertCircle,
+  User, Zap, CheckCircle2, ChevronRight, Loader2,
+  ExternalLink, AlertCircle, Shield, Trophy, Calendar,
+  Star, ArrowRight,
 } from 'lucide-react';
-
-// ── Steps ─────────────────────────────────────────────────────────────────────
-const STEPS = [
-  { id: 1, label: 'Your Profile', icon: User },
-  { id: 2, label: 'CF Verification', icon: Zap },
-  { id: 3, label: 'All Done!', icon: CheckCircle2 },
-];
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 const profileSchema = z.object({
-  displayName: z
-    .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be at most 50 characters')
-    .trim(),
+  displayName: z.string().min(2, 'At least 2 characters').max(50).trim(),
   gender: z.enum(['Male', 'Female', 'Other', 'PreferNotToSay']),
 });
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── CodeIIEST SVG Logo ─────────────────────────────────────────────────────
+function CILogo({ size = 48 }: { size?: number }) {
+  const s = size / 48;
+  return (
+    <svg width={size} height={Math.round(size * 1.167)} viewBox="0 0 48 56" fill="none">
+      {/* CI red mark */}
+      <rect x="0"   y="0"  width="48" height="4.5"  fill="#F60000" />
+      <rect x="12"  y="7"  width="36" height="4.5"  fill="#FF2200" />
+      <rect x="19"  y="45" width="29" height="4.5"  fill="#F60000" />
+      <rect x="6"   y="51" width="42" height="4.5"  fill="#671616" />
+      <rect x="6"   y="7"  width="4.5" height="49"  fill="#671616" />
+      <rect x="12"  y="7"  width="4.5" height="43"  fill="#FF2200" />
+      <rect x="0"   y="0"  width="4.5" height="56"  fill="#F60000" />
+      {/* II grey mark */}
+      <rect x="28"  y="0"  width="4"  height="56"   fill="#A6A6A6" />
+      <rect x="35"  y="0"  width="4"  height="56"   fill="#D9D9D9" />
+      <rect x="42"  y="0"  width="4"  height="56"   fill="#D9D9D9" />
+    </svg>
+  );
+}
+
+// ── Step indicator ─────────────────────────────────────────────────────────
+const STEPS = [
+  { id: 1, label: 'Your Profile',       icon: User          },
+  { id: 2, label: 'CF Verification',    icon: Zap           },
+  { id: 3, label: 'All Done!',          icon: CheckCircle2  },
+];
+
 export default function OnboardingPage() {
   const { data: session, update } = useSession();
-  const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cfStatus, setCfStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
-  const [cfHandle, setCfHandle] = useState('');
-  const [cfError, setCfError] = useState('');
+  const router  = useRouter();
+  const [step, setStep]           = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [cfStatus, setCfStatus]   = useState<'idle' | 'success' | 'error'>('idle');
+  const [cfHandle, setCfHandle]   = useState('');
+  const [cfRating, setCfRating]   = useState('');
+  const [cfError,  setCfError]    = useState('');
 
-  // Read CF OAuth callback params from URL
+  // Parse CF OAuth callback params
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    // CF verification success
-    if (params.get('cf_success') === 'true') {
-      const handle = params.get('handle') ?? '';
-      const rating = params.get('rating') ?? '0';
-      setCfHandle(handle);
-      setCfStatus('success');
-      setStep(2); // Go to CF step to show success
-      toast.success(`✅ CF handle @${handle} verified! Rating: ${rating}`);
-      // Clean the URL
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('cf_success') === 'true') {
+      const h = p.get('handle') ?? '';
+      const r = p.get('rating') ?? '0';
+      setCfHandle(h); setCfRating(r); setCfStatus('success');
+      setStep(2);
+      toast.success(`@${h} verified! Rating: ${r}`);
       window.history.replaceState({}, '', '/onboarding');
     }
-
-    // CF verification error
-    const cfErr = params.get('cf_error');
-    if (cfErr) {
-      const messages: Record<string, string> = {
-        denied: 'You denied Codeforces authorization.',
-        handle_taken: `Handle @${params.get('handle')} is already linked to another account.`,
+    const err = p.get('cf_error');
+    if (err) {
+      const msgs: Record<string, string> = {
+        denied:        'You denied Codeforces authorization.',
+        handle_taken:  `@${p.get('handle')} is already linked to another account.`,
         nonce_missing: 'Session expired. Please try again.',
-        nonce_mismatch: 'Security check failed. Please try again.',
-        token_exchange: 'Failed to exchange token with Codeforces. Please retry.',
-        server_error: 'An unexpected error occurred.',
+        nonce_mismatch:'Security check failed. Please try again.',
+        token_exchange:'Failed to exchange token. Please retry.',
+        server_error:  'An unexpected error occurred.',
       };
-      setCfError(messages[cfErr] ?? 'CF verification failed. Please try again.');
-      setCfStatus('error');
-      toast.error(messages[cfErr] ?? 'CF verification failed');
+      setCfError(msgs[err] ?? 'CF verification failed.');
+      setCfStatus('error'); setStep(2);
+      toast.error(msgs[err] ?? 'CF verification failed');
       window.history.replaceState({}, '', '/onboarding');
     }
   }, []);
 
-  // ── Profile Form ──────────────────────────────────────────────────────────
   const {
-    register,
-    handleSubmit,
-    setValue,
+    register, handleSubmit, setValue,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      displayName: session?.user?.name ?? '',
-      gender: undefined,
-    },
+    defaultValues: { displayName: session?.user?.name ?? '', gender: undefined },
   });
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
       const res = await fetch('/api/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
-      if (!res.ok) throw new Error('Failed to save profile');
-
+      if (!res.ok) throw new Error();
       toast.success('Profile saved!');
       setStep(2);
-    } catch {
-      toast.error('Failed to save profile. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch { toast.error('Failed to save profile. Please try again.'); }
+    finally { setSubmitting(false); }
   };
 
-  // ── Finish Onboarding ─────────────────────────────────────────────────────
   const handleFinish = async () => {
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
       await fetch('/api/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isOnboardingComplete: true }),
       });
-
-      // Update the session so middleware doesn't redirect again
       await update({ isOnboardingComplete: true });
-
       toast.success('Welcome to the bootcamp! 🚀');
       router.push('/');
-    } catch {
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch { toast.error('Something went wrong. Please try again.'); }
+    finally { setSubmitting(false); }
   };
 
-  const progressValue = ((step - 1) / (STEPS.length - 1)) * 100;
+  const email   = session?.user?.email ?? '';
+  const rollId  = email.split('@')[0].split('.')[0].toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
-      {/* Background glow */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl" />
+    <div style={{
+      minHeight: '100dvh',
+      background: '#09090b',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px 16px',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* ── Animated background ──────────────────────────────────────────── */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        {/* Red glow — top left (CodeIIEST brand) */}
+        <div style={{
+          position: 'absolute', top: '-10%', left: '-10%',
+          width: 500, height: 500,
+          background: 'radial-gradient(circle, rgba(220,38,38,0.12), transparent 70%)',
+          borderRadius: '50%',
+        }} />
+        {/* Blue glow — bottom right */}
+        <div style={{
+          position: 'absolute', bottom: '-10%', right: '-5%',
+          width: 400, height: 400,
+          background: 'radial-gradient(circle, rgba(59,130,246,0.10), transparent 70%)',
+          borderRadius: '50%',
+        }} />
+        {/* Grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
       </div>
 
-      <div className="relative w-full max-w-lg">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 text-blue-400 text-sm mb-4">
-            <Zap className="w-4 h-4" />
-            Let&apos;s get you set up
+      <div style={{
+        position: 'relative', zIndex: 1,
+        width: '100%', maxWidth: 480,
+        display: 'flex', flexDirection: 'column', gap: 28,
+      }}>
+        {/* ── Logo + heading ──────────────────────────────────────────────── */}
+        <div style={{ textAlign: 'center' }}>
+          {/* Logo */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: 14, marginBottom: 20,
+          }}>
+            <CILogo size={44} />
+            <div style={{ textAlign: 'left' }}>
+              <div style={{
+                fontSize: 9, fontWeight: 800, color: '#ef4444',
+                textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 1,
+              }}>
+                IIEST Shibpur
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                Code<span style={{ color: '#ef4444' }}>IIEST</span>
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-white">
+
+          {/* Setup badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.20)',
+            borderRadius: 30, padding: '5px 14px', marginBottom: 14,
+          }}>
+            <span style={{ fontSize: 11, color: '#ef4444' }}>⚡</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444', letterSpacing: '0.06em' }}>
+              Let&apos;s get you set up
+            </span>
+          </div>
+
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', lineHeight: 1.1, marginBottom: 8 }}>
             Welcome to{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-500">
+            <span style={{
+              background: 'linear-gradient(135deg, #ef4444 0%, #f97316 50%, #dc2626 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
               CodeIIEST
             </span>
           </h1>
-          <p className="text-slate-400 mt-2">Complete your profile to join the bootcamp</p>
+          <p style={{ color: '#64748b', fontSize: 14 }}>
+            CP &amp; DSA Bootcamp 2026 · Complete your profile to join
+          </p>
         </div>
 
-        {/* Step indicators */}
-        <div className="flex items-center justify-center gap-6 mb-8">
-          {STEPS.map(({ id, label, icon: Icon }) => (
-            <div key={id} className="flex flex-col items-center gap-2">
-              <div
-                className={cn(
-                  'w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300',
-                  step > id
-                    ? 'bg-green-500 border-green-500 text-white'
-                    : step === id
-                    ? 'bg-blue-500/20 border-blue-500 text-blue-400'
-                    : 'bg-white/5 border-white/20 text-slate-600'
-                )}
-              >
-                {step > id ? (
-                  <CheckCircle2 className="w-5 h-5" />
-                ) : (
-                  <Icon className="w-4 h-4" />
-                )}
-              </div>
-              <span
-                className={cn(
-                  'text-xs font-medium hidden sm:block',
-                  step === id ? 'text-white' : 'text-slate-600'
-                )}
-              >
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Progress bar */}
-        <Progress value={progressValue} className="mb-8 h-1 bg-white/10" />
-
-        {/* Step card */}
-        <div className="glass rounded-2xl p-8 border border-white/10">
-
-          {/* ── STEP 1: Profile ────────────────────────────────────────────── */}
-          {step === 1 && (
-            <form onSubmit={handleSubmit(onProfileSubmit)} className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-white mb-1">Your Profile</h2>
-                <p className="text-slate-400 text-sm">
-                  This is how you&apos;ll appear on the leaderboard.
-                </p>
-              </div>
-
-              {/* Email (read-only, from Google) */}
-              <div className="space-y-2">
-                <Label className="text-slate-300">Institute Email</Label>
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-slate-400 text-sm">
-                  <span className="flex-1 truncate">{session?.user?.email}</span>
-                  <span className="text-green-400 text-xs bg-green-500/10 px-2 py-0.5 rounded-full">
-                    Verified
-                  </span>
+        {/* ── Step indicators ─────────────────────────────────────────────── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0,
+        }}>
+          {STEPS.map(({ id, label, icon: Icon }, i) => {
+            const done    = step > id;
+            const active  = step === id;
+            const color   = done ? '#22c55e' : active ? '#ef4444' : '#374151';
+            const bg      = done ? 'rgba(34,197,94,0.12)' : active ? 'rgba(220,38,38,0.12)' : 'rgba(255,255,255,0.03)';
+            const border  = done ? 'rgba(34,197,94,0.35)' : active ? 'rgba(220,38,38,0.40)' : 'rgba(255,255,255,0.08)';
+            return (
+              <div key={id} style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: bg, border: `2px solid ${border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.3s ease',
+                    boxShadow: active ? `0 0 16px ${color}40` : 'none',
+                  }}>
+                    {done
+                      ? <CheckCircle2 style={{ width: 18, height: 18, color: '#22c55e' }} />
+                      : <Icon style={{ width: 16, height: 16, color }} />
+                    }
+                  </div>
+                  <span style={{
+                    fontSize: 10, fontWeight: active ? 700 : 500,
+                    color: active ? '#fff' : done ? '#64748b' : '#374151',
+                    whiteSpace: 'nowrap',
+                  }}>{label}</span>
                 </div>
-              </div>
-
-              {/* Display Name */}
-              <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-slate-300">
-                  Display Name <span className="text-red-400">*</span>
-                </Label>
-                <Input
-                  id="displayName"
-                  {...register('displayName')}
-                  placeholder="How you appear on leaderboard"
-                  className="bg-white/5 border-white/20 text-white placeholder:text-slate-600 focus:border-blue-500"
-                />
-                {errors.displayName && (
-                  <p className="text-red-400 text-xs">{errors.displayName.message}</p>
+                {i < STEPS.length - 1 && (
+                  <div style={{
+                    width: 64, height: 2, margin: '0 4px', marginBottom: 22,
+                    background: step > id
+                      ? 'linear-gradient(90deg, #22c55e, rgba(34,197,94,0.3))'
+                      : 'rgba(255,255,255,0.06)',
+                    borderRadius: 2, transition: 'background 0.4s ease',
+                  }} />
                 )}
               </div>
+            );
+          })}
+        </div>
 
-              {/* Gender */}
-              <div className="space-y-2">
-                <Label className="text-slate-300">
-                  Gender <span className="text-red-400">*</span>
-                </Label>
-                <Select onValueChange={(v) => setValue('gender', v as any)}>
-                  <SelectTrigger className="bg-white/5 border-white/20 text-white focus:border-blue-500">
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#161616] border-white/10 text-white">
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                    <SelectItem value="PreferNotToSay">Prefer not to say</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.gender && (
-                  <p className="text-red-400 text-xs">{errors.gender.message}</p>
-                )}
-              </div>
+        {/* ── Main card ───────────────────────────────────────────────────── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.09)',
+          borderRadius: 20,
+          overflow: 'hidden',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+        }}>
+          {/* Card top accent bar */}
+          <div style={{
+            height: 3,
+            background: step === 1
+              ? 'linear-gradient(90deg, #dc2626, #f97316)'
+              : step === 2
+                ? cfStatus === 'success'
+                  ? 'linear-gradient(90deg, #16a34a, #22c55e)'
+                  : 'linear-gradient(90deg, #2563eb, #7c3aed)'
+                : 'linear-gradient(90deg, #16a34a, #22c55e)',
+          }} />
 
-              {/* Parsed IIEST data (display only) */}
-              {session?.user?.email && (
-                <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-1">
-                  <p className="text-blue-400 text-xs font-medium mb-2">
-                    Parsed from your email:
-                  </p>
-                  <div className="text-sm text-slate-400 font-mono space-y-1">
-                    <div className="flex justify-between">
-                      <span>Roll ID</span>
-                      <span className="text-white">
-                        {session.user.email.split('@')[0].split('.')[0].toUpperCase()}
+          <div style={{ padding: '28px 28px 24px' }}>
+
+            {/* ══ STEP 1 — Profile ══════════════════════════════════════════ */}
+            {step === 1 && (
+              <form onSubmit={handleSubmit(onProfileSubmit)}>
+                {/* Step header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    background: 'rgba(220,38,38,0.10)', border: '1px solid rgba(220,38,38,0.25)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <User style={{ width: 18, height: 18, color: '#ef4444' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ color: '#fff', fontSize: 17, fontWeight: 800, marginBottom: 2 }}>Your Profile</h2>
+                    <p style={{ color: '#64748b', fontSize: 12 }}>This is how you&apos;ll appear on the leaderboard.</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  {/* Email (read-only) */}
+                  <div>
+                    <label style={{ display: 'block', color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 7 }}>
+                      Institute Email
+                    </label>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 10, padding: '11px 14px',
+                    }}>
+                      <Shield style={{ width: 14, height: 14, color: '#22c55e', flexShrink: 0 }} />
+                      <span style={{ flex: 1, color: '#94a3b8', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {email}
+                      </span>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: '#22c55e',
+                        background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.20)',
+                        borderRadius: 20, padding: '2px 9px',
+                      }}>
+                        Verified
                       </span>
                     </div>
                   </div>
+
+                  {/* Display Name */}
+                  <div>
+                    <label htmlFor="displayName" style={{ display: 'block', color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 7 }}>
+                      Display Name <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      id="displayName"
+                      {...register('displayName')}
+                      placeholder="How you appear on the leaderboard"
+                      style={{
+                        width: '100%', boxSizing: 'border-box',
+                        padding: '11px 14px', borderRadius: 10, fontSize: 14,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${errors.displayName ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)'}`,
+                        color: '#fff', outline: 'none', transition: 'border-color 0.15s',
+                      }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(220,38,38,0.55)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220,38,38,0.10)'; }}
+                      onBlur={e  => { e.currentTarget.style.borderColor = errors.displayName ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)'; e.currentTarget.style.boxShadow = 'none'; }}
+                    />
+                    {errors.displayName && (
+                      <p style={{ color: '#f87171', fontSize: 11, marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <AlertCircle style={{ width: 11, height: 11 }} /> {errors.displayName.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label style={{ display: 'block', color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 7 }}>
+                      Gender <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <Select onValueChange={(v) => setValue('gender', v as ProfileFormValues['gender'])}>
+                      <SelectTrigger style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${errors.gender ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)'}`,
+                        borderRadius: 10, color: '#94a3b8', height: 44, fontSize: 14,
+                      }}>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', borderRadius: 10 }}>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                        <SelectItem value="PreferNotToSay">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.gender && (
+                      <p style={{ color: '#f87171', fontSize: 11, marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <AlertCircle style={{ width: 11, height: 11 }} /> Please select a gender
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Parsed data chip */}
+                  {rollId && (
+                    <div style={{
+                      background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)',
+                      borderRadius: 10, padding: '12px 14px',
+                    }}>
+                      <p style={{ color: '#ef4444', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 8 }}>
+                        📧 Parsed from your email
+                      </p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#64748b', fontSize: 12 }}>Roll ID</span>
+                        <span style={{ color: '#e2e8f0', fontSize: 13, fontWeight: 700, fontFamily: 'monospace' }}>{rollId}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    style={{
+                      width: '100%', padding: '13px 20px', borderRadius: 12,
+                      background: submitting ? 'rgba(220,38,38,0.4)' : 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                      border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
+                      cursor: submitting ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      boxShadow: '0 4px 20px rgba(220,38,38,0.30)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {submitting
+                      ? <Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} />
+                      : <><span>Continue</span><ChevronRight style={{ width: 18, height: 18 }} /></>
+                    }
+                  </button>
                 </div>
-              )}
+              </form>
+            )}
 
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium gap-2 h-11"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    Continue <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            </form>
-          )}
-
-          {/* ── STEP 2: CF Verification ─────────────────────────────────────── */}
-          {step === 2 && (
-            <div className="space-y-6">
+            {/* ══ STEP 2 — CF Verification ══════════════════════════════════ */}
+            {step === 2 && (
               <div>
-                <h2 className="text-xl font-semibold text-white mb-1">
-                  Codeforces Verification
+                {/* Step header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    background: 'rgba(37,99,235,0.10)', border: '1px solid rgba(37,99,235,0.25)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Zap style={{ width: 18, height: 18, color: '#60a5fa' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ color: '#fff', fontSize: 17, fontWeight: 800, marginBottom: 2 }}>Codeforces Verification</h2>
+                    <p style={{ color: '#64748b', fontSize: 12 }}>Link your CF account — takes under 3 seconds.</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+                  {/* Success */}
+                  {cfStatus === 'success' && (
+                    <div style={{
+                      background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(34,197,94,0.25)',
+                      borderRadius: 14, padding: '20px 18px', textAlign: 'center',
+                    }}>
+                      <div style={{
+                        width: 52, height: 52, borderRadius: '50%',
+                        background: 'rgba(22,163,74,0.15)', border: '2px solid rgba(34,197,94,0.30)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px',
+                        boxShadow: '0 0 20px rgba(34,197,94,0.25)',
+                      }}>
+                        <CheckCircle2 style={{ width: 24, height: 24, color: '#22c55e' }} />
+                      </div>
+                      <p style={{ color: '#22c55e', fontWeight: 800, fontSize: 16, marginBottom: 4 }}>Verified! ✓</p>
+                      <p style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>
+                        <strong style={{ color: '#94a3b8' }}>@{cfHandle}</strong> is now permanently linked.
+                      </p>
+                      {cfRating && (
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.20)',
+                          borderRadius: 20, padding: '4px 12px',
+                        }}>
+                          <Star style={{ width: 12, height: 12, color: '#fbbf24' }} />
+                          <span style={{ color: '#fbbf24', fontSize: 12, fontWeight: 700 }}>Rating: {cfRating}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {cfStatus === 'error' && (
+                    <div style={{
+                      background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.20)',
+                      borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 12,
+                    }}>
+                      <AlertCircle style={{ width: 18, height: 18, color: '#f87171', flexShrink: 0, marginTop: 1 }} />
+                      <div>
+                        <p style={{ color: '#f87171', fontWeight: 700, fontSize: 13, marginBottom: 2 }}>Verification Failed</p>
+                        <p style={{ color: '#64748b', fontSize: 12 }}>{cfError}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Idle / retry — show steps */}
+                  {cfStatus !== 'success' && (
+                    <div style={{
+                      background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: 14, padding: '16px 16px', display: 'flex', flexDirection: 'column', gap: 12,
+                    }}>
+                      {[
+                        { n: 1, text: 'Click the button below' },
+                        { n: 2, text: 'Authorize on codeforces.com' },
+                        { n: 3, text: "You're redirected back automatically ✓" },
+                      ].map(({ n, text }) => (
+                        <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{
+                            width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                            background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.25)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 12, fontWeight: 800, color: '#60a5fa', fontFamily: 'monospace',
+                          }}>{n}</div>
+                          <p style={{ color: '#cbd5e1', fontSize: 13 }}>{text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Verify button */}
+                  {cfStatus !== 'success' && (
+                    <a href="/api/cf/start" style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      padding: '13px 20px', borderRadius: 12, textDecoration: 'none',
+                      background: 'linear-gradient(135deg, #1d4ed8, #2563eb)',
+                      border: '1px solid rgba(59,130,246,0.35)',
+                      color: '#fff', fontSize: 15, fontWeight: 700,
+                      boxShadow: '0 4px 20px rgba(37,99,235,0.30)',
+                      transition: 'all 0.15s ease',
+                    }}>
+                      <Zap style={{ width: 17, height: 17 }} />
+                      Verify on Codeforces
+                      <ExternalLink style={{ width: 14, height: 14, opacity: 0.7 }} />
+                    </a>
+                  )}
+
+                  {/* Continue / Skip */}
+                  {cfStatus === 'success' ? (
+                    <button
+                      onClick={() => setStep(3)}
+                      style={{
+                        width: '100%', padding: '13px', borderRadius: 12,
+                        background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                        border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                        boxShadow: '0 4px 16px rgba(22,163,74,0.30)',
+                      }}
+                    >
+                      Continue <ArrowRight style={{ width: 17, height: 17 }} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setStep(3)}
+                      style={{
+                        width: '100%', padding: '12px', borderRadius: 12,
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
+                        color: '#64748b', fontSize: 14, fontWeight: 500, cursor: 'pointer',
+                      }}
+                    >
+                      Skip for now
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ══ STEP 3 — All Done! ════════════════════════════════════════ */}
+            {step === 3 && (
+              <div style={{ textAlign: 'center' }}>
+                {/* Rocket */}
+                <div style={{
+                  width: 72, height: 72, borderRadius: '50%', margin: '0 auto 20px',
+                  background: 'linear-gradient(135deg, rgba(220,38,38,0.15), rgba(37,99,235,0.15))',
+                  border: '2px solid rgba(220,38,38,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 0 30px rgba(220,38,38,0.20)',
+                }}>
+                  <span style={{ fontSize: 36 }}>🚀</span>
+                </div>
+
+                <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 900, marginBottom: 10 }}>
+                  You&apos;re all set!
                 </h2>
-                <p className="text-slate-400 text-sm">
-                  Link your CF account for leaderboard scoring. Takes under 3 seconds.
-                </p>
-              </div>
-
-              {/* Success state */}
-              {cfStatus === 'success' && (
-                <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-5 text-center space-y-3">
-                  <div className="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="w-7 h-7 text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-green-400 font-semibold">Verified!</p>
-                    <p className="text-slate-400 text-sm mt-1">
-                      @{cfHandle} is now linked to your account permanently.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Error state */}
-              {cfStatus === 'error' && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-red-400 text-sm font-medium">Verification Failed</p>
-                    <p className="text-slate-400 text-xs mt-1">{cfError}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Idle / retry state */}
-              {cfStatus !== 'success' && (
-                <div className="space-y-4">
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-sm">
-                        1
-                      </div>
-                      <p className="text-slate-300 text-sm">Click the button below</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-sm">
-                        2
-                      </div>
-                      <p className="text-slate-300 text-sm">
-                        Authorize on codeforces.com
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-sm">
-                        3
-                      </div>
-                      <p className="text-slate-300 text-sm">
-                        You&apos;re automatically redirected back ✓
-                      </p>
-                    </div>
-                  </div>
-
-                  <a
-                    href="/api/cf/start"
-                    className="flex items-center justify-center gap-2 w-full py-3 bg-orange-500/20 border border-orange-500/30 hover:bg-orange-500/30 text-orange-300 rounded-xl font-medium transition-all duration-200 group"
-                  >
-                    <Zap className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                    Verify on Codeforces
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                {cfStatus === 'success' ? (
-                  <Button
-                    onClick={() => setStep(3)}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium gap-2 h-11"
-                  >
-                    Continue <ChevronRight className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setStep(3)}
-                    variant="outline"
-                    className="flex-1 border-white/20 text-slate-400 hover:text-white h-11"
-                  >
-                    Skip for now
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 3: Done! ───────────────────────────────────────────────── */}
-          {step === 3 && (
-            <div className="space-y-6 text-center">
-              {/* Celebration */}
-              <div className="py-4">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 border border-blue-500/30 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-4xl">🚀</span>
-                </div>
-                <h2 className="text-2xl font-bold text-white mb-2">You&apos;re all set!</h2>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Welcome to the CodeIIEST CP & DSA Summer Bootcamp 2026.
-                  <br />
+                <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+                  Welcome to the <strong style={{ color: '#e2e8f0' }}>CodeIIEST CP &amp; DSA Summer Bootcamp 2026</strong>.<br />
                   Sessions start on{' '}
-                  <span className="text-blue-400 font-medium">June 1st, 2026</span>.
+                  <span style={{ color: '#ef4444', fontWeight: 700 }}>June 1st, 2026</span>.
                 </p>
-              </div>
 
-              {/* Summary cards */}
-              <div className="grid grid-cols-2 gap-3 text-left">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <p className="text-slate-500 text-xs mb-1">Duration</p>
-                  <p className="text-white font-semibold">8 Weeks</p>
+                {/* Info cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24, textAlign: 'left' }}>
+                  {[
+                    { icon: Calendar, label: 'Duration',  value: '8 Weeks',        color: '#60a5fa' },
+                    { icon: Trophy,   label: 'Formula',   value: 'Best 6 of 8',    color: '#fbbf24' },
+                    { icon: Zap,      label: 'Sessions',  value: 'Mon evenings',   color: '#a78bfa' },
+                    { icon: Star,     label: 'Goal',      value: 'Expert Rating',  color: '#34d399' },
+                  ].map(({ icon: Icon, label, value, color }) => (
+                    <div key={label} style={{
+                      background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: 12, padding: '12px 14px',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                        <Icon style={{ width: 12, height: 12, color }} />
+                        <span style={{ color: '#374151', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+                      </div>
+                      <p style={{ color: '#e2e8f0', fontSize: 14, fontWeight: 700 }}>{value}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <p className="text-slate-500 text-xs mb-1">Formula</p>
-                  <p className="text-white font-semibold">Best 6 of 8</p>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <p className="text-slate-500 text-xs mb-1">Sessions</p>
-                  <p className="text-white font-semibold">Every Sunday</p>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <p className="text-slate-500 text-xs mb-1">Goal</p>
-                  <p className="text-white font-semibold">Expert Rating</p>
-                </div>
-              </div>
 
-              <Button
-                onClick={handleFinish}
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-medium gap-2 h-12 text-base"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>Enter the Bootcamp 🎯</>
-                )}
-              </Button>
-            </div>
-          )}
+                {/* Enter button */}
+                <button
+                  onClick={handleFinish}
+                  disabled={submitting}
+                  style={{
+                    width: '100%', padding: '14px 20px', borderRadius: 12,
+                    background: submitting
+                      ? 'rgba(220,38,38,0.4)'
+                      : 'linear-gradient(135deg, #dc2626 0%, #9333ea 100%)',
+                    border: 'none', color: '#fff', fontSize: 16, fontWeight: 800,
+                    cursor: submitting ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    boxShadow: '0 6px 24px rgba(220,38,38,0.35)',
+                    letterSpacing: '0.01em',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {submitting
+                    ? <Loader2 style={{ width: 20, height: 20, animation: 'spin 1s linear infinite' }} />
+                    : <><span>Enter the Bootcamp</span><span>🎯</span></>
+                  }
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Footer note */}
-        <p className="text-center text-slate-600 text-xs mt-6">
+        {/* ── Footer note ─────────────────────────────────────────────────── */}
+        <p style={{ textAlign: 'center', color: '#374151', fontSize: 11 }}>
           Only IIEST Shibpur students (@students.iiests.ac.in) can participate.
         </p>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
