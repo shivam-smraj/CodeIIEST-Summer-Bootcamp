@@ -79,6 +79,7 @@ export function ProfileClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <_ProfileStyles />
 
       {/* ── Identity Hero Card ───────────────────────────────────────────── */}
       <div style={{
@@ -97,8 +98,8 @@ export function ProfileClient() {
           background: `${rc.text}08`, borderRadius: '50%', filter: 'blur(40px)', pointerEvents: 'none',
         }} />
 
-        <div style={{ padding: '28px 28px 24px', position: 'relative' }}>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div className="profile-hero-inner" style={{ padding: '28px 28px 24px', position: 'relative' }}>
+          <div className="profile-hero-row">
 
             {/* Avatar */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -134,12 +135,12 @@ export function ProfileClient() {
                 </h2>
               </div>
 
-              <p style={{ color: '#374151', fontSize: 12, fontFamily: 'monospace', marginBottom: 12 }}>
+              <p style={{ color: '#6b7280', fontSize: 12, fontFamily: 'monospace', marginBottom: 12, wordBreak: 'break-all' }}>
                 {profile.email}
               </p>
 
               {/* Tags row */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="profile-tags" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {profile.rollId && (
                   <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '4px 12px', fontSize: 12, color: '#64748b', fontFamily: 'monospace' }}>
                     {profile.rollId}
@@ -238,7 +239,7 @@ export function ProfileClient() {
             <div key={label} style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)', padding: '14px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, color }}>
                 {icon}
-                <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#374151' }}>{label}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280' }}>{label}</span>
               </div>
               <p style={{ color: '#fff', fontWeight: 900, fontSize: 22, fontFamily: 'monospace', margin: 0 }}>{value}</p>
             </div>
@@ -313,8 +314,8 @@ export function ProfileClient() {
 
                 {/* Week label */}
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: '#374151', fontSize: 10, fontWeight: 700 }}>W{i + 1}</div>
-                  <div style={{ color: '#1f2937', fontSize: 9, marginTop: 1 }}>
+                  <div style={{ color: '#94a3b8', fontSize: 10, fontWeight: 700 }}>W{i + 1}</div>
+                  <div style={{ color: '#6b7280', fontSize: 9, marginTop: 1 }}>
                     {WEEK_DATES_ARR[i]?.contest.replace('Fri, ', '') ?? ''}
                   </div>
                 </div>
@@ -323,7 +324,7 @@ export function ProfileClient() {
           })}
         </div>
 
-        <p style={{ color: '#1f2937', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
+        <p style={{ color: '#6b7280', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
           Best 6 of 8 weeks counted toward total. Red = missed. Gray = upcoming.
         </p>
       </div>
@@ -407,8 +408,8 @@ export function ProfileClient() {
             { label: 'Prizes', value: '1st: Mech KB · 2nd: Mouse · 3rd: LED Lamp' },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p style={{ color: '#1f2937', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>{label}</p>
-              <p style={{ color: '#475569', fontSize: 12 }}>{value}</p>
+              <p style={{ color: '#6b7280', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>{label}</p>
+              <p style={{ color: '#64748b', fontSize: 12 }}>{value}</p>
             </div>
           ))}
         </div>
@@ -417,3 +418,47 @@ export function ProfileClient() {
     </div>
   );
 }
+
+/* ── ProfileClient CSS ─────────────────────────────────────────────────────── */
+const _ProfileStyles = () => (
+  <style>{`
+    /* Hero identity row: side-by-side on desktop, stacked on mobile */
+    .profile-hero-row {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    /* CF + stats: side by side on desktop */
+    .profile-cf-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .profile-hero-inner { padding: 20px 16px 18px !important; }
+      .profile-hero-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .profile-hero-row > *:last-child {
+        /* Season badge: move to end */
+        order: 3;
+        align-self: center;
+      }
+      .profile-hero-row > *:nth-child(2) {
+        /* Identity info — full width */
+        width: 100%;
+        min-width: 0;
+      }
+      .profile-hero-row .profile-tags {
+        justify-content: center;
+      }
+      .profile-cf-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  `}</style>
+);
+export { _ProfileStyles };

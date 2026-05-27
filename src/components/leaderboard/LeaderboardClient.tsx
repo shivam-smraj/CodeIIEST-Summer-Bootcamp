@@ -285,30 +285,58 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
       <div
         className="lb-mobile-row"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '14px 16px',
+          padding: '12px 14px',
           borderBottom: '1px solid rgba(255,255,255,0.04)',
           background: isTop3 ? 'rgba(234,179,8,0.02)' : 'transparent',
         }}
       >
-        <div style={{ width:28, textAlign:'center', fontWeight:700, fontSize:12 }}>
-          {isTop3 ? medalEmoji : <span style={{color:'#374151'}}>{user.rank}</span>}
+        {/* Top row: rank + avatar + name + total */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 28, textAlign: 'center', fontWeight: 700, fontSize: 12, flexShrink: 0 }}>
+            {isTop3 ? medalEmoji : <span style={{color:'#6b7280'}}>{user.rank}</span>}
+          </div>
+          <div style={{ width: 38, height: 38, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.10)', overflow:'hidden', flexShrink:0 }}>
+            <Avatar style={{ width:'100%', height:'100%' }}>
+              <AvatarImage src={user.cfAvatar ?? ''} />
+              <AvatarFallback style={{ background:'#1e293b', color:'#fff', fontSize:12, fontWeight:700 }}>{user.displayName?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <p style={{ color:'#fff', fontWeight:600, fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user.displayName}</p>
+            <p style={{ color:rankColor, fontSize:10, fontFamily:'monospace' }}>@{user.cfHandle}{user.cfRating ? ` · ${user.cfRating}` : ''}</p>
+          </div>
+          <div style={{ textAlign:'right', flexShrink:0 }}>
+            <div style={{ fontWeight:900, fontSize:15, color: isTop3 ? '#fbbf24' : '#fff', fontFamily:'monospace' }}>{user.totalPoints}</div>
+            <div style={{ color:'#6b7280', fontSize:10 }}>pts</div>
+          </div>
         </div>
-        <div style={{ width:40, height:40, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.10)', overflow:'hidden', flexShrink:0 }}>
-          <Avatar style={{ width:'100%', height:'100%' }}>
-            <AvatarImage src={user.cfAvatar ?? ''} />
-            <AvatarFallback style={{ background:'#1e293b', color:'#fff', fontSize:12, fontWeight:700 }}>{user.displayName?.[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-        </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <p style={{ color:'#fff', fontWeight:600, fontSize:14, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user.displayName}</p>
-          <p style={{ color:rankColor, fontSize:11, fontFamily:'monospace' }}>@{user.cfHandle}</p>
-        </div>
-        <div style={{ textAlign:'right', flexShrink:0 }}>
-          <div style={{ fontWeight:900, fontSize:16, color: isTop3 ? '#fbbf24' : '#fff' }}>{user.totalPoints}</div>
-          <div style={{ color:'#374151', fontSize:10 }}>pts</div>
+
+        {/* Weekly scores row */}
+        <div style={{ display:'flex', gap:4, marginTop:8, marginLeft:38, flexWrap:'wrap' }}>
+          {Array.from({length:8}).map((_,i) => {
+            const score = user.scores?.[i];
+            return (
+              <div key={i} style={{
+                display:'flex', flexDirection:'column', alignItems:'center',
+                minWidth:28, padding:'3px 4px',
+                borderRadius:6,
+                background: score == null ? 'rgba(255,255,255,0.03)'
+                  : score === 0 ? 'rgba(239,68,68,0.10)'
+                  : 'rgba(52,211,153,0.10)',
+                border: score == null ? '1px solid rgba(255,255,255,0.06)'
+                  : score === 0 ? '1px solid rgba(239,68,68,0.20)'
+                  : '1px solid rgba(52,211,153,0.20)',
+              }}>
+                <span style={{ fontSize:8, color:'#6b7280', fontWeight:700, lineHeight:1 }}>W{i+1}</span>
+                <span style={{
+                  fontSize:11, fontFamily:'monospace', fontWeight:700, lineHeight:1.4,
+                  color: score == null ? '#374151' : score === 0 ? 'rgba(239,68,68,0.6)' : '#34d399',
+                }}>
+                  {score == null ? '—' : score === 0 ? '✕' : score}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

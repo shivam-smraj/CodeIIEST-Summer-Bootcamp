@@ -148,8 +148,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* ── Bottom bar ───────────────────────────────────────────────────── */}
-        <div style={{
+        {/* ── Bottom bar ───────────────────────────────────────────────────────── */}
+        <div className="footer-bottom-bar" style={{
           borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 18,
           display: 'flex', flexWrap: 'wrap', gap: 8,
           alignItems: 'center', justifyContent: 'space-between',
@@ -225,6 +225,11 @@ export function Footer() {
             gap: 40px;
             justify-content: center;
             width: 100%;
+          }
+          .footer-bottom-bar {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
           }
         }
       `}</style>
