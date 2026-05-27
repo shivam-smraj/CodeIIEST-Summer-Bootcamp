@@ -7,107 +7,106 @@ export const metadata: Metadata = {
   description: 'Meet the CodeIIEST CP Team — mentors and organizers of the CodeIIEST CP & DSA Summer Bootcamp 2026.',
 };
 
-// ── Team data ──────────────────────────────────────────────────────────────────
-// Replace with real data from Google Form submissions before June 1st
+// ── Team data (from Google Form — May 28, 2026) ───────────────────────────────
 const MENTORS: {
   name: string; role: string; cfHandle: string; cfRating: number;
   cfRank: string; department: string; batch: number;
   linkedin?: string; image?: string; bio: string; speciality: string;
 }[] = [
   {
-    name: 'Aryan Gupta',
-    role: 'Head Mentor',
-    cfHandle: 'aryan_g',
-    cfRating: 1847,
+    name: 'Rohit Das',
+    role: 'Lead Mentor — Competitive Programming',
+    cfHandle: 'ROHITDAScr7',
+    cfRating: 1626,
     cfRank: 'expert',
     department: 'CSB',
-    batch: 2025,
-    bio: 'Placed at Google SWE. Loves constructive algorithms and DP. Has solved 1200+ problems on Codeforces.',
+    batch: 2028,
+    bio: 'Expert-rated (1626) with a strong command of advanced data structures and algorithmic techniques. Top performer of the team.',
+    speciality: 'Data Structures & Algorithms',
+  },
+  {
+    name: 'Mrigaj Shaw',
+    role: 'Mentor — Problem Solving & Sessions',
+    cfHandle: 'Kakarot_DB',
+    cfRating: 1545,
+    cfRank: 'specialist',
+    department: 'CSB',
+    batch: 2028,
+    bio: 'Avid problem solver passionate about CP. Loves hosting sessions, preparing mashups, and mentoring juniors on the right path.',
     speciality: 'DP & Graph Theory',
-    linkedin: 'https://linkedin.com/',
+    linkedin: 'https://www.linkedin.com/in/mrigaj-shaw-462767277/',
   },
   {
-    name: 'Priyanka Sharma',
-    role: 'Mentor — DSA',
-    cfHandle: 'priyanka_cp',
-    cfRating: 1723,
-    cfRank: 'expert',
-    department: 'CSB',
-    batch: 2025,
-    bio: 'ICPC Amritapuri Regionalist 2024. Passionate about teaching binary search and number theory.',
-    speciality: 'Binary Search & Math',
-    linkedin: 'https://linkedin.com/',
-  },
-  {
-    name: 'Rohan Das',
+    name: 'Mayank',
     role: 'Mentor — Algorithms',
-    cfHandle: 'rohan_d99',
-    cfRating: 1651,
-    cfRank: 'expert',
-    department: 'ETB',
-    batch: 2026,
-    bio: 'CP enthusiast since 1st year. Specializes in graph algorithms and segment trees.',
-    speciality: 'Graphs & Trees',
-    linkedin: 'https://linkedin.com/',
-  },
-  {
-    name: 'Ananya Roy',
-    role: 'Mentor — Competitive Math',
-    cfHandle: 'ananya_r',
-    cfRating: 1604,
-    cfRank: 'expert',
-    department: 'MEB',
-    batch: 2026,
-    bio: 'Started CP in 2nd year, went from Newbie to Expert in 8 months. Loves teaching number theory.',
-    speciality: 'Number Theory & Combinatorics',
-    linkedin: 'https://linkedin.com/',
-  },
-  {
-    name: 'Souvik Mondal',
-    role: 'Mentor — STL & Implementation',
-    cfHandle: 'souvik_m',
-    cfRating: 1556,
+    cfHandle: 'Mayank_9207',
+    cfRating: 1490,
     cfRank: 'specialist',
     department: 'ITB',
-    batch: 2027,
-    bio: 'Known for clean, fast C++ code. Runs weekly upsolving sessions in the WhatsApp group.',
-    speciality: 'STL, Sorting & Implementation',
-    linkedin: 'https://linkedin.com/',
+    batch: 2028,
+    bio: 'Managing tradeoffs full time. Specialist (peak 1490) with sharp instincts for greedy and two-pointer strategies.',
+    speciality: 'Greedy & Two Pointers',
+    linkedin: 'https://www.linkedin.com/in/mayank9207',
   },
   {
-    name: 'Ishita Agarwal',
-    role: 'Mentor — Backtracking & Recursion',
-    cfHandle: 'ishita_a',
-    cfRating: 1501,
+    name: 'Krish Mohan',
+    role: 'Mentor — Competitive Programming',
+    cfHandle: 'Anon_thefool',
+    cfRating: 1482,
     cfRank: 'specialist',
     department: 'CSB',
-    batch: 2027,
-    bio: 'Her backtracking sessions are legendary in CodeIIEST. Makes recursion feel natural.',
-    speciality: 'Recursion & Backtracking',
-    linkedin: 'https://linkedin.com/',
+    batch: 2028,
+    bio: 'Specialist on Codeforces who enjoys tricky implementation problems. Keen on helping peers level up their problem-solving skills.',
+    speciality: 'Implementation & STL',
+    linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
+  },
+  {
+    name: 'Aditya Shaw',
+    role: 'Mentor — Algorithms',
+    cfHandle: 'adityawcode',
+    cfRating: 1445,
+    cfRank: 'specialist',
+    department: 'ITB',
+    batch: 2028,
+    bio: 'Likes logic flawless and conversations unfiltered. Specialist with sharp instincts for constructive and binary search problems.',
+    speciality: 'Constructive & Binary Search',
+    linkedin: 'https://www.linkedin.com/in/aditya-shaw-code',
+  },
+  {
+    name: 'B V Shree Keshav',
+    role: 'Mentor — Contest Organizer',
+    cfHandle: 'bvsk',
+    cfRating: 1246,
+    cfRank: 'pupil',
+    department: 'ITB',
+    batch: 2028,
+    bio: "From Chennai — just let it happen and don't forget to smile. Loves conducting contests and supporting participants wherever possible.",
+    speciality: 'Contest Hosting & Community',
+    linkedin: 'https://www.linkedin.com/in/shree-keshav-440088348',
   },
 ];
 
 const ORGANIZERS = [
   {
     name: 'Shivam Kumar',
-    role: 'Platform Developer',
-    cfHandle: 'sh1van_dev',
+    role: 'Platform Developer · Problem Setter · Mentor',
+    cfHandle: 'S_M_Raj',
+    cfRating: 1705,
     department: 'EEB',
     batch: 2028,
-    bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS.',
-    linkedin: undefined as string | undefined,
+    bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS. MAX Expert (1705). Contest problem setter and Week-1 session mentor.',
+    linkedin: 'https://www.linkedin.com/in/smraj0198/',
     isDevLead: true,
   },
 ];
 
-const RANK_COLORS: Record<string, { text: string; bg: string; border: string; gradient: string }> = {
-  newbie:             { text: '#9e9e9e', bg: 'rgba(158,158,158,0.10)', border: 'rgba(158,158,158,0.20)', gradient: 'from-gray-500/20 to-gray-600/10' },
-  pupil:              { text: '#4caf50', bg: 'rgba(76,175,80,0.10)',   border: 'rgba(76,175,80,0.20)',   gradient: 'from-green-500/20 to-green-600/10' },
-  specialist:         { text: '#03a9f4', bg: 'rgba(3,169,244,0.10)',   border: 'rgba(3,169,244,0.20)',   gradient: 'from-cyan-500/20 to-blue-600/10' },
-  expert:             { text: '#1e88e5', bg: 'rgba(30,136,229,0.10)',  border: 'rgba(30,136,229,0.20)',  gradient: 'from-blue-500/20 to-blue-700/10' },
-  'candidate master': { text: '#aa00ff', bg: 'rgba(170,0,255,0.10)',   border: 'rgba(170,0,255,0.20)',   gradient: 'from-purple-500/20 to-violet-700/10' },
-  master:             { text: '#ff6d00', bg: 'rgba(255,109,0,0.10)',   border: 'rgba(255,109,0,0.20)',   gradient: 'from-orange-500/20 to-amber-600/10' },
+const RANK_COLORS: Record<string, { text: string; bg: string; border: string }> = {
+  newbie:             { text: '#9e9e9e', bg: 'rgba(158,158,158,0.10)', border: 'rgba(158,158,158,0.20)' },
+  pupil:              { text: '#4caf50', bg: 'rgba(76,175,80,0.10)',   border: 'rgba(76,175,80,0.20)'   },
+  specialist:         { text: '#03a9f4', bg: 'rgba(3,169,244,0.10)',   border: 'rgba(3,169,244,0.20)'   },
+  expert:             { text: '#1e88e5', bg: 'rgba(30,136,229,0.10)',  border: 'rgba(30,136,229,0.20)'  },
+  'candidate master': { text: '#aa00ff', bg: 'rgba(170,0,255,0.10)',   border: 'rgba(170,0,255,0.20)'   },
+  master:             { text: '#ff6d00', bg: 'rgba(255,109,0,0.10)',   border: 'rgba(255,109,0,0.20)'   },
 };
 
 export default function TeamPage() {
@@ -120,12 +119,10 @@ export default function TeamPage() {
         paddingTop: 60, paddingBottom: 56, textAlign: 'center',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decorative background orbs */}
         <div style={{ position: 'absolute', top: -60, left: '20%', width: 300, height: 300, background: 'rgba(220,38,38,0.04)', borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: -40, right: '20%', width: 250, height: 250, background: 'rgba(30,136,229,0.04)', borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
-          {/* A CodeIIEST × GDG Production badge from PDF */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 20,
             background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)',
@@ -152,15 +149,15 @@ export default function TeamPage() {
           </h1>
 
           <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.8, maxWidth: 540, margin: '0 auto 28px' }}>
-            Seniors who actually use this stuff — not recordings from 2019.
-            Taught by IIEST Shibpur CP experts who&apos;ve been in your shoes.
+            Real IIEST Shibpur students who&apos;ve been in your shoes —
+            not recordings from 2019.
           </p>
 
           {/* Stat pills */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
             {[
               { label: `${MENTORS.length} Mentors`, icon: '🎓' },
-              { label: 'Expert+ Rated', icon: '⭐' },
+              { label: 'Specialist+ Rated', icon: '⭐' },
               { label: 'IIEST Verified', icon: '🏫' },
               { label: 'Mon Sessions', icon: '📅' },
             ].map(({ label, icon }) => (
@@ -176,9 +173,9 @@ export default function TeamPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 24px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 20px' }}>
 
-        {/* ── Season Info Banner ───────────────────────────────────────────── */}
+        {/* ── Season Info Banner ─────────────────────────────────────────── */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(220,38,38,0.06) 0%, rgba(30,136,229,0.06) 100%)',
           border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16,
@@ -200,45 +197,48 @@ export default function TeamPage() {
               { label: 'Format', value: '1 Topic + 1 CF Contest / Week' },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{label}</p>
+                <p style={{ color: '#6b7280', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{label}</p>
                 <p style={{ color: '#e2e8f0', fontSize: 13, fontWeight: 600 }}>{value}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Mentors ──────────────────────────────────────────────────────── */}
+        {/* ── Mentors ───────────────────────────────────────────────────── */}
         <div style={{ marginBottom: 64 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 28 }}>
-            <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>Mentors</h2>
-            <span style={{ color: '#374151', fontSize: 13 }}>
-              Taught by seniors who actually use this stuff
+            <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>Mentors &amp; Team</h2>
+            <span style={{ color: '#6b7280', fontSize: 13 }}>
+              Real IIEST Shibpur students — no placeholders
             </span>
           </div>
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: 18,
           }}>
             {MENTORS.map(m => <MentorCard key={m.cfHandle} mentor={m} />)}
           </div>
         </div>
 
-        {/* ── Organizers ───────────────────────────────────────────────────── */}
+        {/* ── Organizers ────────────────────────────────────────────────── */}
         <div style={{ marginBottom: 60 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 }}>
-            <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>Platform & Org</h2>
-            <span style={{ color: '#374151', fontSize: 13 }}>The people who built and run this</span>
+            <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>Platform &amp; Org</h2>
+            <span style={{ color: '#6b7280', fontSize: 13 }}>The people who built and run this</span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
             {ORGANIZERS.map(org => (
               <div key={org.cfHandle} style={{
-                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(139,92,246,0.25)',
                 borderRadius: 18, padding: 24, display: 'flex', gap: 16,
                 position: 'relative', overflow: 'hidden',
               }}>
+                {/* Top accent */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent)' }} />
+
                 {org.isDevLead && (
                   <div style={{
                     position: 'absolute', top: 14, right: 14,
@@ -257,37 +257,45 @@ export default function TeamPage() {
                 }}>
                   {org.name[0]}
                 </div>
-                <div style={{ minWidth: 0 }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <h3 style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 3 }}>{org.name}</h3>
-                  <p style={{ color: '#a78bfa', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{org.role}</p>
-                  <p style={{ color: '#4b5563', fontSize: 12, lineHeight: 1.65, marginBottom: 10 }}>{org.bio}</p>
-                  <a href={`https://codeforces.com/profile/${org.cfHandle}`}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{ color: '#60a5fa', fontSize: 12, fontFamily: 'monospace', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    @{org.cfHandle} <ExternalLink style={{ width: 10, height: 10, opacity: 0.5 }} />
-                  </a>
+                  <p style={{ color: '#a78bfa', fontSize: 11, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>{org.role}</p>
+                  <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.65, marginBottom: 10 }}>{org.bio}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <a href={`https://codeforces.com/profile/${org.cfHandle}`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{ color: '#60a5fa', fontSize: 12, fontFamily: 'monospace', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      @{org.cfHandle} <ExternalLink style={{ width: 10, height: 10, opacity: 0.5 }} />
+                    </a>
+                    {org.linkedin && (
+                      <a href={org.linkedin} target="_blank" rel="noopener noreferrer"
+                        style={{ background: 'rgba(96,165,250,0.10)', border: '1px solid rgba(96,165,250,0.20)', borderRadius: 6, padding: '2px 8px', color: '#60a5fa', fontSize: 10, fontWeight: 600, textDecoration: 'none' }}>
+                        LinkedIn ↗
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Rules from PDF ───────────────────────────────────────────────── */}
+        {/* ── Rules from PDF ────────────────────────────────────────────── */}
         <div style={{
           background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 20, padding: '36px 32px', marginBottom: 56,
+          borderRadius: 20, padding: '36px 28px', marginBottom: 56,
         }}>
           <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 20, marginBottom: 24 }}>
             📋 Ground Rules — Six Lines
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
             {[
-              { n: 'i', rule: 'Write your own code.', detail: 'Discussing live, copying, or letting AI do your thinking = cheating. We catch it, you\'re out.' },
-              { n: 'ii', rule: 'Syntax ok. Solution not.', detail: 'Looking up syntax is fine. If you can\'t write what you\'re pasting, you don\'t know it yet.' },
-              { n: 'iii', rule: 'Missed a contest?', detail: 'Scores zero and gets dropped from your average. Life happens — just show up next week.' },
-              { n: 'iv', rule: 'Upsolve, always.', detail: 'Every problem you couldn\'t crack on Friday is homework before Monday. The contest is the diagnostic.' },
-              { n: 'v', rule: 'Don\'t watch your rating in W1.', detail: 'It will dip. It will bounce. Two contests is noise. Two months is signal. Stop refreshing.' },
-              { n: 'vi', rule: 'Stuck? WhatsApp group.', detail: 'Seniors are in there for a reason. No dumb questions — only unasked ones.' },
+              { n: 'i',   rule: 'Write your own code.',         detail: "Discussing live, copying, or letting AI do your thinking = cheating. We catch it, you're out." },
+              { n: 'ii',  rule: 'Syntax ok. Solution not.',     detail: "Looking up syntax is fine. If you can't write what you're pasting, you don't know it yet." },
+              { n: 'iii', rule: 'Missed a contest?',            detail: 'Scores zero and gets dropped from your average. Life happens — just show up next week.' },
+              { n: 'iv',  rule: 'Upsolve, always.',             detail: "Every problem you couldn't crack on Friday is homework before Monday. The contest is the diagnostic." },
+              { n: 'v',   rule: "Don't watch your rating in W1.", detail: 'It will dip. It will bounce. Two contests is noise. Two months is signal. Stop refreshing.' },
+              { n: 'vi',  rule: 'Stuck? WhatsApp group.',       detail: 'Seniors are in there for a reason. No dumb questions — only unasked ones.' },
             ].map(({ n, rule, detail }) => (
               <div key={n} style={{
                 background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
@@ -305,7 +313,7 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {/* ── CTA ─────────────────────────────────────────────────────────── */}
+        {/* ── CTA ──────────────────────────────────────────────────────── */}
         <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(220,38,38,0.08), rgba(30,136,229,0.06))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '44px 32px' }}>
           <div style={{ fontSize: 40, marginBottom: 14 }}>🚀</div>
           <h2 style={{ color: '#fff', fontWeight: 900, fontSize: 24, marginBottom: 10 }}>
@@ -348,7 +356,7 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 14 }}>
         {/* Avatar */}
         <div style={{
-          width: 56, height: 56, borderRadius: '50%', flexShrink: 0,
+          width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
           background: rc.bg, border: `2px solid ${rc.border}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 18, fontWeight: 900, color: rc.text, overflow: 'hidden',
@@ -362,7 +370,7 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
         {/* Info */}
         <div style={{ minWidth: 0, flex: 1 }}>
           <h3 style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{mentor.name}</h3>
-          <p style={{ color: '#64748b', fontSize: 12, marginBottom: 6 }}>{mentor.role}</p>
+          <p style={{ color: '#64748b', fontSize: 11, marginBottom: 6, lineHeight: 1.3 }}>{mentor.role}</p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: rc.bg, border: `1px solid ${rc.border}`, borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 700, color: rc.text }}>
               {mentor.cfRank.charAt(0).toUpperCase() + mentor.cfRank.slice(1)} · {mentor.cfRating}
@@ -373,12 +381,12 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
 
       {/* Speciality */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#374151' }}>Focus</span>
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280' }}>Focus</span>
         <span style={{ fontSize: 12, color: rc.text, fontWeight: 600 }}>{mentor.speciality}</span>
       </div>
 
       {/* Bio */}
-      <p style={{ color: '#4b5563', fontSize: 12, lineHeight: 1.7, marginBottom: 14 }}>{mentor.bio}</p>
+      <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.7, marginBottom: 14 }}>{mentor.bio}</p>
 
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12 }}>
@@ -388,7 +396,7 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
           @{mentor.cfHandle} <ExternalLink style={{ width: 10, height: 10, opacity: 0.5 }} />
         </a>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ color: '#1f2937', fontSize: 11 }}>{mentor.department} · {mentor.batch}</span>
+          <span style={{ color: '#6b7280', fontSize: 11 }}>{mentor.department} · {mentor.batch}</span>
           {mentor.linkedin && (
             <a href={mentor.linkedin} target="_blank" rel="noopener noreferrer"
               style={{ background: 'rgba(96,165,250,0.10)', border: '1px solid rgba(96,165,250,0.20)', borderRadius: 6, padding: '2px 8px', color: '#60a5fa', fontSize: 10, fontWeight: 600, textDecoration: 'none' }}>
