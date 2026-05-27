@@ -25,11 +25,22 @@ import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import type { CFUserInfoResponse, CFOAuthTokenPayload } from '@/types/codeforces';
 
-const REDIRECT_BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+const CF_CLIENT_ID     = process.env.CF_CLIENT_ID!;
+const CF_CLIENT_SECRET = process.env.CF_CLIENT_SECRET!;
 
 export async function GET(req: NextRequest) {
   // ── Auth check ────────────────────────────────────────────────────────────
   const session = await auth();
+
+  // Derive the base URL from:
+  // 1. The cookie set by /api/cf/start (most reliable — same origin that started the flow)
+  // 2. The incoming request origin (fallback)
+  const cookieStore = await cookies();
+  const originFromCookie = cookieStore.get('cf_origin')?.value;
+  const REDIRECT_BASE = originFromCookie ?? req.nextUrl.origin;
+  // The redirect_uri MUST match what was sent to Codeforces in /api/cf/start
+  const redirectUri = `${REDIRECT_BASE}/api/cf/callback`;
+
   if (!session?.user?.id) {
     return NextResponse.redirect(`${REDIRECT_BASE}/?auth=required`);
   }
@@ -46,8 +57,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // ── Retrieve and clear nonce ──────────────────────────────────────────
-    const cookieStore = await cookies();
+    // ── Retrieve and clear nonce + origin cookies ──────────────────────────
     const storedNonce = cookieStore.get('cf_oauth_nonce')?.value;
 
     if (!storedNonce) {
@@ -56,6 +66,7 @@ export async function GET(req: NextRequest) {
       );
     }
     cookieStore.delete('cf_oauth_nonce');
+    cookieStore.delete('cf_origin');
 
     // ── Exchange code for tokens ──────────────────────────────────────────
     const tokenRes = await fetch('https://codeforces.com/oauth/token', {
@@ -63,9 +74,9 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         code,
-        client_id: process.env.CF_CLIENT_ID!,
-        client_secret: process.env.CF_CLIENT_SECRET!,
-        redirect_uri: process.env.CF_REDIRECT_URI!,
+        client_id: CF_CLIENT_ID,
+        client_secret: CF_CLIENT_SECRET,
+        redirect_uri: redirectUri,   // ← MUST match what start route sent
         grant_type: 'authorization_code',
       }),
     });

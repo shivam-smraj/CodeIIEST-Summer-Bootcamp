@@ -59,9 +59,23 @@ export async function GET(req: NextRequest) {
   });
 
   // ── Build CF OAuth authorization URL ─────────────────────────────────────
+  // Derive redirect_uri from the actual request origin — works on localhost AND
+  // on Vercel without needing a CF_REDIRECT_URI env var.
+  const origin = req.nextUrl.origin; // e.g. "https://codeiiest-bootcamp.vercel.app"
+  const redirectUri = `${origin}/api/cf/callback`;
+
+  // Store the origin so the callback can use it for post-auth redirects
+  cookieStore.set('cf_origin', origin, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 300,
+    path: '/',
+  });
+
   const params = new URLSearchParams({
     client_id: process.env.CF_CLIENT_ID!,
-    redirect_uri: process.env.CF_REDIRECT_URI!,
+    redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'openid profile',
     nonce,
