@@ -5,51 +5,54 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * SplashScreen — animated CodeIIEST logo intro.
  *
- * APPROACH (hydration-safe):
- *  - Uses a fixed overlay div (not body/html visibility tricks) to cover
- *    the page content during the animation. This avoids SSR/hydration mismatches.
- *  - On first visit: overlay is visible (opacity 1), animation runs, then fades out.
- *  - On return visit within the session: overlay starts at opacity 0, removed immediately.
- *  - sessionStorage key 'ci-splash-shown' prevents showing on every navigation.
+ * STRATEGY: Show on EVERY full page load/refresh, but NOT on client-side
+ * navigation (React router pushes).
  *
- *  The overlay is rendered server-side with opacity: 0 by default (no flash).
- *  A useLayoutEffect-like trick via a ref + immediate DOM mutation makes it
- *  visible before the first paint on first visit.
+ * How it works:
+ *   - A module-level variable `splashShownThisLoad` starts as `false`.
+ *   - On a full page refresh, the JavaScript module re-initialises → `false` → show splash.
+ *   - On client-side navigation (Next.js Link), the module stays in memory → already `true` → skip.
+ *   - This is better than sessionStorage (which persists the ENTIRE browser session
+ *     and never shows the splash again until the tab is closed).
+ *
+ * HYDRATION-SAFE:
+ *   - Overlay renders with opacity:0 by SSR (invisible, no layout shift, no mismatch).
+ *   - useEffect immediately sets opacity:1 on the overlay element before the first paint.
+ *   - No body/html visibility:hidden tricks → zero hydration warnings.
  */
+
+// Resets on every hard refresh, persists across client-side navigation.
+let splashShownThisLoad = false;
+
 export function SplashScreen() {
-  const overlayRef   = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     const el = overlayRef.current;
     if (!el) return;
 
-    let alreadyShown = false;
-    try {
-      alreadyShown = !!sessionStorage.getItem('ci-splash-shown');
-    } catch { /* incognito */ }
-
-    if (alreadyShown) {
-      // Return visit — remove overlay immediately
+    if (splashShownThisLoad) {
+      // Client-side navigation — skip immediately
       setDone(true);
       return;
     }
 
-    // First visit — make overlay visible immediately (before paint)
-    try { sessionStorage.setItem('ci-splash-shown', '1'); } catch { /* ignore */ }
+    // First load this session — mark shown and run animation
+    splashShownThisLoad = true;
 
-    // Show overlay and lock scroll
-    el.style.opacity   = '1';
+    // Make overlay visible immediately (before next paint)
+    el.style.opacity = '1';
     el.style.pointerEvents = 'all';
     document.body.style.overflow = 'hidden';
 
-    // After animation completes: fade out overlay
+    // After animation: fade out overlay
     const fadeTimer = setTimeout(() => {
       el.style.transition = 'opacity 0.6s ease';
-      el.style.opacity    = '0';
+      el.style.opacity = '0';
     }, 3400);
 
-    // After fade completes: remove entirely
+    // After fade: remove from DOM
     const doneTimer = setTimeout(() => {
       document.body.style.overflow = '';
       setDone(true);
@@ -79,12 +82,12 @@ export function SplashScreen() {
           from { height: 0; }
           to   { height: 380px; }
         }
-        @keyframes ci-pulse-glow {
+        @keyframes ci-glow {
           0%, 100% { filter: drop-shadow(0 0 0px #dc2626); }
-          50%       { filter: drop-shadow(0 0 24px #dc2626cc); }
+          50%       { filter: drop-shadow(0 0 28px #dc2626cc); }
         }
-        @keyframes ci-text-in {
-          from { opacity: 0; transform: translateY(12px); }
+        @keyframes ci-label-in {
+          from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
@@ -109,60 +112,58 @@ export function SplashScreen() {
         .ci-logo-row {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          animation: ci-pulse-glow 2s ease-in-out 1.5s 1 forwards;
+          gap: 6px;
+          animation: ci-glow 2s ease-in-out 1.5s 1 forwards;
         }
 
         .ci-splash-label {
           font-family: system-ui, sans-serif;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
           color: #374151;
-          animation: ci-text-in 0.5s ease-out 2s both;
+          animation: ci-label-in 0.5s ease-out 2s both;
         }
 
-        /* CI — horizontal top/bottom bars */
-        #ci-r46, #ci-r48, #ci-r49_2 {
-          animation: ci-horiz 0.8s var(--ci-easein) forwards;
+        /* Red CI bars */
+        #sp-r46, #sp-r48, #sp-r49_2 {
+          animation: ci-horiz 0.75s var(--ci-easein) forwards;
           transform-origin: right;
         }
-        #ci-r49 {
-          animation: ci-horiz 0.8s var(--ci-easeout) 0.9s forwards;
+        #sp-r49 {
+          animation: ci-horiz 0.75s var(--ci-easeout) 0.85s forwards;
           transform: scaleX(0);
           transform-origin: right;
         }
-
-        /* CI — vertical bars */
-        #ci-r123 {
-          animation: ci-vert 0.8s var(--ci-easeout) 0.9s forwards;
+        #sp-r123 {
+          animation: ci-vert 0.75s var(--ci-easeout) 0.85s forwards;
           transform: scaleY(0);
           transform-origin: top;
         }
-        #ci-r126 {
-          animation: ci-vert 0.8s var(--ci-easeout) 0.9s forwards;
+        #sp-r126 {
+          animation: ci-vert 0.75s var(--ci-easeout) 0.85s forwards;
           transform: scaleY(0);
           transform-origin: bottom;
         }
-        #ci-r129 {
-          animation: ci-vert-grow 0.8s var(--ci-easeout) 0.9s forwards;
+        #sp-r129 {
+          animation: ci-vert-grow 0.75s var(--ci-easeout) 0.85s forwards;
           height: 0;
         }
 
-        /* II — all three bars */
-        #ci-ri121 {
-          animation: ci-vert 0.8s ease-out 0.9s forwards;
+        /* Grey II bars */
+        #sp-ri1 {
+          animation: ci-vert 0.75s ease-out 0.85s forwards;
           transform: scaleY(0);
           transform-origin: top;
         }
-        #ci-ri122 {
-          animation: ci-vert 0.8s ease-out 1.1s forwards;
+        #sp-ri2 {
+          animation: ci-vert 0.75s ease-out 1.05s forwards;
           transform: scaleY(0);
           transform-origin: bottom;
         }
-        #ci-ri123 {
-          animation: ci-vert 0.8s ease-out 1.0s forwards;
+        #sp-ri3 {
+          animation: ci-vert 0.75s ease-out 0.95s forwards;
           transform: scaleY(0);
           transform-origin: top;
         }
@@ -176,22 +177,22 @@ export function SplashScreen() {
         aria-live="polite"
       >
         <div className="ci-logo-row">
-          {/* Red "CI" mark */}
-          <svg width="160" height="190" viewBox="0 0 425 495" fill="none">
-            <rect id="ci-r46"   width="425" height="40" fill="#F60000" />
-            <rect id="ci-r48"   x="110" y="60"  width="315" height="40"  fill="#FF0000" />
-            <rect id="ci-r49"   x="165" y="400" width="260" height="40"  fill="#F60000" />
-            <rect id="ci-r49_2" x="55"  y="455" width="370" height="40"  fill="#671616" />
-            <rect id="ci-r126"  x="55"  y="60"  width="40"  height="435" fill="#671616" />
-            <rect id="ci-r129"  x="110" y="60"  width="40"  height="380" fill="#FF0000" />
-            <rect id="ci-r123"  width="40" height="495" fill="#F60000" />
+          {/* Red "CI" mark — own 425×495 coordinate space */}
+          <svg width="155" height="185" viewBox="0 0 425 495" fill="none">
+            <rect id="sp-r46"   width="425" height="40" fill="#F60000" />
+            <rect id="sp-r48"   x="110" y="60"  width="315" height="40"  fill="#FF0000" />
+            <rect id="sp-r49"   x="165" y="400" width="260" height="40"  fill="#F60000" />
+            <rect id="sp-r49_2" x="55"  y="455" width="370" height="40"  fill="#671616" />
+            <rect id="sp-r126"  x="55"  y="60"  width="40"  height="435" fill="#671616" />
+            <rect id="sp-r129"  x="110" y="60"  width="40"  height="380" fill="#FF0000" />
+            <rect id="sp-r123"  width="40" height="495" fill="#F60000" />
           </svg>
 
-          {/* Grey "II" mark */}
-          <svg width="55" height="190" viewBox="0 0 151 495" fill="none">
-            <rect id="ci-ri121" width="37"  height="495" fill="#A6A6A6" />
-            <rect id="ci-ri122" x="57"  width="37" height="495" fill="#D9D9D9" />
-            <rect id="ci-ri123" x="114" width="37" height="495" fill="#D9D9D9" />
+          {/* Grey "II" mark — own 151×495 coordinate space */}
+          <svg width="53" height="185" viewBox="0 0 151 495" fill="none">
+            <rect id="sp-ri1" width="37"  height="495" fill="#A6A6A6" />
+            <rect id="sp-ri2" x="57"  width="37" height="495" fill="#D9D9D9" />
+            <rect id="sp-ri3" x="114" width="37" height="495" fill="#D9D9D9" />
           </svg>
         </div>
 

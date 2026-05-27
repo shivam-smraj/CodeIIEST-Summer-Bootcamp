@@ -259,29 +259,6 @@ export function HeroSection() {
             </>
           )}
         </div>
-
-        {/* Stats bar */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '24px 48px',
-          }}
-        >
-          {[
-            { icon: '📅', value: '8', label: 'Weeks' },
-            { icon: '🏆', value: '8', label: 'Contests' },
-            { icon: '✅', value: 'Best 6', label: 'Rule' },
-            { icon: '⚡', value: '<3s', label: 'CF Verify' },
-          ].map(({ icon, value, label }) => (
-            <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, marginBottom: 4 }}>{icon}</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1 }}>{value}</div>
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 3, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Scroll indicator */}
