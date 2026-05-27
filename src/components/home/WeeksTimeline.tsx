@@ -87,7 +87,7 @@ export function WeeksTimeline() {
                 borderBottom: i < 7 ? '1px solid rgba(255,255,255,0.04)' : 'none',
                 background:   isActive ? `${meta.color}08` : 'transparent',
                 borderLeft:   isActive ? `3px solid ${meta.color}` : '3px solid transparent',
-                opacity:      isFuture ? 0.60 : 1,
+                opacity:      isFuture ? 0.90 : 1,
                 transition:   'background 0.2s',
               }}
             >
@@ -118,8 +118,8 @@ export function WeeksTimeline() {
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                   <span style={{ fontSize: 16, flexShrink: 0 }}>{meta.emoji}</span>
                   <span style={{
-                    color:      isActive ? '#fff' : isPast ? '#cbd5e1' : '#94a3b8',
-                    fontWeight: isActive ? 700 : 500,
+                    color:      isActive ? '#fff' : isPast ? '#cbd5e1' : '#e2e8f0',
+                    fontWeight: 700,
                     fontSize:   14, lineHeight: 1.35,
                   }}>
                     {topic}

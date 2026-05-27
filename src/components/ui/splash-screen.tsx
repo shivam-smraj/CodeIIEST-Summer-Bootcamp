@@ -38,9 +38,6 @@ export function SplashScreen() {
       return;
     }
 
-    // First load this session — mark shown and run animation
-    splashShownThisLoad = true;
-
     // Make overlay visible immediately (before next paint)
     el.style.opacity = '1';
     el.style.pointerEvents = 'all';
@@ -55,6 +52,7 @@ export function SplashScreen() {
     // After fade: remove from DOM
     const doneTimer = setTimeout(() => {
       document.body.style.overflow = '';
+      splashShownThisLoad = true; // Mark shown only on SUCCESSFUL completion of the animation! (Solves React StrictMode double-mount skipping the splash screen)
       setDone(true);
     }, 4100);
 

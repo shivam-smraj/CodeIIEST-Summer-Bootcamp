@@ -5,7 +5,7 @@ import Link from 'next/link';
 function CILogoFooter() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 5, height: 32 }}>
-      <svg width="24" height="32" viewBox="0 0 425 495" fill="none">
+      <svg width="24" height="32" viewBox="0 0 475 495" fill="none">
         <rect width="425" height="40" fill="#F60000"/>
         <rect x="110" y="60" width="315" height="40" fill="#FF0000"/>
         <rect x="165" y="400" width="260" height="40" fill="#F60000"/>
@@ -154,10 +154,10 @@ export function Footer() {
           display: 'flex', flexWrap: 'wrap', gap: 8,
           alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <p style={{ color: '#4b5563', fontSize: 11 }}>
+          <p className="footer-bottom-text" style={{ color: '#4b5563', fontSize: 11 }}>
             © {year} CodeIIEST · Built by the CodeIIEST Dev Team
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <div className="footer-bottom-credits" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <span style={{ color: '#4b5563', fontSize: 11 }}>Made with</span>
             <span style={{ color: '#dc2626', fontSize: 13 }}>♥</span>
             <span style={{ color: '#4b5563', fontSize: 11 }}>by{' '}</span>
@@ -230,6 +230,15 @@ export function Footer() {
             flex-direction: column;
             align-items: center;
             text-align: center;
+            justify-content: center !important;
+          }
+          .footer-bottom-text {
+            text-align: center !important;
+            width: 100%;
+          }
+          .footer-bottom-credits {
+            justify-content: center !important;
+            width: 100%;
           }
         }
       `}</style>

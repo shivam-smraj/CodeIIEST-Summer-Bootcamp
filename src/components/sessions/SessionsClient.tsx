@@ -79,13 +79,8 @@ function SessionCard({
       <button
         onClick={onToggle}
         disabled={isLocked}
+        className="session-card-header"
         style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-          padding: '16px 18px',
-          textAlign: 'left',
           background: 'none',
           border: 'none',
           cursor: isLocked ? 'default' : 'pointer',
@@ -93,48 +88,33 @@ function SessionCard({
         }}
       >
         {/* Week badge */}
-        <div style={{
-          width: 52,
-          height: 52,
-          borderRadius: 12,
+        <div className="session-card-badge" style={{
           background: isLocked ? 'rgba(255,255,255,0.04)' : accent.bg,
           border: `1px solid ${isLocked ? 'rgba(255,255,255,0.06)' : accent.border}`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          lineHeight: 1,
         }}>
-          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: isLocked ? '#374151' : accent.text, opacity: 0.7 }}>
+          <span className="session-card-wk-text" style={{ color: isLocked ? '#374151' : accent.text, opacity: 0.7 }}>
             Wk
           </span>
-          <span style={{ fontSize: 20, fontWeight: 900, color: isLocked ? '#374151' : accent.text }}>
+          <span className="session-card-num-text" style={{ color: isLocked ? '#374151' : accent.text }}>
             {session.weekNumber}
           </span>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{
+        <div className="session-card-content">
+          <h3 className="session-card-title" style={{
             color: isLocked ? '#374151' : '#fff',
-            fontSize: 15,
-            fontWeight: 600,
-            marginBottom: 4,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
           }}>
             {session.topic}
           </h3>
 
           {isLocked ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px 10px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#374151', fontSize: 12 }}>
                 <Lock style={{ width: 11, height: 11 }} /> Locked
               </span>
               {weekDates && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#1f2937', fontSize: 11 }}>
+                <span className="session-card-dates" style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4b5563', fontSize: 11 }}>
                   <Calendar style={{ width: 10, height: 10 }} />
                   {weekDates.session} &nbsp;·&nbsp; Contest: {weekDates.contest}
                 </span>
@@ -162,7 +142,7 @@ function SessionCard({
         </div>
 
         {/* Right: badges + chevron */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <div className="session-card-right">
           {!isLocked && session.isRecordingAvailable && (
             <span style={{
               display: 'flex', alignItems: 'center', gap: 4,
@@ -293,6 +273,94 @@ function SessionCard({
       )}
 
       <style>{`
+        .session-card-header {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 16px 18px;
+          text-align: left;
+        }
+        .session-card-badge {
+          width: 52px;
+          height: 52px;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          line-height: 1;
+        }
+        .session-card-wk-text {
+          font-size: 9px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          opacity: 0.7;
+        }
+        .session-card-num-text {
+          font-size: 20px;
+          font-weight: 900;
+        }
+        .session-card-content {
+          flex: 1;
+          min-width: 0;
+        }
+        .session-card-title {
+          font-size: 15px;
+          font-weight: 600;
+          margin-bottom: 4px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .session-card-right {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 640px) {
+          .session-card-header {
+            flex-wrap: wrap !important;
+            padding: 14px 14px !important;
+            gap: 10px !important;
+          }
+          .session-card-badge {
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 10px !important;
+          }
+          .session-card-wk-text {
+            font-size: 8px !important;
+          }
+          .session-card-num-text {
+            font-size: 16px !important;
+          }
+          .session-card-content {
+            flex: 1;
+            min-width: 140px !important;
+          }
+          .session-card-title {
+            white-space: normal !important;
+            font-size: 14px !important;
+            line-height: 1.35 !important;
+          }
+          .session-card-dates {
+            font-size: 10px !important;
+          }
+          .session-card-right {
+            width: 100% !important;
+            justify-content: flex-end !important;
+            margin-top: 4px !important;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding-top: 6px;
+            gap: 6px !important;
+          }
+        }
+
         .session-link {
           display: flex; align-items: center; gap: 8;
           padding: 11px 14px;

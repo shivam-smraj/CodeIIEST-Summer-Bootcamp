@@ -312,7 +312,7 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
         </div>
 
         {/* Weekly scores row */}
-        <div style={{ display:'flex', gap:4, marginTop:8, marginLeft:38, flexWrap:'wrap' }}>
+        <div style={{ display:'flex', gap:4, marginTop:8, marginLeft:38, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 4 }}>
           {Array.from({length:8}).map((_,i) => {
             const score = user.scores?.[i];
             return (

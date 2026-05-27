@@ -28,7 +28,7 @@ function CILogo() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 30, flexShrink: 0 }}>
       {/* Red CI */}
-      <svg width="22" height="30" viewBox="0 0 425 495" fill="none">
+      <svg width="22" height="30" viewBox="0 0 475 495" fill="none">
         <rect width="425" height="40" fill="#F60000"/>
         <rect x="110" y="60" width="315" height="40" fill="#FF0000"/>
         <rect x="165" y="400" width="260" height="40" fill="#F60000"/>

@@ -59,10 +59,16 @@ export async function GET(req: NextRequest) {
   });
 
   // ── Build CF OAuth authorization URL ─────────────────────────────────────
-  // Derive redirect_uri from the actual request origin — works on localhost AND
-  // on Vercel without needing a CF_REDIRECT_URI env var.
-  const origin = req.nextUrl.origin; // e.g. "https://codeiiest-bootcamp.vercel.app"
-  const redirectUri = `${origin}/api/cf/callback`;
+  // Derive redirect_uri dynamically and robustly. If CF_REDIRECT_URI env var is set, use it.
+  // Otherwise, use forwarded headers (x-forwarded-proto, x-forwarded-host)
+  // to ensure it works correctly on Vercel behind proxies and on localhost.
+  let redirectUri = process.env.CF_REDIRECT_URI;
+  if (!redirectUri) {
+    const proto = req.headers.get('x-forwarded-proto') || 'http';
+    const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || 'localhost:3000';
+    redirectUri = `${proto}://${host}/api/cf/callback`;
+  }
+  const origin = new URL(redirectUri).origin;
 
   // Store the origin so the callback can use it for post-auth redirects
   cookieStore.set('cf_origin', origin, {

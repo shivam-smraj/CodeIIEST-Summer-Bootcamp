@@ -32,12 +32,25 @@ export async function GET(req: NextRequest) {
   // ── Auth check ────────────────────────────────────────────────────────────
   const session = await auth();
 
-  // Derive the base URL from:
+  // Derive the base URL dynamically and robustly:
   // 1. The cookie set by /api/cf/start (most reliable — same origin that started the flow)
-  // 2. The incoming request origin (fallback)
+  // 2. The CF_REDIRECT_URI environment variable (if set)
+  // 3. The incoming request headers (fallback for proxies like Vercel)
   const cookieStore = await cookies();
   const originFromCookie = cookieStore.get('cf_origin')?.value;
-  const REDIRECT_BASE = originFromCookie ?? req.nextUrl.origin;
+  
+  let REDIRECT_BASE = originFromCookie;
+  if (!REDIRECT_BASE) {
+    let redirectUriEnv = process.env.CF_REDIRECT_URI;
+    if (redirectUriEnv) {
+      REDIRECT_BASE = new URL(redirectUriEnv).origin;
+    } else {
+      const proto = req.headers.get('x-forwarded-proto') || 'http';
+      const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || 'localhost:3000';
+      REDIRECT_BASE = `${proto}://${host}`;
+    }
+  }
+  
   // The redirect_uri MUST match what was sent to Codeforces in /api/cf/start
   const redirectUri = `${REDIRECT_BASE}/api/cf/callback`;
 

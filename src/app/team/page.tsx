@@ -14,19 +14,7 @@ const MENTORS: {
   linkedin?: string; image?: string; bio: string; speciality: string;
   isDevLead?: boolean;
 }[] = [
-    {
-      name: 'Shivam Kumar',
-      role: 'Platform Developer · Problem Setter · Mentor',
-      cfHandle: 'S_M_Raj',
-      cfRating: 1705,
-      cfRank: 'expert',
-      department: 'EEB',
-      batch: 2028,
-      bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS. MAX Expert (1705). Contest problem setter and bootcamp session mentor.',
-      speciality: 'Platform Dev & Problem Setting',
-      linkedin: 'https://www.linkedin.com/in/smraj0198/',
-      isDevLead: true,
-    },
+
     {
       name: 'Rohit Das',
       role: 'Lead Mentor — Competitive Programming',
@@ -37,18 +25,6 @@ const MENTORS: {
       batch: 2028,
       bio: 'Expert-rated (1626) with a strong command of advanced data structures and algorithmic techniques. Top performer of the team.',
       speciality: 'Data Structures & Algorithms',
-    },
-    {
-      name: 'Mrigaj Shaw',
-      role: 'Mentor — Problem Solving & Sessions',
-      cfHandle: 'Kakarot_DB',
-      cfRating: 1545,
-      cfRank: 'specialist',
-      department: 'CSB',
-      batch: 2028,
-      bio: 'Avid problem solver passionate about CP. Loves hosting sessions, preparing mashups, and mentoring juniors on the right path.',
-      speciality: 'DP & Graph Theory',
-      linkedin: 'https://www.linkedin.com/in/mrigaj-shaw-462767277/',
     },
     {
       name: 'Mayank',
@@ -63,16 +39,17 @@ const MENTORS: {
       linkedin: 'https://www.linkedin.com/in/mayank9207',
     },
     {
-      name: 'Krish Mohan',
-      role: 'Mentor — Competitive Programming',
-      cfHandle: 'Anon_thefool',
-      cfRating: 1482,
-      cfRank: 'specialist',
-      department: 'CSB',
+      name: 'Shivam Kumar',
+      role: 'Platform Developer · Problem Setter · Mentor',
+      cfHandle: 'S_M_Raj',
+      cfRating: 1705,
+      cfRank: 'expert',
+      department: 'EEB',
       batch: 2028,
-      bio: 'Specialist on Codeforces who enjoys tricky implementation problems. Keen on helping peers level up their problem-solving skills.',
-      speciality: 'Implementation & STL',
-      linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
+      bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS. MAX Expert (1705). Contest problem setter and bootcamp session mentor.',
+      speciality: 'Platform Dev & Problem Setting',
+      linkedin: 'https://www.linkedin.com/in/smraj0198/',
+      isDevLead: true,
     },
     {
       name: 'Aditya Shaw',
@@ -86,6 +63,32 @@ const MENTORS: {
       speciality: 'Constructive & Binary Search',
       linkedin: 'https://www.linkedin.com/in/aditya-shaw-code',
     },
+    {
+      name: 'Mrigaj Shaw',
+      role: 'Mentor — Problem Solving & Sessions',
+      cfHandle: 'Kakarot_DB',
+      cfRating: 1545,
+      cfRank: 'specialist',
+      department: 'CSB',
+      batch: 2028,
+      bio: 'Avid problem solver passionate about CP. Loves hosting sessions, preparing mashups, and mentoring juniors on the right path.',
+      speciality: 'DP & Graph Theory',
+      linkedin: 'https://www.linkedin.com/in/mrigaj-shaw-462767277/',
+    },
+
+    {
+      name: 'Krish Mohan',
+      role: 'Mentor — Competitive Programming',
+      cfHandle: 'Anon_thefool',
+      cfRating: 1482,
+      cfRank: 'specialist',
+      department: 'CSB',
+      batch: 2028,
+      bio: 'Specialist on Codeforces who enjoys tricky implementation problems. Keen on helping peers level up their problem-solving skills.',
+      speciality: 'Implementation & STL',
+      linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
+    },
+
     {
       name: 'B V Shree Keshav',
       role: 'Mentor — Contest Organizer',
@@ -293,7 +296,8 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
       transition: 'transform 0.2s ease, border-color 0.2s ease',
     }}>
       {/* Top color accent */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
         background: mentor.isDevLead
           ? 'linear-gradient(90deg, transparent, rgba(139,92,246,0.7), transparent)'
           : `linear-gradient(90deg, transparent, ${rc.text}50, transparent)`,

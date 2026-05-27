@@ -31,8 +31,8 @@ function CILogo({ size = 48 }: { size?: number }) {
   const iiW = Math.round(size * 0.35);  // II mark is narrower
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      {/* Red "CI" mark — uses its own 425×495 coordinate space */}
-      <svg width={ciW} height={h} viewBox="0 0 425 495" fill="none">
+      {/* Red "CI" mark — uses its own 475×495 coordinate space */}
+      <svg width={ciW} height={h} viewBox="0 0 475 495" fill="none">
         <rect width="425" height="40" fill="#F60000" />
         <rect x="110" y="60" width="315" height="40" fill="#FF0000" />
         <rect x="165" y="400" width="260" height="40" fill="#F60000" />

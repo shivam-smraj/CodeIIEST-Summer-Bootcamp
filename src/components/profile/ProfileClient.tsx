@@ -178,7 +178,7 @@ export function ProfileClient() {
       </div>
 
       {/* ── CF Handle + Stats row ─────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="profile-cf-stats" style={{ gap: 12 }}>
 
         {/* CF Handle Card */}
         <div style={{
@@ -435,7 +435,7 @@ const _ProfileStyles = () => (
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .profile-hero-inner { padding: 20px 16px 18px !important; }
       .profile-hero-row {
         flex-direction: column;
