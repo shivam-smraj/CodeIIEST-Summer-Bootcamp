@@ -34,31 +34,6 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-/**
- * SPLASH SCREEN STRATEGY — eliminates FOUC completely:
- *
- * The inline <script> below runs synchronously BEFORE the browser paints.
- * It checks sessionStorage immediately:
- *   - First visit: sets body visibility to "hidden" so nothing is shown.
- *     The SplashScreen React component then takes over (z-index:99999),
- *     and after 4.2s both the splash fades AND body becomes visible again.
- *   - Return visit: sessionStorage flag already set → body stays visible,
- *     no splash is shown at all.
- *
- * This is the ONLY reliable way to prevent FOUC without SSR tricks.
- */
-const splashBlockingScript = `
-(function(){
-  try {
-    var shown = sessionStorage.getItem('ci-splash-shown');
-    if (!shown) {
-      // First visit: hide body immediately so no content flashes
-      document.documentElement.style.visibility = 'hidden';
-    }
-  } catch(e) {}
-})();
-`;
-
 export default async function RootLayout({
   children,
 }: {
@@ -67,16 +42,16 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html lang="en" className="dark">
-      <head>
-        {/* Blocking script — runs before first paint to prevent FOUC */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script dangerouslySetInnerHTML={{ __html: splashBlockingScript }} />
-      </head>
+    // suppressHydrationWarning: The SplashScreen component mutates the DOM
+    // (overlay opacity) client-side after hydration. This is intentional and
+    // safe — suppressing the warning prevents false-positive console errors.
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased bg-[#0a0a0a] text-white`}
+        className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
+        style={{ background: '#09090b', color: '#f8fafc', minHeight: '100dvh' }}
       >
         <SessionProvider session={session}>
+          {/* Splash screen overlay — shown only on first visit per session */}
           <SplashScreen />
           {children}
           <Toaster
