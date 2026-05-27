@@ -12,101 +12,101 @@ const MENTORS: {
   name: string; role: string; cfHandle: string; cfRating: number;
   cfRank: string; department: string; batch: number;
   linkedin?: string; image?: string; bio: string; speciality: string;
+  isDevLead?: boolean;
 }[] = [
-  {
-    name: 'Rohit Das',
-    role: 'Lead Mentor — Competitive Programming',
-    cfHandle: 'ROHITDAScr7',
-    cfRating: 1626,
-    cfRank: 'expert',
-    department: 'CSB',
-    batch: 2028,
-    bio: 'Expert-rated (1626) with a strong command of advanced data structures and algorithmic techniques. Top performer of the team.',
-    speciality: 'Data Structures & Algorithms',
-  },
-  {
-    name: 'Mrigaj Shaw',
-    role: 'Mentor — Problem Solving & Sessions',
-    cfHandle: 'Kakarot_DB',
-    cfRating: 1545,
-    cfRank: 'specialist',
-    department: 'CSB',
-    batch: 2028,
-    bio: 'Avid problem solver passionate about CP. Loves hosting sessions, preparing mashups, and mentoring juniors on the right path.',
-    speciality: 'DP & Graph Theory',
-    linkedin: 'https://www.linkedin.com/in/mrigaj-shaw-462767277/',
-  },
-  {
-    name: 'Mayank',
-    role: 'Mentor — Algorithms',
-    cfHandle: 'Mayank_9207',
-    cfRating: 1490,
-    cfRank: 'specialist',
-    department: 'ITB',
-    batch: 2028,
-    bio: 'Managing tradeoffs full time. Specialist (peak 1490) with sharp instincts for greedy and two-pointer strategies.',
-    speciality: 'Greedy & Two Pointers',
-    linkedin: 'https://www.linkedin.com/in/mayank9207',
-  },
-  {
-    name: 'Krish Mohan',
-    role: 'Mentor — Competitive Programming',
-    cfHandle: 'Anon_thefool',
-    cfRating: 1482,
-    cfRank: 'specialist',
-    department: 'CSB',
-    batch: 2028,
-    bio: 'Specialist on Codeforces who enjoys tricky implementation problems. Keen on helping peers level up their problem-solving skills.',
-    speciality: 'Implementation & STL',
-    linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
-  },
-  {
-    name: 'Aditya Shaw',
-    role: 'Mentor — Algorithms',
-    cfHandle: 'adityawcode',
-    cfRating: 1445,
-    cfRank: 'specialist',
-    department: 'ITB',
-    batch: 2028,
-    bio: 'Likes logic flawless and conversations unfiltered. Specialist with sharp instincts for constructive and binary search problems.',
-    speciality: 'Constructive & Binary Search',
-    linkedin: 'https://www.linkedin.com/in/aditya-shaw-code',
-  },
-  {
-    name: 'B V Shree Keshav',
-    role: 'Mentor — Contest Organizer',
-    cfHandle: 'bvsk',
-    cfRating: 1246,
-    cfRank: 'pupil',
-    department: 'ITB',
-    batch: 2028,
-    bio: "From Chennai — just let it happen and don't forget to smile. Loves conducting contests and supporting participants wherever possible.",
-    speciality: 'Contest Hosting & Community',
-    linkedin: 'https://www.linkedin.com/in/shree-keshav-440088348',
-  },
-];
-
-const ORGANIZERS = [
-  {
-    name: 'Shivam Kumar',
-    role: 'Platform Developer · Problem Setter · Mentor',
-    cfHandle: 'S_M_Raj',
-    cfRating: 1705,
-    department: 'EEB',
-    batch: 2028,
-    bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS. MAX Expert (1705). Contest problem setter and Week-1 session mentor.',
-    linkedin: 'https://www.linkedin.com/in/smraj0198/',
-    isDevLead: true,
-  },
-];
+    {
+      name: 'Shivam Kumar',
+      role: 'Platform Developer · Problem Setter · Mentor',
+      cfHandle: 'S_M_Raj',
+      cfRating: 1705,
+      cfRank: 'expert',
+      department: 'EEB',
+      batch: 2028,
+      bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS. MAX Expert (1705). Contest problem setter and bootcamp session mentor.',
+      speciality: 'Platform Dev & Problem Setting',
+      linkedin: 'https://www.linkedin.com/in/smraj0198/',
+      isDevLead: true,
+    },
+    {
+      name: 'Rohit Das',
+      role: 'Lead Mentor — Competitive Programming',
+      cfHandle: 'ROHITDAScr7',
+      cfRating: 1626,
+      cfRank: 'expert',
+      department: 'CSB',
+      batch: 2028,
+      bio: 'Expert-rated (1626) with a strong command of advanced data structures and algorithmic techniques. Top performer of the team.',
+      speciality: 'Data Structures & Algorithms',
+    },
+    {
+      name: 'Mrigaj Shaw',
+      role: 'Mentor — Problem Solving & Sessions',
+      cfHandle: 'Kakarot_DB',
+      cfRating: 1545,
+      cfRank: 'specialist',
+      department: 'CSB',
+      batch: 2028,
+      bio: 'Avid problem solver passionate about CP. Loves hosting sessions, preparing mashups, and mentoring juniors on the right path.',
+      speciality: 'DP & Graph Theory',
+      linkedin: 'https://www.linkedin.com/in/mrigaj-shaw-462767277/',
+    },
+    {
+      name: 'Mayank',
+      role: 'Mentor — Algorithms',
+      cfHandle: 'Mayank_9207',
+      cfRating: 1490,
+      cfRank: 'specialist',
+      department: 'ITB',
+      batch: 2028,
+      bio: 'Managing tradeoffs full time. Specialist (peak 1490) with sharp instincts for greedy and two-pointer strategies.',
+      speciality: 'Greedy & Two Pointers',
+      linkedin: 'https://www.linkedin.com/in/mayank9207',
+    },
+    {
+      name: 'Krish Mohan',
+      role: 'Mentor — Competitive Programming',
+      cfHandle: 'Anon_thefool',
+      cfRating: 1482,
+      cfRank: 'specialist',
+      department: 'CSB',
+      batch: 2028,
+      bio: 'Specialist on Codeforces who enjoys tricky implementation problems. Keen on helping peers level up their problem-solving skills.',
+      speciality: 'Implementation & STL',
+      linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
+    },
+    {
+      name: 'Aditya Shaw',
+      role: 'Mentor — Algorithms',
+      cfHandle: 'adityawcode',
+      cfRating: 1445,
+      cfRank: 'specialist',
+      department: 'ITB',
+      batch: 2028,
+      bio: 'Likes logic flawless and conversations unfiltered. Specialist with sharp instincts for constructive and binary search problems.',
+      speciality: 'Constructive & Binary Search',
+      linkedin: 'https://www.linkedin.com/in/aditya-shaw-code',
+    },
+    {
+      name: 'B V Shree Keshav',
+      role: 'Mentor — Contest Organizer',
+      cfHandle: 'bvsk',
+      cfRating: 1246,
+      cfRank: 'pupil',
+      department: 'ITB',
+      batch: 2028,
+      bio: "From Chennai — just let it happen and don't forget to smile. Loves conducting contests and supporting participants wherever possible.",
+      speciality: 'Contest Hosting & Community',
+      linkedin: 'https://www.linkedin.com/in/shree-keshav-440088348',
+    },
+  ];
 
 const RANK_COLORS: Record<string, { text: string; bg: string; border: string }> = {
-  newbie:             { text: '#9e9e9e', bg: 'rgba(158,158,158,0.10)', border: 'rgba(158,158,158,0.20)' },
-  pupil:              { text: '#4caf50', bg: 'rgba(76,175,80,0.10)',   border: 'rgba(76,175,80,0.20)'   },
-  specialist:         { text: '#03a9f4', bg: 'rgba(3,169,244,0.10)',   border: 'rgba(3,169,244,0.20)'   },
-  expert:             { text: '#1e88e5', bg: 'rgba(30,136,229,0.10)',  border: 'rgba(30,136,229,0.20)'  },
-  'candidate master': { text: '#aa00ff', bg: 'rgba(170,0,255,0.10)',   border: 'rgba(170,0,255,0.20)'   },
-  master:             { text: '#ff6d00', bg: 'rgba(255,109,0,0.10)',   border: 'rgba(255,109,0,0.20)'   },
+  newbie: { text: '#9e9e9e', bg: 'rgba(158,158,158,0.10)', border: 'rgba(158,158,158,0.20)' },
+  pupil: { text: '#4caf50', bg: 'rgba(76,175,80,0.10)', border: 'rgba(76,175,80,0.20)' },
+  specialist: { text: '#03a9f4', bg: 'rgba(3,169,244,0.10)', border: 'rgba(3,169,244,0.20)' },
+  expert: { text: '#1e88e5', bg: 'rgba(30,136,229,0.10)', border: 'rgba(30,136,229,0.20)' },
+  'candidate master': { text: '#aa00ff', bg: 'rgba(170,0,255,0.10)', border: 'rgba(170,0,255,0.20)' },
+  master: { text: '#ff6d00', bg: 'rgba(255,109,0,0.10)', border: 'rgba(255,109,0,0.20)' },
 };
 
 export default function TeamPage() {
@@ -222,64 +222,6 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {/* ── Organizers ────────────────────────────────────────────────── */}
-        <div style={{ marginBottom: 60 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 }}>
-            <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>Platform &amp; Org</h2>
-            <span style={{ color: '#6b7280', fontSize: 13 }}>The people who built and run this</span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
-            {ORGANIZERS.map(org => (
-              <div key={org.cfHandle} style={{
-                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(139,92,246,0.25)',
-                borderRadius: 18, padding: 24, display: 'flex', gap: 16,
-                position: 'relative', overflow: 'hidden',
-              }}>
-                {/* Top accent */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent)' }} />
-
-                {org.isDevLead && (
-                  <div style={{
-                    position: 'absolute', top: 14, right: 14,
-                    background: 'rgba(96,165,250,0.12)', border: '1px solid rgba(96,165,250,0.25)',
-                    borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700, color: '#60a5fa',
-                  }}>
-                    Dev Lead
-                  </div>
-                )}
-                <div style={{
-                  width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-                  background: 'linear-gradient(135deg, rgba(96,165,250,0.2), rgba(139,92,246,0.2))',
-                  border: '1px solid rgba(139,92,246,0.25)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#c4b5fd', fontWeight: 900, fontSize: 22,
-                }}>
-                  {org.name[0]}
-                </div>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <h3 style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 3 }}>{org.name}</h3>
-                  <p style={{ color: '#a78bfa', fontSize: 11, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>{org.role}</p>
-                  <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.65, marginBottom: 10 }}>{org.bio}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <a href={`https://codeforces.com/profile/${org.cfHandle}`}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{ color: '#60a5fa', fontSize: 12, fontFamily: 'monospace', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      @{org.cfHandle} <ExternalLink style={{ width: 10, height: 10, opacity: 0.5 }} />
-                    </a>
-                    {org.linkedin && (
-                      <a href={org.linkedin} target="_blank" rel="noopener noreferrer"
-                        style={{ background: 'rgba(96,165,250,0.10)', border: '1px solid rgba(96,165,250,0.20)', borderRadius: 6, padding: '2px 8px', color: '#60a5fa', fontSize: 10, fontWeight: 600, textDecoration: 'none' }}>
-                        LinkedIn ↗
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* ── Rules from PDF ────────────────────────────────────────────── */}
         <div style={{
           background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
@@ -290,12 +232,12 @@ export default function TeamPage() {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
             {[
-              { n: 'i',   rule: 'Write your own code.',         detail: "Discussing live, copying, or letting AI do your thinking = cheating. We catch it, you're out." },
-              { n: 'ii',  rule: 'Syntax ok. Solution not.',     detail: "Looking up syntax is fine. If you can't write what you're pasting, you don't know it yet." },
-              { n: 'iii', rule: 'Missed a contest?',            detail: 'Scores zero and gets dropped from your average. Life happens — just show up next week.' },
-              { n: 'iv',  rule: 'Upsolve, always.',             detail: "Every problem you couldn't crack on Friday is homework before Monday. The contest is the diagnostic." },
-              { n: 'v',   rule: "Don't watch your rating in W1.", detail: 'It will dip. It will bounce. Two contests is noise. Two months is signal. Stop refreshing.' },
-              { n: 'vi',  rule: 'Stuck? WhatsApp group.',       detail: 'Seniors are in there for a reason. No dumb questions — only unasked ones.' },
+              { n: 'i', rule: 'Write your own code.', detail: "Discussing live, copying, or letting AI do your thinking = cheating. We catch it, you're out." },
+              { n: 'ii', rule: 'Syntax ok. Solution not.', detail: "Looking up syntax is fine. If you can't write what you're pasting, you don't know it yet." },
+              { n: 'iii', rule: 'Missed a contest?', detail: 'Scores zero and gets dropped from your average. Life happens — just show up next week.' },
+              { n: 'iv', rule: 'Upsolve, always.', detail: "Every problem you couldn't crack on Friday is homework before Monday. The contest is the diagnostic." },
+              { n: 'v', rule: "Don't watch your rating in W1.", detail: 'It will dip. It will bounce. Two contests is noise. Two months is signal. Stop refreshing.' },
+              { n: 'vi', rule: 'Stuck? WhatsApp group.', detail: 'Seniors are in there for a reason. No dumb questions — only unasked ones.' },
             ].map(({ n, rule, detail }) => (
               <div key={n} style={{
                 background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
@@ -345,12 +287,28 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
 
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.03)', border: `1px solid ${rc.border}`,
+      background: mentor.isDevLead ? 'rgba(139,92,246,0.04)' : 'rgba(255,255,255,0.03)',
+      border: mentor.isDevLead ? '1px solid rgba(139,92,246,0.30)' : `1px solid ${rc.border}`,
       borderRadius: 18, padding: 22, overflow: 'hidden', position: 'relative',
       transition: 'transform 0.2s ease, border-color 0.2s ease',
     }}>
       {/* Top color accent */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${rc.text}50, transparent)` }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+        background: mentor.isDevLead
+          ? 'linear-gradient(90deg, transparent, rgba(139,92,246,0.7), transparent)'
+          : `linear-gradient(90deg, transparent, ${rc.text}50, transparent)`,
+      }} />
+
+      {/* Dev Lead badge */}
+      {mentor.isDevLead && (
+        <div style={{
+          position: 'absolute', top: 14, right: 14,
+          background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.35)',
+          borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700, color: '#c4b5fd',
+        }}>
+          Dev Lead
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 14 }}>
