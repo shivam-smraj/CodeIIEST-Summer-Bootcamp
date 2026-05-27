@@ -3,29 +3,33 @@
  *
  * Runs on the Edge runtime BEFORE any page renders.
  *
+ * IMPORTANT: Imports from auth.config.ts (Edge-safe) — NOT from auth.ts.
+ * auth.ts uses Mongoose which crashes on Edge Runtime.
+ *
  * Rules:
  *   1. /admin, /admin/* → requires role: 'admin' or 'superadmin'. Redirect to / if not.
  *   2. /profile → requires login. Redirect to / if not.
  *   3. /onboarding → requires login but NOT necessarily onboarding complete.
  *   4. Any logged-in user without onboarding complete → redirect to /onboarding
  *      (except when already on /onboarding or /api/* or /auth-error)
- *
- * Auth.js v5 middleware pattern: import `auth` from './auth' and use as middleware.
  */
 
-import { auth } from '@root/auth';
+import NextAuth from 'next-auth';
+import { authConfig } from './auth.config';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const ADMIN_ROUTES = ['/admin'];
+const { auth } = NextAuth(authConfig);
+
+const ADMIN_ROUTES     = ['/admin'];
 const PROTECTED_ROUTES = ['/profile', '/onboarding'];
 
 export default auth((req) => {
   const { nextUrl, auth: session } = req as NextRequest & { auth: typeof req.auth };
   const pathname = nextUrl.pathname;
 
-  const isLoggedIn = !!session?.user;
-  const userRole = session?.user?.role ?? 'user';
+  const isLoggedIn          = !!session?.user;
+  const userRole            = session?.user?.role ?? 'user';
   const isOnboardingComplete = session?.user?.isOnboardingComplete ?? false;
 
   // ── Admin routes ──────────────────────────────────────────────────────────
@@ -39,7 +43,7 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // ── Protected routes (login required) ────────────────────────────────────
+  // ── Protected routes (login required) ─────────────────────────────────────
   if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
     if (!isLoggedIn) {
       return NextResponse.redirect(new URL('/', nextUrl));
@@ -47,8 +51,6 @@ export default auth((req) => {
   }
 
   // ── Onboarding redirect ───────────────────────────────────────────────────
-  // If logged in but hasn't completed onboarding, redirect to /onboarding
-  // Skip this for: /onboarding itself, /api routes, /auth-error
   if (
     isLoggedIn &&
     !isOnboardingComplete &&
