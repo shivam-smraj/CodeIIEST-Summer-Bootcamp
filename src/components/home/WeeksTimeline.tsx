@@ -74,7 +74,7 @@ export function WeeksTimeline() {
           background: 'rgba(255,255,255,0.02)',
         }}>
           {['WEEK', 'DATES', 'TOPIC', 'CONTEST'].map(h => (
-            <div key={h} style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#374151' }}>{h}</div>
+            <div key={h} style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#6b7280' }}>{h}</div>
           ))}
         </div>
 
@@ -101,7 +101,7 @@ export function WeeksTimeline() {
                   : 'transparent',
                 borderLeft: isActive ? `3px solid ${meta.color}` : '3px solid transparent',
                 alignItems: 'center',
-                opacity: isFuture ? 0.45 : 1,
+                opacity: isFuture ? 0.60 : 1,
                 transition: 'background 0.2s',
               }}
             >
@@ -109,7 +109,7 @@ export function WeeksTimeline() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{
                   fontFamily: 'monospace', fontWeight: 900, fontSize: 15,
-                  color: isActive ? meta.color : isPast ? '#34d399' : '#374151',
+                  color: isActive ? meta.color : isPast ? '#34d399' : '#6b7280',
                 }}>
                   W{String(weekNum).padStart(2, '0')}
                 </span>
@@ -119,11 +119,11 @@ export function WeeksTimeline() {
               </div>
 
               {/* Date range */}
-              <div style={{ fontSize: 12, color: '#4b5563' }}>
+              <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
                 {dates ? (
                   <>
                     <span>{dates.session.replace('Mon, ', '')}</span>
-                    <span style={{ color: '#1f2937' }}> → </span>
+                    <span style={{ color: '#4b5563' }}> → </span>
                     <span>{dates.contest.replace('Fri, ', '')}</span>
                   </>
                 ) : '—'}
@@ -133,8 +133,8 @@ export function WeeksTimeline() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 16 }}>{meta.emoji}</span>
                 <span style={{
-                  color: isActive ? '#fff' : isPast ? '#94a3b8' : '#4b5563',
-                  fontWeight: isActive ? 700 : 400,
+                  color: isActive ? '#fff' : isPast ? '#cbd5e1' : '#94a3b8',
+                  fontWeight: isActive ? 700 : isPast ? 500 : 500,
                   fontSize: 14,
                   lineHeight: 1.3,
                 }}>
@@ -153,7 +153,7 @@ export function WeeksTimeline() {
               </div>
 
               {/* Contest date */}
-              <div style={{ fontSize: 12, color: isActive ? meta.color : '#374151', fontWeight: isActive ? 700 : 400, textAlign: 'right' }}>
+              <div style={{ fontSize: 12, color: isActive ? meta.color : '#6b7280', fontWeight: isActive ? 700 : 500, textAlign: 'right' }}>
                 {dates?.contest ?? '—'}
               </div>
             </div>
@@ -161,7 +161,7 @@ export function WeeksTimeline() {
         })}
       </div>
 
-      <p style={{ textAlign: 'center', color: '#1f2937', fontSize: 12, marginTop: 16 }}>
+      <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 12, marginTop: 16, fontWeight: 500 }}>
         Sessions: Monday evenings · Contests: Friday evenings · Exact timings in WhatsApp group
       </p>
 

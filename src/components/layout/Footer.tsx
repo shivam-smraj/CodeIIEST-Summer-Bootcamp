@@ -92,62 +92,88 @@ export function Footer() {
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px 24px' }}>
 
-        {/* Main row */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '28px 48px', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
+        {/* ── Main row ─────────────────────────────────────────────────────── */}
+        {/*
+          Desktop: brand | navigate | follow us  (flex row, space-between)
+          Mobile:  brand centered on first row,
+                   then navigate + follow us side-by-side in a second row.
+          Achieved with a two-level flex layout and CSS media queries embedded.
+        */}
+        <div className="footer-main" style={{ marginBottom: 28 }}>
 
-          {/* Brand */}
-          <div>
+          {/* Brand — centered on mobile, left-aligned on desktop */}
+          <div className="footer-brand">
             <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 10 }}>
               <CILogoFooter />
               <div>
                 <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, letterSpacing: '-0.01em' }}>CodeIIEST</div>
-                <div style={{ color: '#dc2626', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', marginTop: 1 }}>CP BOOTCAMP '26</div>
+                <div style={{ color: '#dc2626', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', marginTop: 1 }}>CP BOOTCAMP &apos;26</div>
               </div>
             </Link>
-            <p style={{ color: '#374151', fontSize: 12, lineHeight: 1.65, maxWidth: 220 }}>
-              8-week CP & DSA bootcamp for IIEST Shibpur students. Jun 01 – Jul 24, 2026.
+            <p style={{ color: '#6b7280', fontSize: 12, lineHeight: 1.65, maxWidth: 220 }}>
+              8-week CP &amp; DSA bootcamp for IIEST Shibpur students. Jun 01 – Jul 24, 2026.
             </p>
           </div>
 
-          {/* Nav links */}
-          <div>
-            <p style={{ color: '#374151', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Navigate</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {NAV_LINKS.map(({ href, label }) => (
-                <Link key={href} href={href} style={{ color: '#4b5563', fontSize: 13, textDecoration: 'none', transition: 'color 0.15s' }}
-                  className="footer-link">
-                  {label}
-                </Link>
-              ))}
+          {/* Nav + Social — side by side on mobile, separate on desktop */}
+          <div className="footer-links-row">
+            {/* Navigate */}
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Navigate</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {NAV_LINKS.map(({ href, label }) => (
+                  <Link key={href} href={href}
+                    style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none', transition: 'color 0.15s', fontWeight: 500 }}
+                    className="footer-link">
+                    {label}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Social links */}
-          <div>
-            <p style={{ color: '#374151', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Follow Us</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {SOCIAL_LINKS.map(({ href, label, icon }) => (
-                <a key={href} href={href} target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#4b5563', fontSize: 12, textDecoration: 'none', transition: 'color 0.15s' }}
-                  className="footer-link">
-                  {icon}
-                  <span>{label}</span>
-                </a>
-              ))}
+            {/* Follow Us */}
+            <div>
+              <p style={{ color: '#9ca3af', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Follow Us</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                {SOCIAL_LINKS.map(({ href, label, icon }) => (
+                  <a key={href} href={href} target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#6b7280', fontSize: 13, textDecoration: 'none', transition: 'color 0.15s', fontWeight: 500 }}
+                    className="footer-link">
+                    {icon}
+                    <span>{label}</span>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 18, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ color: '#1f2937', fontSize: 11 }}>
+        {/* ── Bottom bar ───────────────────────────────────────────────────── */}
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 18,
+          display: 'flex', flexWrap: 'wrap', gap: 8,
+          alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <p style={{ color: '#4b5563', fontSize: 11 }}>
             © {year} CodeIIEST · Built by the CodeIIEST Dev Team
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: '#1f2937', fontSize: 11 }}>Made with</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{ color: '#4b5563', fontSize: 11 }}>Made with</span>
             <span style={{ color: '#dc2626', fontSize: 13 }}>♥</span>
-            <span style={{ color: '#1f2937', fontSize: 11 }}>at IIEST Shibpur ·</span>
-            <a href="https://codeforces.com" target="_blank" rel="noopener noreferrer" style={{ color: '#1e3a5f', fontSize: 11, textDecoration: 'none' }}>
+            <span style={{ color: '#4b5563', fontSize: 11 }}>by{' '}</span>
+            <a
+              href="https://www.linkedin.com/in/smraj0198/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#60a5fa', fontSize: 11, fontWeight: 800, textDecoration: 'none', borderBottom: '1px solid rgba(96,165,250,0.40)', paddingBottom: 1, transition: 'color 0.15s, border-color 0.15s' }}
+              className="footer-shivam-link"
+            >
+              Shivam
+            </a>
+            <span style={{ color: '#374151', fontSize: 11 }}>·</span>
+            <a href="https://codeforces.com" target="_blank" rel="noopener noreferrer"
+              style={{ color: '#4b5563', fontSize: 11, textDecoration: 'none', transition: 'color 0.15s' }}
+              className="footer-link">
               Powered by Codeforces API
             </a>
           </div>
@@ -155,7 +181,52 @@ export function Footer() {
       </div>
 
       <style>{`
-        .footer-link:hover { color: #94a3b8 !important; }
+        /* Hover states */
+        .footer-link:hover { color: #e2e8f0 !important; }
+        .footer-shivam-link:hover { color: #93c5fd !important; border-color: rgba(147,197,253,0.6) !important; }
+
+        /* ── Desktop layout ── */
+        .footer-main {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 28px 48px;
+          align-items: flex-start;
+          justify-content: space-between;
+        }
+        .footer-brand {
+          text-align: left;
+        }
+        .footer-links-row {
+          display: flex;
+          gap: 48px;
+          align-items: flex-start;
+        }
+
+        /* ── Mobile layout (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .footer-main {
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+          }
+          .footer-brand {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .footer-brand p {
+            text-align: center;
+          }
+          .footer-links-row {
+            /* Navigate + Follow Us side by side */
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+          }
+        }
       `}</style>
     </footer>
   );
