@@ -226,7 +226,7 @@ export default function TeamPage() {
         </div>
 
         {/* ── Rules from PDF ────────────────────────────────────────────── */}
-        <div style={{
+        {/* <div style={{
           background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
           borderRadius: 20, padding: '36px 28px', marginBottom: 56,
         }}>
@@ -256,7 +256,7 @@ export default function TeamPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* ── CTA ──────────────────────────────────────────────────────── */}
         <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(220,38,38,0.08), rgba(30,136,229,0.06))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '44px 32px' }}>
@@ -342,10 +342,10 @@ function MentorCard({ mentor }: { mentor: typeof MENTORS[0] }) {
       </div>
 
       {/* Speciality */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+      {/* <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
         <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280' }}>Focus</span>
         <span style={{ fontSize: 12, color: rc.text, fontWeight: 600 }}>{mentor.speciality}</span>
-      </div>
+      </div> */}
 
       {/* Bio */}
       <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.7, marginBottom: 14 }}>{mentor.bio}</p>
