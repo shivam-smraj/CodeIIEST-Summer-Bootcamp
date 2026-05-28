@@ -88,6 +88,18 @@ const MENTORS: {
       speciality: 'Implementation & STL',
       linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
     },
+    {
+      name: 'Aditya Singh',
+      role: 'Mentor — Competitive Programming',
+      cfHandle: 'bumblebee_3965A',
+      cfRating: 1250,
+      cfRank: 'pupil',
+      department: 'CSB',
+      batch: 2028,
+      bio: "Love solving problems. Rated Pupil (1250) on CF . Glad to help juniors dive into world of CP/DSA, where every WA is a step closer to AC.",
+      speciality: 'Contest Hosting & Community',
+      linkedin: 'http://www.linkedin.com/in/aditya-singh-u018',
+    },
 
     {
       name: 'B V Shree Keshav',
