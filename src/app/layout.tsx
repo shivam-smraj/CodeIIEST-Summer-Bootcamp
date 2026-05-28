@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import { auth } from '@root/auth';
 import { Toaster } from '@/components/ui/sonner';
 import { SplashScreen } from '@/components/ui/splash-screen';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -66,7 +67,7 @@ export default async function RootLayout({
                 "@type": "EducationalOrganization",
                 "name": "CodeIIEST",
                 "url": "https://codeiiest.in"
-              },
+               },
               "courseCode": "CODEIIEST-CP-2026",
               "hasCourseInstance": {
                 "@type": "CourseInstance",
@@ -101,6 +102,7 @@ export default async function RootLayout({
               },
             }}
           />
+          <Analytics />
         </SessionProvider>
       </body>
     </html>

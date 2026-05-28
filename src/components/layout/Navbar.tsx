@@ -26,24 +26,21 @@ const NAV_LINKS = [
 /* Inline CodeIIEST mark — tiny version for navbar */
 function CILogo() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 30, flexShrink: 0 }}>
-      {/* Red CI */}
-      <svg width="22" height="30" viewBox="0 0 475 495" fill="none">
-        <rect width="425" height="40" fill="#F60000"/>
-        <rect x="110" y="60" width="315" height="40" fill="#FF0000"/>
-        <rect x="165" y="400" width="260" height="40" fill="#F60000"/>
-        <rect x="55" y="455" width="370" height="40" fill="#671616"/>
-        <rect x="55" y="60" width="40" height="435" fill="#671616"/>
-        <rect x="110" y="60" width="40" height="380" fill="#FF0000"/>
-        <rect width="40" height="495" fill="#F60000"/>
-      </svg>
-      {/* Grey II */}
-      <svg width="10" height="30" viewBox="0 0 151 495" fill="none">
-        <rect width="37" height="495" fill="#A6A6A6"/>
-        <rect x="57" width="37" height="495" fill="#D9D9D9"/>
-        <rect x="114" width="37" height="495" fill="#D9D9D9"/>
-      </svg>
-    </div>
+    <svg width="38" height="30" viewBox="0 0 621 495" fill="none" style={{ flexShrink: 0 }}>
+      {/* Red "CI" mark */}
+      <rect width="425" height="40" fill="#F60000"/>
+      <rect x="110" y="60" width="315" height="40" fill="#FF0000"/>
+      <rect x="165" y="400" width="260" height="40" fill="#F60000"/>
+      <rect x="55" y="455" width="370" height="40" fill="#671616"/>
+      <rect x="55" y="60" width="40" height="435" fill="#671616"/>
+      <rect x="110" y="60" width="40" height="380" fill="#FF0000"/>
+      <rect width="40" height="495" fill="#F60000"/>
+
+      {/* Grey "II" mark */}
+      <rect x="470" width="37" height="495" fill="#A6A6A6"/>
+      <rect x="527" width="37" height="495" fill="#D9D9D9"/>
+      <rect x="584" width="37" height="495" fill="#D9D9D9"/>
+    </svg>
   );
 }
 

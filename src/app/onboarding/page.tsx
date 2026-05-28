@@ -26,28 +26,23 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 // Two SEPARATE SVGs in a flex row — they MUST NOT share a viewBox or the
 // coordinates for the II mark collide with the CI mark and they overlap.
 function CILogo({ size = 48 }: { size?: number }) {
-  const h   = Math.round(size * 1.165);
-  const ciW = Math.round(size * 0.82);  // CI mark is wider
-  const iiW = Math.round(size * 0.35);  // II mark is narrower
+  const width = Math.round(size * 1.2545);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      {/* Red "CI" mark — uses its own 475×495 coordinate space */}
-      <svg width={ciW} height={h} viewBox="0 0 475 495" fill="none">
-        <rect width="425" height="40" fill="#F60000" />
-        <rect x="110" y="60" width="315" height="40" fill="#FF0000" />
-        <rect x="165" y="400" width="260" height="40" fill="#F60000" />
-        <rect x="55" y="455" width="370" height="40" fill="#671616" />
-        <rect x="55" y="60" width="40" height="435" fill="#671616" />
-        <rect x="110" y="60" width="40" height="380" fill="#FF0000" />
-        <rect width="40" height="495" fill="#F60000" />
-      </svg>
-      {/* Grey "II" mark — uses its own 151×495 coordinate space */}
-      <svg width={iiW} height={h} viewBox="0 0 151 495" fill="none">
-        <rect width="37" height="495" fill="#A6A6A6" />
-        <rect x="57" width="37" height="495" fill="#D9D9D9" />
-        <rect x="114" width="37" height="495" fill="#D9D9D9" />
-      </svg>
-    </div>
+    <svg width={width} height={size} viewBox="0 0 621 495" fill="none" style={{ flexShrink: 0 }}>
+      {/* Red "CI" mark */}
+      <rect width="425" height="40" fill="#F60000" />
+      <rect x="110" y="60" width="315" height="40" fill="#FF0000" />
+      <rect x="165" y="400" width="260" height="40" fill="#F60000" />
+      <rect x="55" y="455" width="370" height="40" fill="#671616" />
+      <rect x="55" y="60" width="40" height="435" fill="#671616" />
+      <rect x="110" y="60" width="40" height="380" fill="#FF0000" />
+      <rect width="40" height="495" fill="#F60000" />
+
+      {/* Grey "II" mark */}
+      <rect x="470" width="37" height="495" fill="#A6A6A6" />
+      <rect x="527" width="37" height="495" fill="#D9D9D9" />
+      <rect x="584" width="37" height="495" fill="#D9D9D9" />
+    </svg>
   );
 }
 

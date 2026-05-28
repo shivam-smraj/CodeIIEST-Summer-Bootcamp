@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Users, Trophy, CalendarDays, TrendingUp, TerminalSquare,
   SlidersHorizontal, Shield, Zap, ChevronRight, Activity,
-  BookOpen, RefreshCw,
+  BookOpen, RefreshCw, Eye, Globe,
 } from 'lucide-react';
 import { WEEK_TOPICS, WEEK_DATES } from '@/lib/constants';
 
@@ -18,6 +18,8 @@ interface DashboardStats {
   totalSessions: number;
   unlockedSessions: number;
   contestsDone: number;
+  views: number;
+  uniqueVisitors: number;
 }
 
 const QUICK_ACTIONS = [
@@ -83,8 +85,9 @@ export function AdminDashboard() {
       fetch('/api/admin/users?limit=1').then(r => r.json()),
       fetch('/api/admin/contests').then(r => r.json()),
       fetch('/api/sessions').then(r => r.json()),
+      fetch('/api/admin/analytics').then(r => r.json()).catch(() => ({ views: 0, uniqueVisitors: 0 })),
     ])
-      .then(([usersData, contestsData, sessionsData]) => {
+      .then(([usersData, contestsData, sessionsData, analyticsData]) => {
         const s: typeof sessions = sessionsData.sessions ?? [];
         setSessions(s);
         setStats({
@@ -93,6 +96,8 @@ export function AdminDashboard() {
           totalSessions: s.length,
           unlockedSessions: s.filter(x => x.isUnlocked).length,
           contestsDone: s.filter(x => x.isContestPosted).length,
+          views: analyticsData.views ?? 0,
+          uniqueVisitors: analyticsData.uniqueVisitors ?? 0,
         });
       })
       .catch(() => {})
@@ -152,6 +157,24 @@ export function AdminDashboard() {
       color: '#34d399',
       gradient: 'linear-gradient(135deg, rgba(52,211,153,0.12), rgba(52,211,153,0.04))',
       border: 'rgba(52,211,153,0.20)',
+    },
+    {
+      icon: Eye,
+      label: 'Page Views',
+      value: stats?.views !== undefined ? stats.views.toLocaleString() : '—',
+      sub: 'total hits',
+      color: '#f472b6',
+      gradient: 'linear-gradient(135deg, rgba(244,114,182,0.12), rgba(244,114,182,0.04))',
+      border: 'rgba(244,114,182,0.20)',
+    },
+    {
+      icon: Globe,
+      label: 'Unique Visitors',
+      value: stats?.uniqueVisitors !== undefined ? stats.uniqueVisitors.toLocaleString() : '—',
+      sub: 'unique IPs',
+      color: '#22d3ee',
+      gradient: 'linear-gradient(135deg, rgba(34,211,238,0.12), rgba(34,211,238,0.04))',
+      border: 'rgba(34,211,238,0.20)',
     },
   ];
 

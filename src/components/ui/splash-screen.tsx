@@ -175,8 +175,8 @@ export function SplashScreen() {
         aria-live="polite"
       >
         <div className="ci-logo-row">
-          {/* Red "CI" mark — own 425×495 coordinate space */}
-          <svg width="155" height="185" viewBox="0 0 425 495" fill="none">
+          <svg width="232" height="185" viewBox="0 0 621 495" fill="none">
+            {/* Red "CI" mark */}
             <rect id="sp-r46"   width="425" height="40" fill="#F60000" />
             <rect id="sp-r48"   x="110" y="60"  width="315" height="40"  fill="#FF0000" />
             <rect id="sp-r49"   x="165" y="400" width="260" height="40"  fill="#F60000" />
@@ -184,13 +184,11 @@ export function SplashScreen() {
             <rect id="sp-r126"  x="55"  y="60"  width="40"  height="435" fill="#671616" />
             <rect id="sp-r129"  x="110" y="60"  width="40"  height="380" fill="#FF0000" />
             <rect id="sp-r123"  width="40" height="495" fill="#F60000" />
-          </svg>
 
-          {/* Grey "II" mark — own 151×495 coordinate space */}
-          <svg width="53" height="185" viewBox="0 0 151 495" fill="none">
-            <rect id="sp-ri1" width="37"  height="495" fill="#A6A6A6" />
-            <rect id="sp-ri2" x="57"  width="37" height="495" fill="#D9D9D9" />
-            <rect id="sp-ri3" x="114" width="37" height="495" fill="#D9D9D9" />
+            {/* Grey "II" mark */}
+            <rect id="sp-ri1" x="470" width="37"  height="495" fill="#A6A6A6" />
+            <rect id="sp-ri2" x="527" width="37"  height="495" fill="#D9D9D9" />
+            <rect id="sp-ri3" x="584" width="37"  height="495" fill="#D9D9D9" />
           </svg>
         </div>
 
