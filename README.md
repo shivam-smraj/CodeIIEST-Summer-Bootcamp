@@ -277,7 +277,7 @@ erDiagram
         array uniqueIpHashes
     }
     
-    USER ||--o[0..8] CONTEST : "participates in"
+    USER ||--o{ CONTEST : "participates in"
     CONTEST ||--|| SESSION : "associated with"
 ```
 
