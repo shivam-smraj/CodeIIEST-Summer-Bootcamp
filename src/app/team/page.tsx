@@ -34,7 +34,7 @@ const MENTORS: {
       cfRank: 'specialist',
       department: 'ITB',
       batch: 2028,
-      bio: 'Managing tradeoffs full time. Specialist (peak 1490) with sharp instincts for greedy and two-pointer strategies.',
+      bio: 'Managing tradeoffs full time. Specialist (peak 1490).',
       speciality: 'Greedy & Two Pointers',
       linkedin: 'https://www.linkedin.com/in/mayank9207',
     },
@@ -46,7 +46,7 @@ const MENTORS: {
       cfRank: 'expert',
       department: 'EEB',
       batch: 2028,
-      bio: 'Built the entire bootcamp platform — Google OAuth, CF verification, leaderboard & CMS. MAX Expert (1705). Contest problem setter and bootcamp session mentor.',
+      bio: 'Built the entire bootcamp platform, Expert (1705).',
       speciality: 'Platform Dev & Problem Setting',
       linkedin: 'https://www.linkedin.com/in/smraj0198/',
       isDevLead: true,
@@ -59,7 +59,7 @@ const MENTORS: {
       cfRank: 'specialist',
       department: 'ITB',
       batch: 2028,
-      bio: 'Likes logic flawless and conversations unfiltered. Specialist with sharp instincts for constructive and binary search problems.',
+      bio: 'Likes logic flawless and conversations unfiltered. Specialist on codeforces.',
       speciality: 'Constructive & Binary Search',
       linkedin: 'https://www.linkedin.com/in/aditya-shaw-code',
     },
@@ -71,7 +71,7 @@ const MENTORS: {
       cfRank: 'specialist',
       department: 'CSB',
       batch: 2028,
-      bio: 'Avid problem solver passionate about CP. Loves hosting sessions, preparing mashups, and mentoring juniors on the right path.',
+      bio: 'Avid problem solver passionate about CP.',
       speciality: 'DP & Graph Theory',
       linkedin: 'https://www.linkedin.com/in/mrigaj-shaw-462767277/',
     },
@@ -84,7 +84,7 @@ const MENTORS: {
       cfRank: 'specialist',
       department: 'CSB',
       batch: 2028,
-      bio: 'Specialist on Codeforces who enjoys tricky implementation problems. Keen on helping peers level up their problem-solving skills.',
+      bio: 'Specialist on Codeforces. Keen on helping peers level up their problem-solving skills.',
       speciality: 'Implementation & STL',
       linkedin: 'https://www.linkedin.com/in/krish-mohan-072442344/',
     },
@@ -97,7 +97,7 @@ const MENTORS: {
       cfRank: 'pupil',
       department: 'ITB',
       batch: 2028,
-      bio: "From Chennai — just let it happen and don't forget to smile. Loves conducting contests and supporting participants wherever possible.",
+      bio: "From Chennai. Just let it happen and don't forget to smile.",
       speciality: 'Contest Hosting & Community',
       linkedin: 'https://www.linkedin.com/in/shree-keshav-440088348',
     },
@@ -151,10 +151,10 @@ export default function TeamPage() {
             }}>CP Team</span>
           </h1>
 
-          <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.8, maxWidth: 540, margin: '0 auto 28px' }}>
+          {/* <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.8, maxWidth: 540, margin: '0 auto 28px' }}>
             Real IIEST Shibpur students who&apos;ve been in your shoes —
             not recordings from 2019.
-          </p>
+          </p> */}
 
           {/* Stat pills */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -187,7 +187,7 @@ export default function TeamPage() {
         }}>
           <div>
             <p style={{ color: '#dc2626', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
-              SEASON 01
+              YEAR 2K26
             </p>
             <p style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>Jun 01 → Jul 24, 2026</p>
           </div>
@@ -261,12 +261,12 @@ export default function TeamPage() {
         {/* ── CTA ──────────────────────────────────────────────────────── */}
         <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(220,38,38,0.08), rgba(30,136,229,0.06))', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '44px 32px' }}>
           <div style={{ fontSize: 40, marginBottom: 14 }}>🚀</div>
-          <h2 style={{ color: '#fff', fontWeight: 900, fontSize: 24, marginBottom: 10 }}>
+          {/* <h2 style={{ color: '#fff', fontWeight: 900, fontSize: 24, marginBottom: 10 }}>
             Two summers from now, you&apos;ll wish you&apos;d started this one.
           </h2>
           <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7, maxWidth: 440, margin: '0 auto 24px' }}>
             The growth is the point. The prizes are real. Eight weeks from now you&apos;ll be a different programmer.
-          </p>
+          </p> */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/sessions" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#dc2626', color: '#fff', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, textDecoration: 'none', boxShadow: '0 0 24px rgba(220,38,38,0.3)' }}>
               View Sessions →
