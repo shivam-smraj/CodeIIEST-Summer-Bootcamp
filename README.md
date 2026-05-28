@@ -3,12 +3,13 @@
 <div align="center">
 
 ```text
-   ______          __         ____  _____________________
-  / ____/___  ____/ /__  ____/ / / / / ____/ ___/_  __/_/
- / /   / __ \/ __  / _ \/ __  / /_/ / __/  \__ \ / /  
-/ /___/ /_/ / /_/ /  __/ /_/ / __  / /___ ___/ // /   
-\____/\____/\__,_/\___/\__,_/_/ /_/_____//____//_/    
-      ⚡ CP & DSA Summer Bootcamp Portal ⚡
+ ██████╗  ██████╗ ██████╗ ███████╗██╗██╗███████╗███████╗████████╗
+██╔════╝ ██╔═══██╗██╔══██╗██╔════╝██║██║██╔════╝██╔════╝╚══██╔══╝
+██║      ██║   ██║██║  ██║█████╗  ██║██║█████╗  ███████╗   ██║   
+██║      ██║   ██║██║  ██║██╔══╝  ██║██║██╔══╝  ╚════██║   ██║   
+╚██████╗ ╚██████╔╝██████╔╝███████╗██║██║███████╗███████║   ██║   
+ ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝╚═╝╚═╝╚══════╝╚══════╝   ╚═╝   
+              ⚡ CP & DSA Summer Bootcamp Portal ⚡
 ```
 
 [![Next.js Version](https://img.shields.io/badge/Next.js-16.2.6-blue?style=for-the-badge&logo=next.js&logoColor=white&labelColor=222)](https://nextjs.org)
@@ -26,78 +27,93 @@ An elegant, high-performance, and feature-rich Web Portal and Admin Control Pane
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & System Design
 
 ### 🚀 Student Portal & User Experience
-* **Secure Google OAuth Authentication:** Seamless login for IIEST Shibpur students using their institutional or personal Google accounts via **NextAuth.js**.
-* **Smart Institutional Onboarding:** Automatically extracts student enrollment year, graduating batch, specific department code, and full department name from their institutional roll numbers (e.g., `2024EEB109` is parsed to 2024 entry year, 2028 batch, and Electrical Engineering).
-* **One-Click Codeforces Handle Verification:** Simple authentication hook to verify participants' Codeforces handles using public API handshakes to prevent manual typos or handle impersonation.
-* **Interactive Weekly Leaderboard:** Real-time search, filter, and pagination of participants. Ranks are dynamically evaluated, color-coded by performance thresholds, and sortable by total cumulative points.
-* **Responsive Profile Cards & Gamified House Assignments:** Personalized participant dashboards highlighting current Codeforces ratings, peak rankings, Department stats, weekly standings, and assigned gamified houses (**Turing**, **Dijkstra**, **Lovelace**, **Von Neumann**).
-
-### 🛠️ Administrative & CMS Suite
-* **Automated Codeforces Standings Sync Engine:** Admins can query any Codeforces Contest ID, select the corresponding bootcamp week, specify a Group ID, and sync standings instantly.
-* **Preview ── Edit ── Commit Flow:** A safety sync pipeline that fetches standings from Codeforces, matches handles against registered students, lists unregistered players, calculates delta totals, and allows the admin to edit or toggle participants before writing to the database.
-* **Any-Time Score Manager Panel:** A comprehensive, grid-based interface showing all users × 8 weeks of scores, allowing admins to override individual scores, apply manual corrections, or zero/revert weekly scores instantly.
-* **Interactive Sessions CMS:** Dynamic course curriculum scheduler enabling admins to unlock weekly contents, publish topic-specific editorials, set Google Meet/MS Teams links, and post contest problem-set guidelines.
-* **Privileged RBAC (Role-Based Access Control):** Granular access tiers (`user`, `admin`, `superadmin`) to protect administrative routes and write API endpoints.
-
-### 📊 System Analytics & Tracking
-* **Vercel Web Analytics Integration:** Official `@vercel/analytics` integrated within the React tree to monitor site performance, page view distribution, and load speed.
-* **Privacy-Preserving Unique Visitor Analytics:** A lightweight, self-hosted tracker that logs homepage hits. To ensure GDPR and strict user privacy compliance, visitor IP addresses are hashed using `SHA-256` in real-time. The raw IPs are never stored, and unique counts are dynamically updated.
-* **Admin Analytics Dashboard:** A beautiful, visual analytics grid displaying real-time metrics, including:
-  * **Page Views** (aggregated hits)
-  * **Unique Visitors** (unique hashed IPs)
-  * **Registered Participants** (total registered students)
-  * **Contests Synced** (progress of synced weeks)
-  * **Sessions Unlocked** (weeks published)
+* **Secure Google OAuth:** Real-time session generation via **NextAuth.js** (Auth.js v5) supporting institutional domains.
+* **Auto Institutional Onboarding:** Instant roll identifier parsing (e.g., `2024EEB109` automatically yields batch 2028, enrollment 2024, and Electrical Engineering).
+* **One-Click Codeforces handshake:** Secure, instant validation of participant handles via public Codeforces API checks.
+* **Responsive Leaderboard:** Highly responsive, paginated, and real-time scoreboard with inline search filters.
+* **Gamified Profiles:** Dynamic user cards with Codeforces ratings, current milestones, and allocated bootcamp houses (**Turing**, **Dijkstra**, **Lovelace**, **Von Neumann**).
 
 ---
 
-## 🏗️ Core Architecture & Flow Diagram
+### 🛠️ Administrative & CMS Control Suite
+* **Automated Standings Sync:** Live contest pulling using Codeforces standing endpoints and group structures.
+* **Preview ── Edit ── Commit Flow:** Visual verification panel comparing raw CF data with matched bootcamp players before writing changes.
+* **Multi-Week Score Manager:** Administrative spreadsheet grid for manual adjustments, reverts, or score overrides.
+* **Curriculum CMS:** Timing locks, editorial upload interfaces, and Google Meet integration for weekly bootcamp topics.
+* **Privileged RBAC:** Role-based access control protecting secure APIs and admin routes with high-priority check layers.
 
-### Student Onboarding Flow
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Student as Student Browser
-    participant App as Next.js App
-    participant Auth as NextAuth Google
-    participant DB as MongoDB Database
-    participant CF as Codeforces API
+---
 
-    Student->>App: Click "Sign In with Google"
-    App->>Auth: Request Authentication
-    Auth-->>App: Return Google Session Profile
-    App->>DB: Check if Profile Registered
-    alt Not Registered
-        App->>Student: Redirect to Onboarding Wizard
-        Student->>App: Input Roll ID (e.g., 2024EEB109)
-        App->>App: Automatically parse Dept (EE), Year (2024), Grad Batch (2028)
-        Student->>App: Connect Codeforces Handle (e.g., Anon_thefool)
-        App->>CF: Verify handle validity via Codeforces OAuth Handshake
-        CF-->>App: Handle verified successfully
-        App->>DB: Write user profile with default "User" role
-    else Already Registered
-        App->>Student: Load Profile Dashboard
-    end
-```
-
-### Standings Sync Flow (Admin Control)
+### 📊 Platform Infrastructure Architecture
 ```mermaid
 graph TD
-    A[Admin inputs Codeforces Contest ID & Selects Week] --> B(Query Codeforces API /contest.standings)
-    B --> C{Verify Standing Rows}
-    C -->|Match verified students| D[Preview Grid: Show Calculated Week Scores]
-    C -->|Unregistered Handles| E[Preview Grid: Flag Unmatched Codeforces Users]
-    D --> F[Admin Edits/Overwrites and approves Sync]
-    F --> G[Atomic Commit to MongoDB]
-    G --> H[Update User totalPoints = Sum of top 6 weeks]
+    %% Clients
+    Browser[Student Browser] -->|HTTPS Requests| Next[Next.js App Server]
+    AdminBrowser[Admin Dashboard] -->|Auth Token + POST| Next
+    
+    %% Middleware & Auth
+    Next -->|Session Validation| Auth[NextAuth.js]
+    Auth -->|OAuth Handshake| Google[Google Identity Provider]
+    
+    %% Databases
+    Next -->|Mongoose ODM| DB[(MongoDB Atlas Database)]
+    
+    %% Third-party APIs
+    Next -->|Poll Standings| CF[Codeforces REST API]
+    Browser -->|Usage Metrics| Vercel[Vercel Web Analytics]
 ```
 
 ---
 
-## 💻 Technical Stack & Environment
+### 🧮 Dynamic Best-N Score Calculation Model
+To make the standings fair and accommodate missed contests, total points are dynamically evaluated as the sum of the student's **top 6 out of 8 weekly contests**:
+
+```mermaid
+graph LR
+    subgraph "Weekly Points Collected (Example)"
+        W1[Week 1: 100]
+        W2[Week 2: 85]
+        W3[Week 3: 0]
+        W4[Week 4: 90]
+        W5[Week 5: 95]
+        W6[Week 6: 80]
+        W7[Week 7: 100]
+        W8[Week 8: 70]
+    end
+
+    W1 & W2 & W4 & W5 & W6 & W7 & W8 --> Sort[Sort Descending]
+    W3 -->|Lowest Score Dropped| Drop1[Unused Week]
+    W8 -->|Lowest Score Dropped| Drop2[Unused Week]
+    
+    Sort --> Top6[Select Top 6 Scores]
+    Top6 -->|Sum: 100+100+95+90+85+80| Total[totalPoints: 550]
+```
+
+---
+
+### 📊 Real-Time Visitor Metrics & Logging
+* **Vercel Web Analytics:** Injected at layout root to track rendering speeds and page transitions.
+* **Anonymized IP Analytics:** Logs hits privately using local `SHA-256` hashing (zero raw IP collection, GDPR compliant).
+* **Metrics Board:** Sleek UI display inside the admin dashboard showing active counts:
+
+```mermaid
+graph TD
+    Visitor[Site Visitor] -->|Access Page| Hit[POST /api/analytics]
+    Hit -->|Extract IP & Hash| SHA[SHA-256 Generator]
+    SHA -->|Hash String| DBUpdate[MongoDB Atomic Update]
+    DBUpdate -->|Increment Views & $addToSet IP| Stats[(Analytics Collection)]
+    
+    Admin[Admin Panel] -->|Load Dashboard| Metric[GET /api/admin/analytics]
+    Metric -->|Read Stats| Stats
+    Metric -->|Display UI| Cards[Page Views & Unique Visitor Cards]
+```
+
+---
+
+## 🏗️ Technical Stack
 
 * **Core Framework:** Next.js 16.2.6 (App Router), React 19.2.4, TypeScript 5.x
 * **Database & ORM:** MongoDB, Mongoose ODM 9.6.2
