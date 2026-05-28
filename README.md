@@ -21,13 +21,13 @@
 
 An elegant, high-performance, and feature-rich Web Portal and Admin Control Panel designed for **CodeIIEST** to conduct, manage, and track its annual **8-Week Competitive Programming and DSA Summer Bootcamp**.
 
-[Explore Platform Features](#-key-features) • [Developer Setup](#%EF%B8%8F-local-development-setup) • [API Directory](#-api-endpoint-reference) • [Database Architecture](#%EF%B8%8F-core-database-schema-reference)
+[Explore Platform Features](#-key-features-overview) • [Developer Setup](#%EF%B8%8F-local-development-setup) • [System Design Diagrams](#%EF%B8%8F-system-design--workflows) • [API Directory](#-api-endpoint-reference)
 
 </div>
 
 ---
 
-## 🌟 Key Features & System Design
+## 🌟 Key Features Overview
 
 ### 🚀 Student Portal & User Experience
 * **Secure Google OAuth:** Real-time session generation via **NextAuth.js** (Auth.js v5) supporting institutional domains.
@@ -47,7 +47,11 @@ An elegant, high-performance, and feature-rich Web Portal and Admin Control Pane
 
 ---
 
-### 📊 Platform Infrastructure Architecture
+## 🗺️ System Design & Workflows
+
+### 1. Overall System Architecture
+Diagram detailing client web layers, authentication frameworks, backend controllers, external Codeforces APIs, and database caches:
+
 ```mermaid
 graph TD
     %% Clients
@@ -68,8 +72,88 @@ graph TD
 
 ---
 
-### 🧮 Dynamic Best-N Score Calculation Model
-To make the standings fair and accommodate missed contests, total points are dynamically evaluated as the sum of the student's **top 6 out of 8 weekly contests**:
+### 2. Student Onboarding Workflow
+Dynamic workflow showing how student data is validated and parsed automatically on first registration:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Student as Student Browser
+    participant App as Next.js App
+    participant Auth as NextAuth Google
+    participant DB as MongoDB Database
+    participant CF as Codeforces API
+
+    Student->>App: Click "Sign In with Google"
+    App->>Auth: Request Authentication
+    Auth-->>App: Return Google Session Profile
+    App->>DB: Check if Profile Registered
+    alt Not Registered
+        App->>Student: Redirect to Onboarding Wizard
+        Student->>App: Input Roll ID (e.g., 2024EEB109)
+        App->>App: Automatically parse Dept (EE), Year (2024), Grad Batch (2028)
+        Student->>App: Connect Codeforces Handle (e.g., Anon_thefool)
+        App->>CF: Verify handle validity via Codeforces OAuth Handshake
+        CF-->>App: Handle verified successfully
+        App->>DB: Write user profile with default "User" role
+    else Already Registered
+        App->>Student: Load Profile Dashboard
+    end
+```
+
+---
+
+### 3. Role-Based Access Control (RBAC) Guard Pipeline
+Security sequence depicting NextAuth token validation and MongoDB role checks protecting admin operations:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Admin Browser
+    participant Router as Next.js API Middleware
+    participant Auth as NextAuth.js (Session)
+    participant DB as MongoDB (User Role)
+    participant API as Target Admin API Route
+
+    Admin->>Router: HTTPS POST /api/admin/... (with Cookie)
+    Router->>Auth: Check Active Session Auth
+    alt Session Missing
+        Auth-->>Admin: 401 Unauthorized Response
+    else Session Valid
+        Auth->>Router: Session Data (Email)
+        Router->>DB: Fetch User Role from Database
+        DB-->>Router: User Role (e.g., 'user', 'admin')
+        alt Role is NOT admin or superadmin
+            Router-->>Admin: 403 Forbidden Response
+        else Role IS Admin / Superadmin
+            Router->>API: Forward Authorized Request
+            API->>DB: Execute Action & Commit
+            DB-->>API: Success Response
+            API-->>Admin: 200 OK Response
+        end
+    end
+```
+
+---
+
+### 4. Standings Sync & Score Calculator Workflow
+Flow highlighting the dry-run standings parser, delta comparisons, and score sorting formulas:
+
+```mermaid
+graph TD
+    A[Admin inputs Codeforces Contest ID & Selects Week] --> B(Query Codeforces API /contest.standings)
+    B --> C{Verify Standing Rows}
+    C -->|Match verified students| D[Preview Grid: Show Calculated Week Scores]
+    C -->|Unregistered Handles| E[Preview Grid: Flag Unmatched Codeforces Users]
+    D --> F[Admin Edits/Overwrites and approves Sync]
+    F --> G[Atomic Commit to MongoDB]
+    G --> H[Update User totalPoints = Sum of top 6 weeks]
+```
+
+---
+
+### 5. Best-N (Top 6 of 8 Weeks) Points Model
+Formula mapping how the top scoring weeks are isolated and compiled dynamically to compile total points:
 
 ```mermaid
 graph LR
@@ -94,10 +178,23 @@ graph LR
 
 ---
 
-### 📊 Real-Time Visitor Metrics & Logging
-* **Vercel Web Analytics:** Injected at layout root to track rendering speeds and page transitions.
-* **Anonymized IP Analytics:** Logs hits privately using local `SHA-256` hashing (zero raw IP collection, GDPR compliant).
-* **Metrics Board:** Sleek UI display inside the admin dashboard showing active counts:
+### 6. Codeforces API Data Normalization Pipeline
+Data mapping detailing how CF JSON fields are parsed, normalized, and mapped to internal models:
+
+```mermaid
+graph TD
+    Raw[Codeforces /contest.standings JSON] --> Parser[Standings Parser]
+    Parser --> Filter[Filter: Group ID & Registered Handles Only]
+    Filter --> Math[Compute Week Points based on Solve Count & Penalty]
+    Math --> DBCompare[Load Existing DB User Scores]
+    DBCompare --> Delta[Compute Deltas & Total Rank Shift]
+    Delta --> Visual[Generate Preview Standings Table]
+```
+
+---
+
+### 7. Real-Time Visitor Metrics & Logging
+Private tracking architecture detailing asynchronous client hits and unique IP hashing updates:
 
 ```mermaid
 graph TD
@@ -109,6 +206,79 @@ graph TD
     Admin[Admin Panel] -->|Load Dashboard| Metric[GET /api/admin/analytics]
     Metric -->|Read Stats| Stats
     Metric -->|Display UI| Cards[Page Views & Unique Visitor Cards]
+```
+
+---
+
+### 8. Mongoose Serverless Connection Cache Flow
+Database caching scheme that safeguards Atlas from connection exhaustion across dynamic lambdas:
+
+```mermaid
+graph TD
+    subgraph "Next.js Lambda Containers (Vercel)"
+        L1[Lambda instance 1]
+        L2[Lambda instance 2]
+        L3[Lambda instance 3]
+    end
+
+    subgraph "Global Variable Cache Block"
+        GC1[global.__mongooseCache]
+        GC2[global.__mongooseCache]
+        GC3[global.__mongooseCache]
+    end
+
+    subgraph "MongoDB Atlas Cluster"
+        Pool[(Pooled Connection Instance)]
+    end
+
+    L1 -->|Reuses Connection| GC1
+    L2 -->|Reuses Connection| GC2
+    L3 -->|Reuses Connection| GC3
+    
+    GC1 & GC2 & GC3 -->|Single active pool channel| Pool
+```
+
+---
+
+## 🗃️ Database Entity Relationship (ER) Schema
+
+Blueprint detailing keys, indexes, and primary structural schemas within the MongoDB database:
+
+```mermaid
+erDiagram
+    USER {
+        ObjectId _id PK
+        string email UK
+        string displayName
+        string cfHandle UK
+        string rollId
+        string role
+        number totalPoints
+        array scores
+    }
+    SESSION {
+        ObjectId _id PK
+        number weekNumber UK
+        string topic
+        boolean isUnlocked
+        string editorialUrl
+        number contestId
+    }
+    CONTEST {
+        ObjectId _id PK
+        number contestId UK
+        string name
+        array standings
+        Date syncedAt
+    }
+    ANALYTICS {
+        ObjectId _id PK
+        number views
+        array uniqueIpHashes
+    }
+    
+    USER ||--o[0..8] CONTEST : "participates in"
+    CONTEST ||--|| SESSION : "associated with"
 ```
 
 ---
@@ -301,34 +471,6 @@ npm run reset:contest
   ]
 }
 ```
-
----
-
-## 🗃️ Core Database Schema Reference
-
-### 👤 User Schema (`src/models/User.ts`)
-Tracks student profile information, verified handles, and weekly scores.
-* **Identity:** Google Account associations, email, displayName.
-* **Institutional:** Roll number, graduation batch year, automatic department string parsing.
-* **Codeforces:** Verified CF handle, current CF rating, avatar URL.
-* **Bootcamp Stats:**
-  * `scores`: array of size 8 representing week 1 to 8 points.
-  * `weeklyRanks`: standings rank of the student in each weekly contest.
-  * `totalPoints`: computed cumulative score (sum of the top 6 scoring weeks).
-
-### 📅 Session Schema (`src/models/Session.ts`)
-Controls the CMS data for the weekly CP curriculum.
-* `weekNumber`: number (1 through 8).
-* `topic`: topic title (e.g., "Advanced Graphs & Flows").
-* `isUnlocked`: boolean visibility control.
-* `editorialUrl`, `editorialTitle`: resources for problem analysis.
-* `meetUrl`: meeting link for live lectures.
-* `contestId`: linked Codeforces contest ID.
-
-### 📉 Analytics Schema (`src/models/Analytics.ts`)
-Aggregates performance stats and site traffic.
-* `views`: total website page views.
-* `uniqueIpHashes`: array of SHA-256 anonymized client IP hashes to ensure unique visitor counting.
 
 ---
 
