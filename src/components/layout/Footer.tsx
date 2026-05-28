@@ -60,8 +60,8 @@ const SOCIAL_LINKS = [
     ),
   },
   {
-    href: 'https://github.com/dsc-iiest/',
-    label: 'GitHub',
+    href: 'https://github.com/shivam-smraj/CodeIIEST-Summer-Bootcamp',
+    label: 'GitHub Repo',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
@@ -109,9 +109,32 @@ export function Footer() {
                 <div style={{ color: '#dc2626', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', marginTop: 1 }}>CP BOOTCAMP &apos;26</div>
               </div>
             </Link>
-            <p style={{ color: '#6b7280', fontSize: 12, lineHeight: 1.65, maxWidth: 220 }}>
+            <p style={{ color: '#6b7280', fontSize: 12, lineHeight: 1.65, maxWidth: 220, marginBottom: 14 }}>
               8-week CP &amp; DSA bootcamp for IIEST Shibpur students. Jun 01 – Jul 24, 2026.
             </p>
+            {/* Open Source Pill Badge */}
+            <a href="https://github.com/shivam-smraj/CodeIIEST-Summer-Bootcamp" target="_blank" rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 20,
+                padding: '4px 10px',
+                fontSize: 11,
+                color: '#9ca3af',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              className="footer-repo-badge"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+              </svg>
+              <span>GitHub Repository</span>
+              <span style={{ fontSize: 9, background: 'rgba(220,38,38,0.15)', color: '#f87171', padding: '1px 5px', borderRadius: 10, fontWeight: 700 }}>Open Source</span>
+            </a>
           </div>
 
           {/* Nav + Social — side by side on mobile, separate on desktop */}
@@ -180,9 +203,27 @@ export function Footer() {
       </div>
 
       <style>{`
-        /* Hover states */
-        .footer-link:hover { color: #e2e8f0 !important; }
-        .footer-shivam-link:hover { color: #93c5fd !important; border-color: rgba(147,197,253,0.6) !important; }
+        /* Hover states with high-performance transitions */
+        .footer-link {
+          display: inline-flex !important;
+          align-items: center;
+          transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .footer-link:hover {
+          color: #f87171 !important;
+          transform: translateX(4px);
+        }
+        .footer-shivam-link:hover {
+          color: #93c5fd !important;
+          border-color: rgba(147,197,253,0.6) !important;
+        }
+        .footer-repo-badge:hover {
+          background: rgba(220, 38, 38, 0.08) !important;
+          border-color: rgba(220, 38, 38, 0.3) !important;
+          color: #ffffff !important;
+          transform: translateY(-1.5px);
+          box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
+        }
 
         /* ── Desktop layout ── */
         .footer-main {
@@ -218,7 +259,6 @@ export function Footer() {
             text-align: center;
           }
           .footer-links-row {
-            /* Navigate + Follow Us side by side */
             display: flex;
             flex-direction: row;
             gap: 40px;
@@ -238,6 +278,9 @@ export function Footer() {
           .footer-bottom-credits {
             justify-content: center !important;
             width: 100%;
+          }
+          .footer-link:hover {
+            transform: none !important; /* Disable translate shift on mobile to avoid layout jitters */
           }
         }
       `}</style>
