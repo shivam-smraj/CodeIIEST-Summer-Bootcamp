@@ -15,7 +15,7 @@ export default function SessionsPage() {
         borderBottom: '1px solid rgba(255,255,255,0.07)',
         background: 'linear-gradient(to bottom, rgba(139,92,246,0.06), transparent)',
       }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', padding: '44px 24px 28px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '56px 24px 32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
             <div style={{
               width: 48, height: 48, borderRadius: 12,

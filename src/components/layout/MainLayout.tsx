@@ -16,8 +16,8 @@ export function MainLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      {/* pt-16 accounts for the fixed navbar height */}
-      <main className="flex-1 pt-16">{children}</main>
+      {/* pt-16 accounts for the fixed navbar height — using inline style to ensure reliability on all builds */}
+      <main className="flex-1" style={{ paddingTop: '64px' }}>{children}</main>
       <Footer />
     </div>
   );

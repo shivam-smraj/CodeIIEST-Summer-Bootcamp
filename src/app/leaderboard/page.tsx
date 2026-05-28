@@ -15,7 +15,7 @@ export default function LeaderboardPage() {
         borderBottom: '1px solid rgba(255,255,255,0.07)',
         background: 'linear-gradient(to bottom, rgba(234,179,8,0.04), transparent)',
       }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 24px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '52px 24px 36px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
             <div style={{
               width: 44, height: 44, borderRadius: 12,
