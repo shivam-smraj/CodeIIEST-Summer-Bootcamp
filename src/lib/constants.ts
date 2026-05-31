@@ -76,14 +76,14 @@ export const WEEK_TOPICS = [
 
 // Official contest dates from PDF schedule (Season 01)
 export const WEEK_DATES = [
-  { session: 'Mon, Jun 02', contest: 'Fri, Jun 05' },
-  { session: 'Mon, Jun 09', contest: 'Fri, Jun 12' },
-  { session: 'Mon, Jun 16', contest: 'Fri, Jun 19' },
-  { session: 'Mon, Jun 23', contest: 'Fri, Jun 26' },
-  { session: 'Mon, Jun 30', contest: 'Fri, Jul 03' },
-  { session: 'Mon, Jul 07', contest: 'Fri, Jul 10' },
-  { session: 'Mon, Jul 14', contest: 'Fri, Jul 17' },
-  { session: 'Mon, Jul 21', contest: 'Fri, Jul 24' },
+  { session: 'Mon, Jun 01', contest: 'Fri, Jun 05' },
+  { session: 'Mon, Jun 08', contest: 'Fri, Jun 12' },
+  { session: 'Mon, Jun 15', contest: 'Fri, Jun 19' },
+  { session: 'Mon, Jun 22', contest: 'Fri, Jun 26' },
+  { session: 'Mon, Jun 29', contest: 'Fri, Jul 03' },
+  { session: 'Mon, Jul 06', contest: 'Fri, Jul 10' },
+  { session: 'Mon, Jul 13', contest: 'Fri, Jul 17' },
+  { session: 'Mon, Jul 20', contest: 'Fri, Jul 24' },
 ] as const;
 
 // House config for faction system (Phase 14)
