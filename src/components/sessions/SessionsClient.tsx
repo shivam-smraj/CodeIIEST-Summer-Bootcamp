@@ -32,7 +32,15 @@ export function SessionsClient() {
   useEffect(() => {
     fetch('/api/sessions')
       .then(r => r.json())
-      .then(d => setSessions(d.sessions ?? []))
+      .then(d => {
+        const fetchedSessions = d.sessions ?? [];
+        setSessions(fetchedSessions);
+        // Automatically expand the active unlocked week by default
+        const activeUnlocked = fetchedSessions.find((s: SessionData) => s.isUnlocked);
+        if (activeUnlocked) {
+          setExpandedId(activeUnlocked._id);
+        }
+      })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
