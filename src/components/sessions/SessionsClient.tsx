@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import {
   Lock, Video, ExternalLink, BookOpen, Trophy,
   Calendar, Clock, ChevronDown, ChevronUp, Play,
@@ -143,17 +144,6 @@ function SessionCard({
 
         {/* Right: badges + chevron */}
         <div className="session-card-right">
-          {!isLocked && session.isRecordingAvailable && (
-            <span style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              fontSize: 11, color: '#f87171',
-              background: 'rgba(239,68,68,0.10)',
-              border: '1px solid rgba(239,68,68,0.20)',
-              borderRadius: 20, padding: '3px 8px',
-            }}>
-              <Video style={{ width: 10, height: 10 }} /> Rec
-            </span>
-          )}
           {!isLocked && session.isContestPosted && (
             <span style={{
               display: 'flex', alignItems: 'center', gap: 4,
@@ -180,7 +170,7 @@ function SessionCard({
           padding: '20px 18px',
         }}>
           {/* Meta row */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', marginBottom: 16, fontSize: 13 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', marginBottom: 18, fontSize: 13 }}>
             {weekDates && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#64748b' }}>
                 <Calendar style={{ width: 13, height: 13 }} />
@@ -195,24 +185,53 @@ function SessionCard({
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#64748b' }}>
               <Clock style={{ width: 13, height: 13 }} /> {session.durationMinutes} min
             </span>
-            {session.targetRating && (
-              <span style={{ color: '#64748b' }}>🎯 Target: <strong style={{ color: accent.text }}>{session.targetRating}</strong></span>
-            )}
           </div>
 
-          {/* Action links */}
+          {/* 1. Primary Action Row: The two study PDF Viewers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12, marginBottom: 16 }}>
+            <Link
+              href={`/sessions/viewer?file=${encodeURIComponent(`/pdf/Week 0${session.weekNumber} · Prerequisites.pdf`)}&title=${encodeURIComponent(`Week 0${session.weekNumber} · Prerequisites`)}`}
+              className="session-link shadow-lg shadow-red-950/5 hover:scale-[1.01] transition-transform"
+              style={{
+                background: 'rgba(220,38,38,0.08)',
+                border: '1px solid rgba(220,38,38,0.22)',
+                color: '#fca5a5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <BookOpen style={{ width: 15, height: 15 }} />
+              <span className="font-bold">View Prerequisites PDF</span>
+              <ExternalLink style={{ width: 12, height: 12, marginLeft: 'auto', opacity: 0.5 }} />
+            </Link>
+
+            <Link
+              href={`/sessions/viewer?file=${encodeURIComponent(`/pdf/Week 0${session.weekNumber} · Slides.pdf`)}&title=${encodeURIComponent(`Week 0${session.weekNumber} · Session Slides`)}`}
+              className="session-link shadow-lg shadow-blue-950/5 hover:scale-[1.01] transition-transform"
+              style={{
+                background: 'rgba(59,130,246,0.08)',
+                border: '1px solid rgba(59,130,246,0.22)',
+                color: '#93c5fd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <Video style={{ width: 15, height: 15 }} />
+              <span className="font-bold">View Session Slides PDF</span>
+              <ExternalLink style={{ width: 12, height: 12, marginLeft: 'auto', opacity: 0.5 }} />
+            </Link>
+          </div>
+
+          {/* 2. Secondary Actions Row: Google Meet, Contest, Editorial */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px,1fr))', gap: 10, marginBottom: 20 }}>
             {session.meetLink && (
               <a href={session.meetLink} target="_blank" rel="noopener noreferrer" className="session-link" style={{ background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.20)', color:'#6ee7b7' }}>
                 <Play style={{ width: 14, height: 14 }} />
                 <span>Join Google Meet</span>
-                <ExternalLink style={{ width: 12, height: 12, marginLeft: 'auto', opacity: 0.5 }} />
-              </a>
-            )}
-            {session.recordingLink && (
-              <a href={session.recordingLink} target="_blank" rel="noopener noreferrer" className="session-link" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.20)', color:'#fca5a5' }}>
-                <Video style={{ width: 14, height: 14 }} />
-                <span>Watch Recording</span>
                 <ExternalLink style={{ width: 12, height: 12, marginLeft: 'auto', opacity: 0.5 }} />
               </a>
             )}
@@ -224,43 +243,13 @@ function SessionCard({
               </a>
             )}
             {session.postContestData?.editorialLink && (
-              <a href={session.postContestData.editorialLink} target="_blank" rel="noopener noreferrer" className="session-link" style={{ background:'rgba(96,165,250,0.08)', border:'1px solid rgba(96,165,250,0.20)', color:'#93c5fd' }}>
+              <a href={session.postContestData.editorialLink} target="_blank" rel="noopener noreferrer" className="session-link" style={{ background:'rgba(167,139,250,0.08)', border:'1px solid rgba(167,139,250,0.20)', color:'#c084fc' }}>
                 <BookOpen style={{ width: 14, height: 14 }} />
                 <span>Editorial</span>
                 <ExternalLink style={{ width: 12, height: 12, marginLeft: 'auto', opacity: 0.5 }} />
               </a>
             )}
           </div>
-
-          {/* Prerequisites */}
-          {session.prerequisites.length > 0 && (
-            <div>
-              <h4 style={{ color: '#64748b', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                Prerequisites
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {session.prerequisites.map((p, i) => (
-                  <a key={i} href={p.link} target="_blank" rel="noopener noreferrer"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '10px 14px',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                      borderRadius: 10,
-                      textDecoration: 'none',
-                      fontSize: 13,
-                    }}
-                    className="prereq-link"
-                  >
-                    <span style={{ background:'rgba(255,255,255,0.07)', color:'#94a3b8', borderRadius:6, padding:'2px 8px', fontSize:10, fontFamily:'monospace', flexShrink:0 }}>{p.type}</span>
-                    <span style={{ color: '#cbd5e1', flex: 1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.title}</span>
-                    {p.isRequired && <span style={{ color:'#f87171', fontSize:10, flexShrink:0 }}>Required</span>}
-                    <ExternalLink style={{ width:12, height:12, color:'#374151', flexShrink:0 }} />
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Notes */}
           {session.sessionNotes && (
