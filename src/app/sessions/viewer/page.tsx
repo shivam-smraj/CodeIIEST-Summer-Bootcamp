@@ -146,16 +146,11 @@ function PDFViewerContent() {
         )}
 
         {existState === 'exists' && (
-          <div className="w-full h-full p-0 md:p-4 max-w-7xl flex justify-center">
-            {/* Styled centered document desk container with soft drop shadow */}
-            <div className="w-full h-full md:rounded-xl overflow-hidden bg-[#0a0c18] border border-white/5 shadow-2xl shadow-black/85 relative">
-              <iframe
-                src={`${file}#toolbar=1&navpanes=0`}
-                className="w-full h-full border-0 absolute inset-0"
-                title={title}
-              />
-            </div>
-          </div>
+          <iframe
+            src={`${file}#toolbar=1&navpanes=0`}
+            className="w-full h-full border-0 absolute inset-0"
+            title={title}
+          />
         )}
       </main>
     </div>
