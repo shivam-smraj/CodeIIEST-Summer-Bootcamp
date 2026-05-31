@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LEADERBOARD_FILTERS, CF_RANK_COLORS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -19,30 +20,28 @@ function getRankColor(rank?: string) {
   return RANK_COLORS[(rank ?? '').toLowerCase()] ?? '#94a3b8';
 }
 
+const fetcher = (url: string) => fetch(url).then(r => r.json());
+
 export function LeaderboardClient() {
   const [filter, setFilter] = useState<LeaderboardFilter>('combined-all');
-  const [users, setUsers]   = useState<LeaderboardUser[]>([]);
-  const [top3, setTop3]     = useState<LeaderboardUser[]>([]);
-  const [total, setTotal]   = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage]     = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchLeaderboard = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/leaderboard?filter=${filter}&page=${page}&limit=50`);
-      const data = await res.json();
-      setUsers(data.users ?? []);
-      setTop3(data.top3 ?? []);
-      setTotal(data.total ?? 0);
-      setTotalPages(data.totalPages ?? 1);
-    } catch { /* silent */ }
-    finally { setIsLoading(false); }
-  }, [filter, page]);
+  const { data, isLoading } = useSWR<{
+    users: LeaderboardUser[];
+    top3: LeaderboardUser[];
+    total: number;
+    totalPages: number;
+  }>(
+    `/api/leaderboard?filter=${filter}&page=${page}&limit=50`,
+    fetcher
+  );
+
+  const users = data?.users ?? [];
+  const top3 = data?.top3 ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
   useEffect(() => { setPage(1); }, [filter]);
-  useEffect(() => { void fetchLeaderboard(); }, [fetchLeaderboard]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import useSWR from 'swr';
 import {
   Lock, Video, ExternalLink, BookOpen, Trophy,
   Calendar, Clock, ChevronDown, ChevronUp, Play,
@@ -24,26 +25,25 @@ const WEEK_ACCENTS: { bg: string; border: string; text: string; label: string }[
   { bg: 'rgba(248,113,113,0.10)', border: 'rgba(248,113,113,0.25)', text: '#f87171', label: '#f87171' }, // red
 ];
 
+const fetcher = (url: string) => fetch(url).then(r => r.json());
+
 export function SessionsClient() {
-  const [sessions, setSessions] = useState<SessionData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useSWR<{
+    sessions: SessionData[];
+  }>('/api/sessions', fetcher);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const sessions = data?.sessions ?? [];
+
+  // Automatically expand the active unlocked week by default
   useEffect(() => {
-    fetch('/api/sessions')
-      .then(r => r.json())
-      .then(d => {
-        const fetchedSessions = d.sessions ?? [];
-        setSessions(fetchedSessions);
-        // Automatically expand the active unlocked week by default
-        const activeUnlocked = fetchedSessions.find((s: SessionData) => s.isUnlocked);
-        if (activeUnlocked) {
-          setExpandedId(activeUnlocked._id);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
-  }, []);
+    if (sessions.length > 0 && !expandedId) {
+      const activeUnlocked = sessions.find((s: SessionData) => s.isUnlocked);
+      if (activeUnlocked) {
+        setExpandedId(activeUnlocked._id);
+      }
+    }
+  }, [sessions, expandedId]);
 
   if (isLoading) {
     return (
