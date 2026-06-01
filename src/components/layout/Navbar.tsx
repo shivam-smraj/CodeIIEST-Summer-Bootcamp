@@ -185,7 +185,7 @@ export function Navbar() {
                     }}
                   >
                     <Avatar style={{ width: 28, height: 28 }}>
-                      <AvatarImage src={user.image ?? ''} alt={user.name ?? ''} />
+                      <AvatarImage src={user.image ?? ''} alt={user.name ?? ''} referrerPolicy="no-referrer" />
                       <AvatarFallback style={{ background: 'linear-gradient(135deg,#dc2626,#9f1239)', color: '#fff', fontSize: 11, fontWeight: 700 }}>
                         {user.name?.[0]?.toUpperCase() ?? 'U'}
                       </AvatarFallback>
@@ -210,7 +210,7 @@ export function Navbar() {
                   <DropdownMenuLabel style={{ padding: '10px 12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Avatar style={{ width: 40, height: 40 }}>
-                        <AvatarImage src={user.image ?? ''} />
+                        <AvatarImage src={user.image ?? ''} referrerPolicy="no-referrer" />
                         <AvatarFallback style={{ background: 'linear-gradient(135deg,#dc2626,#9f1239)', color: '#fff', fontWeight: 700 }}>
                           {user.name?.[0]?.toUpperCase()}
                         </AvatarFallback>

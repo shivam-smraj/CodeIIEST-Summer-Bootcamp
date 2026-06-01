@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import { WEEK_TOPICS, WEEK_DATES } from '@/lib/constants';
 
-const TOPICS  = [...WEEK_TOPICS];
-const DATES   = [...WEEK_DATES];
+const TOPICS = [...WEEK_TOPICS];
+const DATES = [...WEEK_DATES];
 
 interface DashboardStats {
   totalUsers: number;
@@ -76,8 +76,8 @@ const WEEK_ACCENTS = [
 ];
 
 export function AdminDashboard() {
-  const [stats, setStats]     = useState<DashboardStats | null>(null);
-  const [isLoading, setLoad]  = useState(true);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isLoading, setLoad] = useState(true);
   const [sessions, setSessions] = useState<{ weekNumber: number; isUnlocked: boolean; isContestPosted: boolean }[]>([]);
 
   useEffect(() => {
@@ -100,13 +100,13 @@ export function AdminDashboard() {
           uniqueVisitors: analyticsData.uniqueVisitors ?? 0,
         });
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoad(false));
   }, []);
 
-  const now   = new Date();
+  const now = new Date();
   const START = new Date('2026-06-01');
-  const END   = new Date('2026-07-25');
+  const END = new Date('2026-07-25');
   const WEEK_STARTS = [
     new Date('2026-06-01'), new Date('2026-06-08'), new Date('2026-06-15'),
     new Date('2026-06-22'), new Date('2026-06-29'), new Date('2026-07-06'),
@@ -119,7 +119,7 @@ export function AdminDashboard() {
     }
   }
   const bootcampStarted = now >= START;
-  const bootcampEnded   = now >= END;
+  const bootcampEnded = now >= END;
 
   const STAT_CARDS = [
     {
@@ -286,14 +286,14 @@ export function AdminDashboard() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {TOPICS.map((topic, i) => {
-              const weekNum   = i + 1;
-              const color     = WEEK_ACCENTS[i];
-              const dates     = DATES[i];
-              const sInfo     = sessions.find(s => s.weekNumber === weekNum);
-              const isUnlocked= sInfo?.isUnlocked ?? false;
+              const weekNum = i + 1;
+              const color = WEEK_ACCENTS[i];
+              const dates = DATES[i];
+              const sInfo = sessions.find(s => s.weekNumber === weekNum);
+              const isUnlocked = sInfo?.isUnlocked ?? false;
               const isContest = sInfo?.isContestPosted ?? false;
-              const isActive  = weekNum === currentWeek;
-              const isPast    = currentWeek > 0 && weekNum < currentWeek;
+              const isActive = weekNum === currentWeek;
+              const isPast = currentWeek > 0 && weekNum < currentWeek;
 
               return (
                 <div key={weekNum} style={{

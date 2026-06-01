@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Search, CheckCircle2, XCircle, Shield, Users, ChevronLeft, ChevronRight, ExternalLink, Filter, RefreshCw } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DEPARTMENT_MAP } from '@/lib/constants';
 
 interface AdminUser {
   _id: string;
@@ -36,6 +37,14 @@ const CF_RANK_COLORS: Record<string, string> = {
   grandmaster: '#f44336', 'legendary grandmaster': '#f44336',
 };
 
+interface AdminStats {
+  total: number;
+  verified: number;
+  onboarded: number;
+  admins: number;
+  branchCounts: Record<string, number>;
+}
+
 export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const [users, setUsers]         = useState<AdminUser[]>([]);
   const [total, setTotal]         = useState(0);
@@ -45,6 +54,14 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const [isLoading, setIsLoading] = useState(true);
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [selectedBranch, setSelectedBranch] = useState<string>('all');
+  const [stats, setStats]         = useState<AdminStats>({
+    total: 0,
+    verified: 0,
+    onboarded: 0,
+    admins: 0,
+    branchCounts: {},
+  });
   const debouncedSearch = useDebounce(search, 400);
 
   const fetchUsers = useCallback(async () => {
@@ -52,6 +69,8 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     try {
       const params = new URLSearchParams({
         page: String(page), limit: '20',
+        role: selectedRole,
+        branch: selectedBranch,
         ...(debouncedSearch && { search: debouncedSearch }),
       });
       const res  = await fetch(`/api/admin/users?${params}`);
@@ -59,11 +78,14 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       setUsers(data.users ?? []);
       setTotal(data.total ?? 0);
       setTotalPages(data.totalPages ?? 1);
+      if (data.stats) {
+        setStats(data.stats);
+      }
     } catch { toast.error('Failed to load users'); }
     finally { setIsLoading(false); }
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, selectedRole, selectedBranch]);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, selectedRole, selectedBranch]);
   useEffect(() => { void fetchUsers(); }, [fetchUsers]);
 
   const handleRoleChange = async (userId: string, newRole: 'user' | 'admin') => {
@@ -77,23 +99,24 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       if (!res.ok) throw new Error();
       setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
       toast.success(`Role updated to ${newRole}`);
+      void fetchUsers();
     } catch { toast.error('Failed to update role'); }
     finally { setChangingRole(null); }
   };
 
-  const filtered = selectedRole === 'all' ? users : users.filter(u => u.role === selectedRole);
-  const verifiedCount  = users.filter(u => u.isCfVerified).length;
-  const onboardedCount = users.filter(u => u.isOnboardingComplete).length;
+  const filtered = users;
+  const verifiedCount  = stats.verified;
+  const onboardedCount = stats.onboarded;
 
   return (
     <div>
       {/* ── Stats bar ──────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px,1fr))', gap: 10, marginBottom: 24 }}>
         {[
-          { label: 'Total Users',   value: total,          icon: '👥', color: '#60a5fa' },
-          { label: 'CF Verified',   value: verifiedCount,  icon: '✅', color: '#34d399' },
-          { label: 'Onboarded',     value: onboardedCount, icon: '🎓', color: '#a78bfa' },
-          { label: 'Admins',        value: users.filter(u => u.role === 'admin' || u.role === 'superadmin').length, icon: '🛡️', color: '#fbbf24' },
+          { label: 'Total Users',   value: stats.total,     icon: '👥', color: '#60a5fa' },
+          { label: 'CF Verified',   value: stats.verified,  icon: '✅', color: '#34d399' },
+          { label: 'Onboarded',     value: stats.onboarded, icon: '🎓', color: '#a78bfa' },
+          { label: 'Admins',        value: stats.admins,    icon: '🛡️', color: '#fbbf24' },
         ].map(s => (
           <div key={s.label} style={{
             background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
@@ -152,6 +175,94 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           style={{ padding: '8px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
           <RefreshCw style={{ width: 13, height: 13 }} />
         </button>
+      </div>
+
+      {/* ── Branch Ribbon ────────────────────────────────────────────── */}
+      <div style={{ 
+        display: 'flex', 
+        gap: 8, 
+        overflowX: 'auto', 
+        paddingBottom: 10, 
+        marginBottom: 16,
+        scrollbarWidth: 'thin',
+      }} className="custom-scrollbar">
+        <button
+          onClick={() => setSelectedBranch('all')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 14px',
+            borderRadius: 20,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            background: selectedBranch === 'all' ? 'rgba(96,165,250,0.15)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${selectedBranch === 'all' ? 'rgba(96,165,250,0.35)' : 'rgba(255,255,255,0.07)'}`,
+            color: selectedBranch === 'all' ? '#60a5fa' : '#94a3b8',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          All Branches <span style={{ fontSize: 10, background: selectedBranch === 'all' ? 'rgba(96,165,250,0.2)' : 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 10, color: selectedBranch === 'all' ? '#60a5fa' : '#4b5563' }}>{stats.total}</span>
+        </button>
+        {Object.entries(DEPARTMENT_MAP)
+          .sort((a, b) => {
+            const countA = stats.branchCounts[a[0].toUpperCase()] ?? 0;
+            const countB = stats.branchCounts[b[0].toUpperCase()] ?? 0;
+            return countB - countA;
+          })
+          .map(([code, name]) => {
+            const count = stats.branchCounts[code.toUpperCase()] ?? 0;
+            const isSelected = selectedBranch === code.toLowerCase();
+          return (
+            <button
+              key={code}
+              onClick={() => setSelectedBranch(isSelected ? 'all' : code.toLowerCase())}
+              title={name}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 14px',
+                borderRadius: 20,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                background: isSelected ? 'rgba(96,165,250,0.15)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isSelected ? 'rgba(96,165,250,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                color: isSelected ? '#60a5fa' : '#64748b',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                if (!isSelected) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                  e.currentTarget.style.color = '#fff';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!isSelected) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  e.currentTarget.style.color = '#64748b';
+                }
+              }}
+            >
+              {code} 
+              <span style={{ 
+                fontSize: 10, 
+                background: isSelected ? 'rgba(96,165,250,0.2)' : 'rgba(255,255,255,0.06)', 
+                padding: '2px 6px', 
+                borderRadius: 10,
+                color: isSelected ? '#60a5fa' : '#4b5563',
+                fontFamily: 'monospace',
+                fontWeight: 700
+              }}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Count */}
@@ -216,7 +327,7 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                     {/* User info */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 11, minWidth: 0 }}>
                       <Avatar style={{ width: 36, height: 36, flexShrink: 0 }}>
-                        <AvatarImage src={user.image ?? ''} />
+                        <AvatarImage src={user.image ?? ''} referrerPolicy="no-referrer" />
                         <AvatarFallback style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.3),rgba(139,92,246,0.3))', color: '#c4b5fd', fontWeight: 700, fontSize: 13 }}>
                           {user.displayName?.[0]?.toUpperCase()}
                         </AvatarFallback>
@@ -309,7 +420,7 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                     }}
                   >
                     <Avatar style={{ width: 44, height: 44, flexShrink: 0 }}>
-                      <AvatarImage src={user.image ?? ''} />
+                      <AvatarImage src={user.image ?? ''} referrerPolicy="no-referrer" />
                       <AvatarFallback style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.3),rgba(139,92,246,0.3))', color: '#c4b5fd', fontWeight: 700 }}>
                         {user.displayName?.[0]?.toUpperCase()}
                       </AvatarFallback>
@@ -378,6 +489,19 @@ export function AdminUsersClient({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           .users-desktop-header { display: none !important; }
           .users-desktop-row { display: none !important; }
           .users-mobile-card { display: flex !important; }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.06);
+          border-radius: 2px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255,255,255,0.12);
         }
       `}</style>
     </div>
