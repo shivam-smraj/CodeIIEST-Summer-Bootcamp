@@ -180,8 +180,13 @@ function PodiumCard({ user, place }: { user: LeaderboardUser; place: 1|2|3 }) {
     3: { emoji:'🥉', avatarSize:52, blockH:52, borderColor:'rgba(180,83,9,0.3)', blockBg:'rgba(180,83,9,0.05)', textColor:'#c2774f', glow:'none' },
   }[place];
 
+  const firstName = user.name.split(' ')[0] || user.displayName.split(' ')[0];
+
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+    <div 
+      title={`${firstName} · Roll ID: ${user.rollId || 'N/A'}`}
+      style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}
+    >
       <div style={{ position:'relative' }}>
         <div style={{
           width: configs.avatarSize, height: configs.avatarSize,
@@ -232,12 +237,14 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
   const rankColor = getRankColor(user.cfRank);
   const isTop3 = user.rank <= 3;
   const medalEmoji = user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉';
+  const firstName = user.name.split(' ')[0] || user.displayName.split(' ')[0];
 
   return (
     <>
       {/* Desktop */}
       <div
         className="lb-desktop-row"
+        title={`${firstName} · Roll ID: ${user.rollId || 'N/A'}`}
         style={{
           display: 'grid',
           gridTemplateColumns: '48px 1fr 80px repeat(8,36px)',
@@ -283,6 +290,7 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
       {/* Mobile card */}
       <div
         className="lb-mobile-row"
+        title={`${firstName} · Roll ID: ${user.rollId || 'N/A'}`}
         style={{
           padding: '12px 14px',
           borderBottom: '1px solid rgba(255,255,255,0.04)',
