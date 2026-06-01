@@ -24,7 +24,7 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export function LeaderboardClient() {
   const [filter, setFilter] = useState<LeaderboardFilter>('combined-all');
-  const [page, setPage]     = useState(1);
+  const [page, setPage] = useState(1);
 
   const { data, isLoading } = useSWR<{
     users: LeaderboardUser[];
@@ -110,7 +110,7 @@ export function LeaderboardClient() {
           borderBottom: '1px solid rgba(255,255,255,0.07)',
           padding: '10px 20px',
         }}>
-          {['#','Participant','Total','W1','W2','W3','W4','W5','W6','W7','W8'].map(h => (
+          {['#', 'Participant', 'Total', 'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'].map(h => (
             <div key={h} style={{ fontSize: 11, color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: h.startsWith('W') || h === 'Total' ? 'center' : 'left' }}>
               {h}
             </div>
@@ -120,7 +120,7 @@ export function LeaderboardClient() {
         {/* Rows */}
         {isLoading ? (
           <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {Array.from({length:7}).map((_,i) => (
+            {Array.from({ length: 7 }).map((_, i) => (
               <div key={i} className="shimmer" style={{ height: 56, borderRadius: 10, background: 'rgba(255,255,255,0.04)' }} />
             ))}
           </div>
@@ -140,13 +140,13 @@ export function LeaderboardClient() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1}
-            style={{ padding:'9px 20px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:10, color:'#94a3b8', cursor:'pointer', fontSize:13, fontWeight:500, opacity: page===1 ? 0.3 : 1 }}>
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            style={{ padding: '9px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 10, color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontWeight: 500, opacity: page === 1 ? 0.3 : 1 }}>
             ← Prev
           </button>
-          <span style={{ color:'#64748b', fontSize:13 }}>{page} / {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages}
-            style={{ padding:'9px 20px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:10, color:'#94a3b8', cursor:'pointer', fontSize:13, fontWeight:500, opacity: page===totalPages ? 0.3 : 1 }}>
+          <span style={{ color: '#64748b', fontSize: 13 }}>{page} / {totalPages}</span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+            style={{ padding: '9px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 10, color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontWeight: 500, opacity: page === totalPages ? 0.3 : 1 }}>
             Next →
           </button>
         </div>
@@ -167,27 +167,27 @@ function Podium({ top3 }: { top3: LeaderboardUser[] }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
       {second && <PodiumCard user={second} place={2} />}
-      {first  && <PodiumCard user={first}  place={1} />}
-      {third  && <PodiumCard user={third}  place={3} />}
+      {first && <PodiumCard user={first} place={1} />}
+      {third && <PodiumCard user={third} place={3} />}
     </div>
   );
 }
 
-function PodiumCard({ user, place }: { user: LeaderboardUser; place: 1|2|3 }) {
+function PodiumCard({ user, place }: { user: LeaderboardUser; place: 1 | 2 | 3 }) {
   const configs = {
-    1: { emoji:'🥇', avatarSize:76, blockH:96, borderColor:'rgba(234,179,8,0.5)', blockBg:'rgba(234,179,8,0.08)', textColor:'#fbbf24', glow:'0 0 24px rgba(234,179,8,0.2)' },
-    2: { emoji:'🥈', avatarSize:60, blockH:68, borderColor:'rgba(148,163,184,0.3)', blockBg:'rgba(148,163,184,0.05)', textColor:'#94a3b8', glow:'none' },
-    3: { emoji:'🥉', avatarSize:52, blockH:52, borderColor:'rgba(180,83,9,0.3)', blockBg:'rgba(180,83,9,0.05)', textColor:'#c2774f', glow:'none' },
+    1: { emoji: '🥇', avatarSize: 76, blockH: 96, borderColor: 'rgba(234,179,8,0.5)', blockBg: 'rgba(234,179,8,0.08)', textColor: '#fbbf24', glow: '0 0 24px rgba(234,179,8,0.2)' },
+    2: { emoji: '🥈', avatarSize: 60, blockH: 68, borderColor: 'rgba(148,163,184,0.3)', blockBg: 'rgba(148,163,184,0.05)', textColor: '#94a3b8', glow: 'none' },
+    3: { emoji: '🥉', avatarSize: 52, blockH: 52, borderColor: 'rgba(180,83,9,0.3)', blockBg: 'rgba(180,83,9,0.05)', textColor: '#c2774f', glow: 'none' },
   }[place];
 
   const firstName = user.name.split(' ')[0] || user.displayName.split(' ')[0];
 
   return (
-    <div 
-      title={`${firstName} · Roll ID: ${user.rollId || 'N/A'}`}
-      style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}
+    <div
+      title={`${firstName} : ${user.rollId || 'N/A'}`}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}
     >
-      <div style={{ position:'relative' }}>
+      <div style={{ position: 'relative' }}>
         <div style={{
           width: configs.avatarSize, height: configs.avatarSize,
           borderRadius: '50%',
@@ -196,35 +196,35 @@ function PodiumCard({ user, place }: { user: LeaderboardUser; place: 1|2|3 }) {
           overflow: 'hidden',
           background: 'rgba(255,255,255,0.05)',
         }}>
-          <Avatar style={{ width:'100%', height:'100%' }}>
+          <Avatar style={{ width: '100%', height: '100%' }}>
             <AvatarImage src={user.cfAvatar ?? ''} />
-            <AvatarFallback style={{ background:'#1e293b', color:'#fff', fontWeight:700, fontSize: place===1?20:16 }}>
+            <AvatarFallback style={{ background: '#1e293b', color: '#fff', fontWeight: 700, fontSize: place === 1 ? 20 : 16 }}>
               {user.displayName?.[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </div>
-        <span style={{ position:'absolute', top:-6, right:-6, fontSize: place===1?22:18 }}>{configs.emoji}</span>
+        <span style={{ position: 'absolute', top: -6, right: -6, fontSize: place === 1 ? 22 : 18 }}>{configs.emoji}</span>
       </div>
 
-      <div style={{ textAlign:'center' }}>
-        <p style={{ color:'#fff', fontWeight:700, fontSize: place===1?15:13 }}>{user.displayName?.split(' ')[0]}</p>
-        <p style={{ color: getRankColor(user.cfRank), fontSize:11, fontFamily:'monospace' }}>@{user.cfHandle}</p>
-        <p style={{ color: configs.textColor, fontWeight:900, fontSize: place===1?20:15, marginTop:4 }}>
-          {user.totalPoints} <span style={{ fontSize:10, fontWeight:400, color:'#64748b' }}>pts</span>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ color: '#fff', fontWeight: 700, fontSize: place === 1 ? 15 : 13 }}>{user.displayName?.split(' ')[0]}</p>
+        <p style={{ color: getRankColor(user.cfRank), fontSize: 11, fontFamily: 'monospace' }}>@{user.cfHandle}</p>
+        <p style={{ color: configs.textColor, fontWeight: 900, fontSize: place === 1 ? 20 : 15, marginTop: 4 }}>
+          {user.totalPoints} <span style={{ fontSize: 10, fontWeight: 400, color: '#64748b' }}>pts</span>
         </p>
       </div>
 
       {/* Podium block */}
       <div style={{
-        width: place===1?100:80,
+        width: place === 1 ? 100 : 80,
         height: configs.blockH,
         background: configs.blockBg,
-        borderRadius:'8px 8px 0 0',
+        borderRadius: '8px 8px 0 0',
         border: `1px solid ${configs.borderColor}`,
         borderBottom: 'none',
-        display:'flex', alignItems:'center', justifyContent:'center',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <span style={{ fontSize: place===1?32:24, fontWeight:900, opacity:0.15, color: configs.textColor }}>
+        <span style={{ fontSize: place === 1 ? 32 : 24, fontWeight: 900, opacity: 0.15, color: configs.textColor }}>
           #{place}
         </span>
       </div>
@@ -244,7 +244,7 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
       {/* Desktop */}
       <div
         className="lb-desktop-row"
-        title={`${firstName} · Roll ID: ${user.rollId || 'N/A'}`}
+        title={`${firstName} : ${user.rollId || 'N/A'}`}
         style={{
           display: 'grid',
           gridTemplateColumns: '48px 1fr 80px repeat(8,36px)',
@@ -257,31 +257,31 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
         onMouseEnter={e => { e.currentTarget.style.background = isTop3 ? 'rgba(234,179,8,0.05)' : 'rgba(255,255,255,0.03)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = isTop3 ? 'rgba(234,179,8,0.02)' : 'transparent'; }}
       >
-        <div style={{ fontSize:13, fontWeight:700 }}>
-          {isTop3 ? <span>{medalEmoji}</span> : <span style={{color:'#374151'}}>{user.rank}</span>}
+        <div style={{ fontSize: 13, fontWeight: 700 }}>
+          {isTop3 ? <span>{medalEmoji}</span> : <span style={{ color: '#374151' }}>{user.rank}</span>}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
-          <div style={{ width:36, height:36, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.10)', overflow:'hidden', flexShrink:0 }}>
-            <Avatar style={{ width:'100%', height:'100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.10)', overflow: 'hidden', flexShrink: 0 }}>
+            <Avatar style={{ width: '100%', height: '100%' }}>
               <AvatarImage src={user.cfAvatar ?? ''} />
-              <AvatarFallback style={{ background:'#1e293b', color:'#fff', fontSize:11, fontWeight:700 }}>{user.displayName?.[0]?.toUpperCase()}</AvatarFallback>
+              <AvatarFallback style={{ background: '#1e293b', color: '#fff', fontSize: 11, fontWeight: 700 }}>{user.displayName?.[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
-          <div style={{ minWidth:0 }}>
-            <p style={{ color:'#fff', fontWeight:600, fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user.displayName}</p>
-            <p style={{ color:rankColor, fontSize:11, fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>@{user.cfHandle}{user.cfRating ? ` · ${user.cfRating}` : ''}</p>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ color: '#fff', fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.displayName}</p>
+            <p style={{ color: rankColor, fontSize: 11, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>@{user.cfHandle}{user.cfRating ? ` · ${user.cfRating}` : ''}</p>
           </div>
         </div>
-        <div style={{ textAlign:'center' }}>
-          <span style={{ fontWeight:900, fontSize:15, color: isTop3 ? '#fbbf24' : '#fff' }}>{user.totalPoints}</span>
+        <div style={{ textAlign: 'center' }}>
+          <span style={{ fontWeight: 900, fontSize: 15, color: isTop3 ? '#fbbf24' : '#fff' }}>{user.totalPoints}</span>
         </div>
-        {Array.from({length:8}).map((_,i) => {
+        {Array.from({ length: 8 }).map((_, i) => {
           const score = user.scores?.[i];
           return (
-            <div key={i} style={{ textAlign:'center', fontSize:11, fontFamily:'monospace' }}>
-              {score == null ? <span style={{color:'#1f2937'}}>—</span>
-               : score === 0 ? <span style={{color:'rgba(239,68,68,0.5)'}}>✕</span>
-               : <span style={{color:'#34d399'}}>{score}</span>}
+            <div key={i} style={{ textAlign: 'center', fontSize: 11, fontFamily: 'monospace' }}>
+              {score == null ? <span style={{ color: '#1f2937' }}>—</span>
+                : score === 0 ? <span style={{ color: 'rgba(239,68,68,0.5)' }}>✕</span>
+                  : <span style={{ color: '#34d399' }}>{score}</span>}
             </div>
           );
         })}
@@ -290,7 +290,7 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
       {/* Mobile card */}
       <div
         className="lb-mobile-row"
-        title={`${firstName} · Roll ID: ${user.rollId || 'N/A'}`}
+        title={`${firstName} : ${user.rollId || 'N/A'}`}
         style={{
           padding: '12px 14px',
           borderBottom: '1px solid rgba(255,255,255,0.04)',
@@ -300,43 +300,43 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
         {/* Top row: rank + avatar + name + total */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 28, textAlign: 'center', fontWeight: 700, fontSize: 12, flexShrink: 0 }}>
-            {isTop3 ? medalEmoji : <span style={{color:'#6b7280'}}>{user.rank}</span>}
+            {isTop3 ? medalEmoji : <span style={{ color: '#6b7280' }}>{user.rank}</span>}
           </div>
-          <div style={{ width: 38, height: 38, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.10)', overflow:'hidden', flexShrink:0 }}>
-            <Avatar style={{ width:'100%', height:'100%' }}>
+          <div style={{ width: 38, height: 38, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.10)', overflow: 'hidden', flexShrink: 0 }}>
+            <Avatar style={{ width: '100%', height: '100%' }}>
               <AvatarImage src={user.cfAvatar ?? ''} />
-              <AvatarFallback style={{ background:'#1e293b', color:'#fff', fontSize:12, fontWeight:700 }}>{user.displayName?.[0]?.toUpperCase()}</AvatarFallback>
+              <AvatarFallback style={{ background: '#1e293b', color: '#fff', fontSize: 12, fontWeight: 700 }}>{user.displayName?.[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
-          <div style={{ flex:1, minWidth:0 }}>
-            <p style={{ color:'#fff', fontWeight:600, fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user.displayName}</p>
-            <p style={{ color:rankColor, fontSize:10, fontFamily:'monospace' }}>@{user.cfHandle}{user.cfRating ? ` · ${user.cfRating}` : ''}</p>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ color: '#fff', fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.displayName}</p>
+            <p style={{ color: rankColor, fontSize: 10, fontFamily: 'monospace' }}>@{user.cfHandle}{user.cfRating ? ` · ${user.cfRating}` : ''}</p>
           </div>
-          <div style={{ textAlign:'right', flexShrink:0 }}>
-            <div style={{ fontWeight:900, fontSize:15, color: isTop3 ? '#fbbf24' : '#fff', fontFamily:'monospace' }}>{user.totalPoints}</div>
-            <div style={{ color:'#6b7280', fontSize:10 }}>pts</div>
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 15, color: isTop3 ? '#fbbf24' : '#fff', fontFamily: 'monospace' }}>{user.totalPoints}</div>
+            <div style={{ color: '#6b7280', fontSize: 10 }}>pts</div>
           </div>
         </div>
 
         {/* Weekly scores row */}
-        <div style={{ display:'flex', gap:4, marginTop:8, marginLeft:38, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 4 }}>
-          {Array.from({length:8}).map((_,i) => {
+        <div style={{ display: 'flex', gap: 4, marginTop: 8, marginLeft: 38, overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 4 }}>
+          {Array.from({ length: 8 }).map((_, i) => {
             const score = user.scores?.[i];
             return (
               <div key={i} style={{
-                display:'flex', flexDirection:'column', alignItems:'center',
-                minWidth:28, padding:'3px 4px',
-                borderRadius:6,
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                minWidth: 28, padding: '3px 4px',
+                borderRadius: 6,
                 background: score == null ? 'rgba(255,255,255,0.03)'
                   : score === 0 ? 'rgba(239,68,68,0.10)'
-                  : 'rgba(52,211,153,0.10)',
+                    : 'rgba(52,211,153,0.10)',
                 border: score == null ? '1px solid rgba(255,255,255,0.06)'
                   : score === 0 ? '1px solid rgba(239,68,68,0.20)'
-                  : '1px solid rgba(52,211,153,0.20)',
+                    : '1px solid rgba(52,211,153,0.20)',
               }}>
-                <span style={{ fontSize:8, color:'#6b7280', fontWeight:700, lineHeight:1 }}>W{i+1}</span>
+                <span style={{ fontSize: 8, color: '#6b7280', fontWeight: 700, lineHeight: 1 }}>W{i + 1}</span>
                 <span style={{
-                  fontSize:11, fontFamily:'monospace', fontWeight:700, lineHeight:1.4,
+                  fontSize: 11, fontFamily: 'monospace', fontWeight: 700, lineHeight: 1.4,
                   color: score == null ? '#374151' : score === 0 ? 'rgba(239,68,68,0.6)' : '#34d399',
                 }}>
                   {score == null ? '—' : score === 0 ? '✕' : score}
