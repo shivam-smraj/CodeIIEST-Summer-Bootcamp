@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,7 +10,8 @@ import {
   CheckCircle2, XCircle, AlertCircle, Trophy, Users, ExternalLink,
   Save, Info, Code2,
 } from 'lucide-react';
-import { WEEK_TOPICS, WEEK_DATES } from '@/lib/constants';
+import { WEEK_TOPICS, WEEK_DATES, PARTICIPATION_BONUS, CF_TIME_DECAY, CF_WA_PENALTY, CF_MIN_FRACTION } from '@/lib/constants';
+import { calcICPCProblemScore } from '@/lib/score-calculator';
 import type { BootcampParticipantPreview, CFRowPreview, PreviewResponse } from '@/app/api/admin/sync-contest/preview/route';
 
 const TOPICS = [...WEEK_TOPICS];
@@ -44,6 +45,7 @@ export function SyncContestClient() {
 
   // ── Editable participant list ────────────────────────────────────────────────
   const [participants, setParticipants] = useState<EditableParticipant[]>([]);
+  const [basePoints, setBasePoints] = useState<Record<string, number>>({});
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [cfRowsExpanded,     setCfRowsExpanded]     = useState(false);
@@ -93,6 +95,14 @@ export function SyncContestClient() {
         isIncluded:  true,
       }));
       setParticipants(editable);
+
+      // Initialise base points for ICPC mode
+      const initialBps: Record<string, number> = {};
+      pdata.problems.forEach(p => {
+        initialBps[p.index] = p.maxPoints ?? 1000;
+      });
+      setBasePoints(initialBps);
+
       setPhase('PREVIEW');
       toast.success(`Preview loaded — ${pdata.bootcampParticipants.length} bootcamp participants found`);
     } catch (err) {
@@ -114,6 +124,38 @@ export function SyncContestClient() {
       p.userId === userId ? { ...p, isIncluded: !p.isIncluded } : p
     ));
   }, []);
+
+  // ── Auto-recalculation on base points change ─────────────────────────────────
+  // Note: Using a custom stringified dep to prevent exhaustive-deps warning loops
+  const basePointsStr = JSON.stringify(basePoints);
+  useEffect(() => {
+    if (!preview || preview.scoreType !== 'icpc-rules') return;
+
+    setParticipants(prev => prev.map(p => {
+      let total = 0;
+      let solved = false;
+      
+      p.problemResults.forEach(pr => {
+        if (pr.points > 0 && pr.solveTimeSeconds != null) { // Accepted
+          const bp = basePoints[pr.index] ?? 1000;
+          const solveTimeMin = Math.floor(pr.solveTimeSeconds / 60);
+          total += calcICPCProblemScore(bp, solveTimeMin, pr.wrongAttempts);
+          solved = true;
+        }
+      });
+      
+      const bonus = solved ? PARTICIPATION_BONUS : 0;
+      const newCalc = Math.round(total + bonus);
+      const isOverridden = p.editedScore !== p.calculatedScore;
+
+      return {
+        ...p,
+        calculatedScore: newCalc,
+        editedScore: isOverridden ? p.editedScore : newCalc,
+      };
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basePointsStr, preview?.scoreType]);
 
   const handleCommit = async () => {
     if (!preview) return;
@@ -168,6 +210,7 @@ export function SyncContestClient() {
     setPhase('FORM');
     setPreview(null);
     setParticipants([]);
+    setBasePoints({});
     setCommitResult(null);
     setCfRowsExpanded(false);
     setNotPartExpanded(false);
@@ -329,6 +372,45 @@ export function SyncContestClient() {
               </span>
             ))}
           </div>
+
+          {/* Scoring Rules & Formula */}
+          {preview.scoreType === 'icpc-rules' && (
+            <div style={{ background: 'rgba(167,139,250,0.04)', border: '1px solid rgba(167,139,250,0.20)', borderRadius: 16, padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <Info style={{ width: 16, height: 16, color: '#a78bfa' }} />
+                <h3 style={{ color: '#c4b5fd', fontWeight: 700, fontSize: 14, margin: 0 }}>ICPC Scoring Formula & Base Points</h3>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'stretch' }}>
+                <div style={{ flex: '1 1 300px', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(167,139,250,0.1)' }}>
+                  <p style={{ color: '#fff', fontSize: 13, fontFamily: 'monospace', marginBottom: 8, fontWeight: 700 }}>
+                    Score = max({CF_MIN_FRACTION}x, x - (x * t * {CF_TIME_DECAY})) - {CF_WA_PENALTY}w
+                  </p>
+                  <ul style={{ color: '#94a3b8', fontSize: 11, margin: 0, paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <li><strong style={{ color: '#cbd5e1' }}>x</strong> = Base points for problem (configurable below)</li>
+                    <li><strong style={{ color: '#cbd5e1' }}>t</strong> = Time taken to solve in minutes ({(CF_TIME_DECAY * 100).toFixed(1)}% decay per min)</li>
+                    <li><strong style={{ color: '#cbd5e1' }}>w</strong> = Wrong attempts before correct answer (-{CF_WA_PENALTY} points each)</li>
+                    <li><strong style={{ color: '#cbd5e1' }}>Bonus</strong>: +{PARTICIPATION_BONUS} points participation bonus if at least 1 problem is solved</li>
+                  </ul>
+                </div>
+                <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <p style={{ color: '#e2e8f0', fontSize: 12, fontWeight: 600, margin: 0 }}>Adjust Base Points (x):</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {preview.problems.map(p => (
+                      <div key={p.index} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <label style={{ color: '#94a3b8', fontSize: 10, fontWeight: 700, textAlign: 'center' }}>Prob {p.index}</label>
+                        <input
+                          type="number"
+                          value={basePoints[p.index] ?? 1000}
+                          onChange={e => setBasePoints(prev => ({ ...prev, [p.index]: parseInt(e.target.value, 10) || 0 }))}
+                          style={{ width: 64, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(167,139,250,0.3)', color: '#fff', borderRadius: 6, padding: '4px 6px', fontSize: 12, fontFamily: 'monospace', textAlign: 'center', outline: 'none' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── TABLE A: All CF rows ──────────────────────────────────────── */}
           <CollapsibleSection
