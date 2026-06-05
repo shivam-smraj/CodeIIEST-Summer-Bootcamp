@@ -20,6 +20,7 @@ export default function LiveEngine() {
   const [contest, setContest] = useState<CFContest | null>(null);
   const [problems, setProblems] = useState<CFProblem[]>([]);
   const [userMap, setUserMap] = useState<Record<string, UserMapInfo>>({});
+  const [officialRanks, setOfficialRanks] = useState<Record<string, number>>({});
   const [submissions, setSubmissions] = useState<CFSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export default function LiveEngine() {
       setContest(data.contest);
       setProblems(data.problems);
       setUserMap(data.userMap);
+      setOfficialRanks(data.officialRanks || {});
 
       let sUrl = `/api/live/status?contestId=${contestId}`;
       if (groupId) sUrl += `&groupId=${groupId}`;
@@ -251,6 +253,10 @@ export default function LiveEngine() {
           firstSolves={firstSolves} 
           userMap={userMap}
           theme={theme}
+          mode={mode}
+          currentTime={currentTime}
+          durationSeconds={contest?.durationSeconds || 0}
+          officialRanks={officialRanks}
         />
         <LiveQueue 
           recentEvents={recentEvents} 

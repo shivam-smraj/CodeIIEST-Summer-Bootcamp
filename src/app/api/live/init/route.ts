@@ -21,15 +21,16 @@ export async function GET(req: NextRequest) {
     await connectToDatabase();
     const users = await User.find({ cfHandle: { $exists: true, $ne: '' } }).lean();
     
-    const userMap: Record<string, { firstName: string; rollId: string; rating?: number; rank?: string }> = {};
+    const userMap: Record<string, { firstName: string; fullName: string; rollId: string; rating?: number; rank?: string }> = {};
     users.forEach((u: any) => {
       if (u.cfHandle) {
         // Extract first name
-        const nameParts = (u.name || u.displayName || '').split(' ');
+        const nameParts = (u.displayName || u.name || '').split(' ');
         const firstName = nameParts[0] || u.cfHandle;
         
         userMap[u.cfHandle.toLowerCase()] = {
           firstName,
+          fullName: u.displayName || u.name || u.cfHandle,
           rollId: u.rollId || 'UNKNOWN',
           rating: u.cfRating,
           rank: u.cfRank,
@@ -37,10 +38,22 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    // 3. Map participant handles to official Codeforces ranks
+    const officialRanks: Record<string, number> = {};
+    if (standings.rows && Array.isArray(standings.rows)) {
+      for (const row of standings.rows) {
+        if (row.party?.members?.[0]) {
+          const handle = row.party.members[0].handle.toLowerCase();
+          officialRanks[handle] = row.rank;
+        }
+      }
+    }
+
     return NextResponse.json({
       contest: standings.contest,
       problems: standings.problems,
       userMap,
+      officialRanks,
     });
   } catch (error) {
     console.error('[LIVE API INIT ERROR]', error);

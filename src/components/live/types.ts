@@ -7,6 +7,7 @@ export type ScoreboardTheme = 'icpc' | 'dark';
 
 export interface UserMapInfo {
   firstName: string;
+  fullName?: string;
   rollId: string;
   rating?: number;
   rank?: string;

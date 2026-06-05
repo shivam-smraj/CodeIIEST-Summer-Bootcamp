@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CFProblem } from '@/types/codeforces';
-import type { ScoreRow, UserMapInfo, ScoreboardTheme } from './types';
+import type { ScoreRow, UserMapInfo, ScoreboardTheme, ContestMode } from './types';
 import { CFHandle } from './CFHandle';
 
 interface LiveTableProps {
@@ -10,27 +10,31 @@ interface LiveTableProps {
   firstSolves: Record<string, number>;
   userMap: Record<string, UserMapInfo>;
   theme: ScoreboardTheme;
+  mode: ContestMode;
+  currentTime: number;
+  durationSeconds: number;
+  officialRanks: Record<string, number>;
 }
 
 // ICPC-exact colors (from DOMjudge / ICPC World Finals live scoreboards)
 const ICPC = {
   // Problem cell backgrounds
-  firstSolve:  '#1DAA1D', // darker green — "score_first"
-  accepted:    '#60E760', // bright green  — "score_correct"
-  wrong:       '#E87272', // pink-red      — "score_incorrect"
-  pending:     '#6666FF', // blue          — "score_pending"
+  firstSolve: '#1DAA1D', // darker green — "score_first"
+  accepted: '#60E760', // bright green  — "score_correct"
+  wrong: '#E87272', // pink-red      — "score_incorrect"
+  pending: '#6666FF', // blue          — "score_pending"
 
   // Medal rank cell backgrounds
-  gold:        '#EEC710', // gold   ranks 1–4
-  silver:      '#AAAAAA', // silver ranks 5–8
-  bronze:      '#C08E55', // bronze ranks 9–12
+  gold: '#EEC710', // gold   ranks 1–4
+  silver: '#AAAAAA', // silver ranks 5–8
+  bronze: '#C08E55', // bronze ranks 9–12
 
   // Table structure
-  rowBorder:   '1px solid #dee2e6',
-  colBorder:   '1px solid silver',
-  headerBg:    '#f8f9fa',
-  bodyBg:      '#ffffff',
-  rowBg:       '#ffffff',
+  rowBorder: '1px solid #dee2e6',
+  colBorder: '1px solid silver',
+  headerBg: '#f8f9fa',
+  bodyBg: '#ffffff',
+  rowBg: '#ffffff',
 };
 
 // Problem header badge colors — same sequence as ICPC (per-problem letter hue)
@@ -43,21 +47,32 @@ const PROB_COLORS = [
 const ROW_H = 46;
 
 function getMedalStyle(rank: number): React.CSSProperties {
-  if (rank <= 4)  return { background: ICPC.gold,   color: '#000', fontWeight: 900 };
-  if (rank <= 8)  return { background: ICPC.silver, color: '#000', fontWeight: 900 };
+  if (rank <= 4) return { background: ICPC.gold, color: '#000', fontWeight: 900 };
+  if (rank <= 8) return { background: ICPC.silver, color: '#000', fontWeight: 900 };
   if (rank <= 12) return { background: ICPC.bronze, color: '#000', fontWeight: 900 };
   return { background: 'transparent', color: '#555', fontWeight: 600 };
 }
 
 function MedalIcon({ rank }: { rank: number }) {
-  if (rank <= 4)  return <span style={{ fontSize: 16 }}>🥇</span>;
-  if (rank <= 8)  return <span style={{ fontSize: 16 }}>🥈</span>;
+  if (rank <= 4) return <span style={{ fontSize: 16 }}>🥇</span>;
+  if (rank <= 8) return <span style={{ fontSize: 16 }}>🥈</span>;
   if (rank <= 12) return <span style={{ fontSize: 16 }}>🥉</span>;
   return null;
 }
 
-export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }: LiveTableProps) {
+export function LiveTable({
+  scoreboard,
+  problems,
+  firstSolves,
+  userMap,
+  theme,
+  mode,
+  currentTime,
+  durationSeconds,
+  officialRanks,
+}: LiveTableProps) {
   const isDark = theme === 'dark';
+  const showCFRankCol = mode === 'live' || (mode === 'replay' && currentTime >= durationSeconds);
 
   // ─── DARK THEME ───────────────────────────────────────────────────
   if (isDark) {
@@ -73,6 +88,9 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }:
             style={{ background: 'rgba(10,11,14,0.97)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
             <div style={{ width: 56, padding: '14px 0', textAlign: 'center' }}>#</div>
             <div style={{ flex: 1, minWidth: 220, padding: '14px 20px' }}>Contestant</div>
+            {showCFRankCol && (
+              <div style={{ width: 75, padding: '14px 0', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>CF Rank</div>
+            )}
             <div style={{ width: 64, padding: '14px 0', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>Σ</div>
             <div style={{ width: 80, padding: '14px 0', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>Pen.</div>
             <div style={{ display: 'flex', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>
@@ -103,15 +121,89 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }:
                     <div style={{ width: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isTop3 ? 18 : 12, fontWeight: 800, color: isTop3 ? accent : 'rgba(255,255,255,0.3)', flexShrink: 0 }}>
                       {isTop3 ? MEDAL_DARK[index] : index + 1}
                     </div>
-                    {/* Name */}
-                    <div className="transition-colors group-hover:bg-white/[0.015]" style={{ flex: 1, minWidth: 220, display: 'flex', alignItems: 'center', padding: '0 20px', overflow: 'hidden', gap: 8 }}>
-                      <div style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        <CFHandle handle={row.displayName} rating={mapped?.rating} rank={mapped?.rank} />
+                    {/* Contestant Cell with Tooltip on Hover */}
+                    <div 
+                      className="transition-colors group-hover:bg-white/[0.015] relative group/tip cursor-help" 
+                      style={{ 
+                        flex: 1, 
+                        minWidth: 220, 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        justifyContent: 'center', 
+                        padding: '0 20px', 
+                        overflow: 'visible',
+                        gap: 2 
+                      }}
+                    >
+                      <a 
+                        href={`https://codeforces.com/profile/${row.handle}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex flex-col justify-center gap-0.5 group/link"
+                        style={{ textDecoration: 'none', color: 'inherit', outline: 'none' }}
+                      >
+                        {/* Name Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                          <span style={{ fontSize: 13.5, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="group-hover/link:underline">
+                            {row.displayName}
+                          </span>
+                          {isTop3 && (
+                            <div style={{ padding: '1px 7px', borderRadius: 999, background: `${accent}18`, border: `1px solid ${accent}35`, color: accent, fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>
+                              #{index + 1}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Handle & Rating Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <CFHandle handle={`@${row.handle}`} rating={mapped?.rating} rank={mapped?.rank} />
+                          {mapped?.rating && (
+                            <span style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: 10.5, marginLeft: 4 }}>
+                              · {mapped.rating}
+                            </span>
+                          )}
+                        </div>
+                      </a>
+
+
+                      {/* Hover Tooltip Card */}
+                      <div className="absolute left-4 bottom-[90%] mb-1.5 hidden group-hover/tip:block whitespace-nowrap z-30"
+                        style={{ 
+                          background: '#0e0f13', 
+                          border: '1px solid rgba(255,255,255,0.1)', 
+                          color: '#fff', 
+                          fontSize: 12, 
+                          padding: '10px 14px', 
+                          borderRadius: 8, 
+                          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5)',
+                          pointerEvents: 'none',
+                          textTransform: 'none',
+                          letterSpacing: 'normal'
+                        }}>
+                        <div style={{ fontWeight: 800, fontSize: 13.5, color: '#fff' }}>{mapped?.fullName || row.displayName}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 4, fontFamily: 'monospace' }}>
+                          Roll ID: <span style={{ color: '#fff', fontWeight: 600 }}>{mapped?.rollId || 'N/A'}</span>
+                        </div>
+                        {mapped?.rating && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, marginTop: 4 }}>
+                            <span style={{ color: 'rgba(255,255,255,0.4)' }}>CF Rating:</span>
+                            <CFHandle handle={String(mapped.rating)} rating={mapped.rating} rank={mapped.rank} />
+                            {mapped.rank && (
+                              <span style={{ color: 'rgba(255,255,255,0.4)', textTransform: 'capitalize' }}>
+                                ({mapped.rank})
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {isTop3 && (
-                        <div style={{ padding: '1px 7px', borderRadius: 999, background: `${accent}18`, border: `1px solid ${accent}35`, color: accent, fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>#{index + 1}</div>
-                      )}
                     </div>
+
+                    {/* CF Rank */}
+                    {showCFRankCol && (
+                      <div className="transition-colors group-hover:bg-white/[0.015]" style={{ width: 75, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(255,255,255,0.03)', fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
+                        {officialRanks[row.handle.toLowerCase()] ? `#${officialRanks[row.handle.toLowerCase()]}` : '—'}
+                      </div>
+                    )}
                     {/* Solved */}
                     <div className="transition-colors group-hover:bg-white/[0.015]" style={{ width: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(255,255,255,0.03)', fontSize: 15, fontWeight: 900, color: row.points > 0 ? '#fff' : 'rgba(255,255,255,0.2)' }}>{row.points}</div>
                     {/* Penalty */}
@@ -183,8 +275,14 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }:
           </div>
           {/* Team */}
           <div style={{ flex: 1, minWidth: 260, padding: '12px 20px', fontWeight: 700, fontSize: 12, color: '#333', textTransform: 'uppercase', letterSpacing: '0.08em', borderRight: ICPC.colBorder }}>
-            Team
+            Participant
           </div>
+          {/* CF Rank */}
+          {showCFRankCol && (
+            <div style={{ width: 85, padding: '12px 8px', textAlign: 'center', fontWeight: 700, fontSize: 12, color: '#333', textTransform: 'uppercase', letterSpacing: '0.08em', borderRight: ICPC.colBorder, flexShrink: 0 }}>
+              CF Rank
+            </div>
+          )}
           {/* Score */}
           <div style={{ width: 110, padding: '12px 8px', textAlign: 'center', fontWeight: 700, fontSize: 12, color: '#333', textTransform: 'uppercase', letterSpacing: '0.08em', borderRight: ICPC.colBorder, flexShrink: 0 }}>
             Score
@@ -217,7 +315,7 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }:
         <div style={{ position: 'relative' }}>
           <AnimatePresence>
             {scoreboard.map((row, index) => {
-              const rank   = index + 1;
+              const rank = index + 1;
               const mapped = userMap[row.handle.toLowerCase()];
               const medalStyle = getMedalStyle(rank);
 
@@ -252,22 +350,89 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }:
                     <span style={{ fontSize: 14, lineHeight: 1 }}>{rank}</span>
                   </div>
 
-                  {/* Team name + university */}
+                  {/* Participant cell with tooltip */}
                   <div
+                    className="relative group/tip cursor-help"
                     style={{
                       flex: 1, minWidth: 260,
-                      display: 'flex', alignItems: 'center',
+                      display: 'flex', flexDirection: 'column',
+                      justifyContent: 'center',
                       padding: '0 16px',
                       borderRight: ICPC.colBorder,
-                      overflow: 'hidden', gap: 10,
+                      overflow: 'visible', gap: 2,
                     }}
                   >
-                    <div style={{ overflow: 'hidden' }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <CFHandle handle={row.displayName} rating={mapped?.rating} rank={mapped?.rank} />
+                    <a
+                      href={`https://codeforces.com/profile/${row.handle}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col justify-center gap-0.5 group/link"
+                      style={{ textDecoration: 'none', color: 'inherit', outline: 'none' }}
+                    >
+                      {/* Name Row */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                        <span style={{ fontSize: 13.5, fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="group-hover/link:underline">
+                          {row.displayName}
+                        </span>
                       </div>
+
+                      {/* Handle & Rating Row */}
+                      <div style={{ display: 'flex', alignItems: 'center', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <CFHandle handle={`@${row.handle}`} rating={mapped?.rating} rank={mapped?.rank} />
+                        {mapped?.rating && (
+                          <span style={{ color: '#666', fontFamily: 'monospace', fontSize: 10.5, marginLeft: 4 }}>
+                            · {mapped.rating}
+                          </span>
+                        )}
+                      </div>
+                    </a>
+
+                    {/* Hover Tooltip Card */}
+                    <div className="absolute left-4 bottom-[90%] mb-1.5 hidden group-hover/tip:block whitespace-nowrap z-30"
+                      style={{ 
+                        background: '#ffffff', 
+                        border: '1px solid #dee2e6', 
+                        color: '#212529', 
+                        fontSize: 12, 
+                        padding: '10px 14px', 
+                        borderRadius: 8, 
+                        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.15)',
+                        pointerEvents: 'none',
+                        textTransform: 'none',
+                        letterSpacing: 'normal'
+                      }}>
+                      <div style={{ fontWeight: 800, fontSize: 13.5, color: '#1a1a1a' }}>{mapped?.fullName || row.displayName}</div>
+                      <div style={{ color: '#666', fontSize: 11, marginTop: 4, fontFamily: 'monospace' }}>
+                        Roll ID: <span style={{ color: '#1a1a1a', fontWeight: 600 }}>{mapped?.rollId || 'N/A'}</span>
+                      </div>
+                      {mapped?.rating && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, marginTop: 4 }}>
+                          <span style={{ color: '#666' }}>CF Rating:</span>
+                          <CFHandle handle={String(mapped.rating)} rating={mapped.rating} rank={mapped.rank} />
+                          {mapped.rank && (
+                            <span style={{ color: '#666', textTransform: 'capitalize' }}>
+                              ({mapped.rank})
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* CF Rank cell */}
+                  {showCFRankCol && (
+                    <div
+                      style={{
+                        width: 85, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRight: ICPC.colBorder,
+                        fontSize: 13, fontWeight: 700, color: '#444',
+                        background: '#f8f9fa',
+                      }}
+                    >
+                      {officialRanks[row.handle.toLowerCase()] ? `#${officialRanks[row.handle.toLowerCase()]}` : '—'}
+                    </div>
+                  )}
 
                   {/* Score: solved + penalty */}
                   <div
