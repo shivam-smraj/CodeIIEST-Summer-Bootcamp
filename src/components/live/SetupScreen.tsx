@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CodeiiestLogo } from '@/components/ui/codeiiest-logo';
-import type { ContestMode, FilterMode } from './types';
-import { Play, Zap, Users, Clock, Trophy, Radio, ChevronRight, Globe } from 'lucide-react';
+import type { ContestMode, FilterMode, ScoreboardTheme } from './types';
+import { Play, Zap, Users, Clock, Trophy, Activity, ChevronRight, Globe, Radio, Check, Sun, Moon } from 'lucide-react';
 
 interface SetupScreenProps {
   contestId: string;
@@ -20,38 +20,110 @@ interface SetupScreenProps {
   setSpeed: (v: number) => void;
   filter: FilterMode;
   setFilter: (v: FilterMode) => void;
+  theme: ScoreboardTheme;
+  setTheme: (v: ScoreboardTheme) => void;
   error: string | null;
   isLoading: boolean;
   onStart: () => void;
 }
 
-// --- Live pulse dot ---
-function PulseDot({ color = '#ef4444' }: { color?: string }) {
+const FEATURES = [
+  { icon: Activity, label: 'ICPC-Style Leaderboard', desc: 'Animated standings with real-time rank changes', color: '#ef4444' },
+  { icon: Zap, label: 'Replay Engine', desc: 'Re-run any contest at 1× – 200× speed', color: '#f59e0b' },
+  { icon: Clock, label: 'Timeline Control', desc: 'Scrub to any moment in the contest', color: '#a78bfa' },
+  { icon: Users, label: 'Student Filter', desc: 'Isolate registered Bootcamp participants', color: '#34d399' },
+  { icon: Trophy, label: 'First-to-Solve', desc: 'Gold star on every problem\'s first AC', color: '#60a5fa' },
+  { icon: Globe, label: 'CF Rating Colors', desc: 'Authentic Codeforces rank colors per handle', color: '#22d3ee' },
+];
+
+// Mini scoreboard row preview for the theme cards
+function ICPCPreview() {
   return (
-    <span className="relative flex h-2.5 w-2.5">
-      <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
-      <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: color }} />
-    </span>
+    <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', border: '1px solid #dee2e6', fontSize: 10, lineHeight: 1 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', background: '#f8f9fa', borderBottom: '1px solid #dee2e6', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', color: '#666', fontWeight: 700 }}>#</div>
+        <div style={{ flex: 1, color: '#666', fontWeight: 700, paddingLeft: 6 }}>Team</div>
+        <div style={{ width: 24, textAlign: 'center', color: '#666', fontWeight: 700 }}>Σ</div>
+        {['A', 'B', 'C'].map(l => (
+          <div key={l} style={{ width: 20, textAlign: 'center' }}>
+            <div style={{ background: l === 'A' ? '#9e9e9e' : l === 'B' ? '#4caf50' : '#2196f3', color: '#fff', borderRadius: 3, fontSize: 8, fontWeight: 800, padding: '1px 0' }}>{l}</div>
+          </div>
+        ))}
+      </div>
+      {/* Gold row */}
+      <div style={{ display: 'flex', alignItems: 'center', background: '#EEC710', borderBottom: '1px solid #dee2e6', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', fontWeight: 900, fontSize: 11 }}>🥇</div>
+        <div style={{ flex: 1, paddingLeft: 6, fontWeight: 700, color: '#000' }}>Peking Univ</div>
+        <div style={{ width: 24, textAlign: 'center', fontWeight: 900 }}>10</div>
+        <div style={{ width: 20, background: '#1DAA1D', textAlign: 'center', color: '#fff', fontWeight: 700, padding: '4px 0' }}>★</div>
+        <div style={{ width: 20, background: '#60E760', textAlign: 'center', fontWeight: 700, padding: '4px 0' }}>✓</div>
+        <div style={{ width: 20, background: '#E87272', textAlign: 'center', fontWeight: 700, padding: '4px 0' }}>✗</div>
+      </div>
+      {/* Silver row */}
+      <div style={{ display: 'flex', alignItems: 'center', background: '#AAAAAA', borderBottom: '1px solid #dee2e6', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', fontWeight: 900, fontSize: 11 }}>🥈</div>
+        <div style={{ flex: 1, paddingLeft: 6, fontWeight: 700, color: '#000' }}>MIT</div>
+        <div style={{ width: 24, textAlign: 'center', fontWeight: 900 }}>9</div>
+        <div style={{ width: 20, background: '#60E760', textAlign: 'center', fontWeight: 700, padding: '4px 0' }}>✓</div>
+        <div style={{ width: 20, background: '#60E760', textAlign: 'center', fontWeight: 700, padding: '4px 0' }}>✓</div>
+        <div style={{ width: 20, padding: '4px 0' }} />
+      </div>
+      {/* Bronze row */}
+      <div style={{ display: 'flex', alignItems: 'center', background: '#C08E55', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', fontWeight: 900, fontSize: 11 }}>🥉</div>
+        <div style={{ flex: 1, paddingLeft: 6, fontWeight: 700, color: '#000' }}>Oxford</div>
+        <div style={{ width: 24, textAlign: 'center', fontWeight: 900 }}>9</div>
+        <div style={{ width: 20, background: '#60E760', textAlign: 'center', fontWeight: 700, padding: '4px 0' }}>✓</div>
+        <div style={{ width: 20, padding: '4px 0' }} />
+        <div style={{ width: 20, background: '#60E760', textAlign: 'center', fontWeight: 700, padding: '4px 0' }}>✓</div>
+      </div>
+    </div>
   );
 }
 
-const FEATURES = [
-  { icon: Radio, label: 'ICPC-Style Broadcast', desc: 'Animated live scoreboard with real-time rank updates' },
-  { icon: Zap, label: 'Replay Engine', desc: 'Replay any finished contest at 1x–200x speed' },
-  { icon: Clock, label: 'Timeline Control', desc: 'Jump to any point in the contest timeline' },
-  { icon: Users, label: 'Student Filter', desc: 'Show only registered Bootcamp students' },
-  { icon: Trophy, label: 'First-to-Solve', desc: 'Highlighted "First AC" cells on every problem' },
-  { icon: Globe, label: 'CF Rating Colors', desc: 'Authentic Codeforces rank colors per user' },
-];
-
-const FEATURE_COLORS = [
-  'from-red-500 to-rose-600',
-  'from-blue-500 to-indigo-600',
-  'from-amber-500 to-orange-600',
-  'from-emerald-500 to-teal-600',
-  'from-purple-500 to-violet-600',
-  'from-cyan-500 to-sky-600'
-];
+function DarkPreview() {
+  return (
+    <div style={{ background: '#07080a', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', fontSize: 10 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', background: '#0c0d11', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '4px 0', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
+        <div style={{ width: 28, textAlign: 'center' }}>#</div>
+        <div style={{ flex: 1, paddingLeft: 6 }}>Team</div>
+        <div style={{ width: 24, textAlign: 'center' }}>Σ</div>
+        {['A', 'B', 'C'].map(l => (
+          <div key={l} style={{ width: 20, textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>{l}</div>
+        ))}
+      </div>
+      {/* Gold row */}
+      <div style={{ display: 'flex', alignItems: 'center', background: '#0a0b0e', borderLeft: '3px solid #fde047', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', fontSize: 11 }}>🥇</div>
+        <div style={{ flex: 1, paddingLeft: 4, fontWeight: 700, color: '#e2e8f0', fontSize: 10 }}>tourist</div>
+        <div style={{ width: 24, textAlign: 'center', fontWeight: 900, color: '#fff' }}>10</div>
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#064e3b,#022c22)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>★</div>
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#14532d,#0d3b20)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>✓</div>
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#7f1d1d,#450a0a)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>✗</div>
+      </div>
+      {/* Silver row */}
+      <div style={{ display: 'flex', alignItems: 'center', background: '#0c0d11', borderLeft: '3px solid #94a3b8', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', fontSize: 11 }}>🥈</div>
+        <div style={{ flex: 1, paddingLeft: 4, fontWeight: 700, color: '#e2e8f0', fontSize: 10 }}>Radewoosh</div>
+        <div style={{ width: 24, textAlign: 'center', fontWeight: 900, color: '#fff' }}>9</div>
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#14532d,#0d3b20)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>✓</div>
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#14532d,#0d3b20)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>✓</div>
+        <div style={{ width: 20, padding: '3px 0' }} />
+      </div>
+      {/* Bronze row */}
+      <div style={{ display: 'flex', alignItems: 'center', background: '#0a0b0e', borderLeft: '3px solid #cd7c3f', padding: '4px 0' }}>
+        <div style={{ width: 28, textAlign: 'center', fontSize: 11 }}>🥉</div>
+        <div style={{ flex: 1, paddingLeft: 4, fontWeight: 700, color: '#e2e8f0', fontSize: 10 }}>Um_nik</div>
+        <div style={{ width: 24, textAlign: 'center', fontWeight: 900, color: '#fff' }}>9</div>
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#14532d,#0d3b20)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>✓</div>
+        <div style={{ width: 20, padding: '3px 0' }} />
+        <div style={{ width: 20, background: 'linear-gradient(160deg,#14532d,#0d3b20)', textAlign: 'center', color: '#fff', fontSize: 8, padding: '3px 0' }}>✓</div>
+      </div>
+    </div>
+  );
+}
 
 export function SetupScreen({
   contestId, setContestId,
@@ -59,301 +131,303 @@ export function SetupScreen({
   mode, setMode,
   speed, setSpeed,
   filter, setFilter,
+  theme, setTheme,
   error, isLoading,
-  onStart
+  onStart,
 }: SetupScreenProps) {
-
-  const [tick, setTick] = useState(0);
-
-  // Subtle animated ticker in the background
-  useEffect(() => {
-    const t = setInterval(() => setTick(p => p + 1), 1500);
-    return () => clearInterval(t);
-  }, []);
 
   const modeOptions = [
     { label: '⏪  Replay Mode', value: 'replay' },
-    { label: '🔴  Live Mode', value: 'live' }
+    { label: '🔴  Live Mode', value: 'live' },
   ];
-
   const speedOptions = [
-    { label: '1x  (Real-time)', value: 1 },
-    { label: '5x', value: 5 },
-    { label: '10x  (Recommended)', value: 10 },
-    { label: '20x', value: 20 },
-    { label: '60x  (Fast)', value: 60 },
-    { label: '200x  (Ultra)', value: 200 }
+    { label: '1×  (Real-time)', value: 1 },
+    { label: '5×', value: 5 },
+    { label: '10×  (Recommended)', value: 10 },
+    { label: '20×', value: 20 },
+    { label: '60×  (Fast)', value: 60 },
+    { label: '200×  (Ultra)', value: 200 },
   ];
-
   const filterOptions = [
     { label: '🎓  Bootcamp Students Only', value: 'bootcamp' },
-    { label: '🌐  All Contestants', value: 'all' }
+    { label: '🌐  All Contestants', value: 'all' },
   ];
+
+  const btnActive = !isLoading && !!contestId;
 
   return (
     <div className="flex-1 min-h-screen bg-[#07080a] flex items-stretch overflow-hidden font-sans">
 
-      {/* ─── LEFT PANEL: branding + feature list ─── */}
-      <div className="hidden lg:flex flex-col justify-between w-[42%] bg-[#0a0b0e] border-r border-white/[0.05] px-12 py-14 relative overflow-hidden shrink-0">
 
-        {/* Background grid lines */}
-        <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
-            backgroundSize: '40px 40px'
-          }}
-        />
 
-        {/* Ambient glows */}
-        <div className="absolute -top-40 -left-20 w-[600px] h-[600px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[350px] h-[350px] bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-100px] right-[-50px] w-[400px] h-[400px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
+      {/* ══════════════ RIGHT PANEL ══════════════ */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-12 py-10 relative overflow-y-auto bg-[#07080a]">
 
-        {/* Logo + wordmark */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-12">
-            <div className="p-2.5 bg-white/[0.03] rounded-xl border border-white/[0.08] backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-              <CodeiiestLogo size="md" />
-            </div>
-            <div>
-              <p className="text-[11px] text-white/40 tracking-[0.25em] uppercase font-bold">CodeIIEST</p>
-              <p className="text-white font-extrabold text-xl leading-tight tracking-wide">Summer Bootcamp</p>
-            </div>
-          </div>
+        {/* Subtle corner glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none" style={{ background: 'radial-gradient(circle at top right, rgba(220,38,38,0.07) 0%, transparent 60%)' }} />
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-4xl xl:text-5xl font-black text-white leading-tight mb-4 tracking-tight"
-          >
-            ICPC Live<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-amber-500">
-              Leaderboard
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.25 }}
-            className="text-white/50 text-sm xl:text-base leading-relaxed max-w-sm"
-          >
-            Broadcast cinematic, animated standings for any Codeforces contest — live or replay.
-          </motion.p>
-        </div>
-
-        {/* Feature Pills */}
-        <div className="relative z-10 space-y-3.5 my-8">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.label}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 + i * 0.08 }}
-              className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.01] border border-white/[0.03] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-300 group cursor-default"
-            >
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${FEATURE_COLORS[i % FEATURE_COLORS.length]} flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                <f.icon className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-white/90 text-sm font-bold leading-tight group-hover:text-white transition-colors">{f.label}</p>
-                <p className="text-white/40 text-xs mt-0.5 leading-relaxed">{f.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Footer note */}
-        <div className="relative z-10 flex items-center gap-2.5 mt-4">
-          <PulseDot color="#22c55e" />
-          <span className="text-white/40 text-xs font-semibold uppercase tracking-wider">Engine ready</span>
-        </div>
-      </div>
-
-      {/* ─── RIGHT PANEL: config form ─── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-14 py-14 relative overflow-y-auto">
-        
-        {/* Glow effect on the form side */}
-        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-red-950/20 rounded-full blur-[150px] pointer-events-none" />
-
-        {/* Mobile logo header */}
+        {/* Mobile Logo */}
         <div className="lg:hidden flex items-center gap-3 mb-10 self-start">
-          <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/[0.08]">
+          <div className="p-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <CodeiiestLogo size="sm" />
           </div>
           <div>
-            <p className="text-[10px] text-white/40 tracking-[0.2em] uppercase font-bold">CodeIIEST</p>
-            <span className="text-white font-black tracking-wide text-md">Summer Bootcamp</span>
+            <p style={{ color: '#ef4444', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>CodeIIEST</p>
+            <span style={{ color: '#fff', fontSize: 17, fontWeight: 900 }}>Summer Bootcamp</span>
           </div>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-md"
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-[480px]"
         >
-          {/* Card Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-3">
-              <PulseDot color="#ef4444" />
-              <span className="text-red-400 text-[11px] font-extrabold tracking-[0.2em] uppercase">Broadcast Console</span>
+          {/* ── Form card ── */}
+          <div style={{
+            background: 'rgba(255,255,255,0.035)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 22,
+            padding: '32px 32px 28px',
+            boxShadow: '0 28px 70px -16px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.06)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* Top accent line */}
+            <div className="absolute top-0 left-10 right-10 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.5), transparent)' }} />
+
+            {/* Header */}
+            <div className="mb-7">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.14)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                  <Radio style={{ width: 13, height: 13, color: '#ef4444' }} />
+                </div>
+                <span style={{ color: '#ef4444', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.22em' }}>Configure Session</span>
+              </div>
+              <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 5 }}>Session Parameters</h2>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, lineHeight: 1.65 }}>Enter your Codeforces contest details to get started.</p>
             </div>
-            <h2 className="text-3xl font-black text-white tracking-tight">Configure Session</h2>
-            <p className="text-white/40 text-sm mt-2">Enter your Codeforces contest details below to launch the live leaderboard.</p>
-          </div>
 
-          {/* Form Card */}
-          <div className="bg-[#0c0d11]/60 border border-white/[0.05] rounded-2xl p-8 backdrop-blur-xl space-y-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] relative">
-            {/* Inner glowing top accent border */}
-            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-red-500/0 via-red-500/30 to-red-500/0" />
+            <div className="space-y-5">
 
-            {/* Contest ID */}
-            <div className="space-y-2">
-              <Label htmlFor="contestId" className="text-[#94a3b8] text-[13px] font-semibold block">
-                Codeforces Contest ID <span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
+              {/* Contest ID */}
+              <div className="space-y-2">
+                <Label htmlFor="contestId" className="text-[#94a3b8] text-[13px] font-semibold flex items-center gap-1.5">
+                  Contest ID <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="contestId"
+                    value={contestId}
+                    onChange={e => setContestId(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && contestId && onStart()}
+                    placeholder="e.g. 2232"
+                    style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', height: 46, borderRadius: 12, fontSize: 15, fontFamily: 'ui-monospace, monospace', paddingRight: 52 }}
+                    className="placeholder:text-white/20 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:border-red-500/50 transition-all"
+                  />
+                  <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)', fontSize: 11, fontFamily: 'monospace', fontWeight: 700 }}>#ID</span>
+                </div>
+                <p style={{ color: 'rgba(255,255,255,0.24)', fontSize: 11 }}>
+                  codeforces.com/group/<span style={{ color: '#a78bfa' }}>GROUP</span>/contest/<span style={{ color: '#60a5fa' }}>XXXX</span>
+                </p>
+              </div>
+
+              {/* Group ID */}
+              <div className="space-y-2">
+                <Label htmlFor="groupId" className="text-[#94a3b8] text-[13px] font-semibold flex justify-between items-center">
+                  <span>Group ID</span>
+                  <span style={{ color: 'rgba(255,255,255,0.22)', fontSize: 10, fontWeight: 500 }}>optional</span>
+                </Label>
                 <Input
-                  id="contestId"
-                  value={contestId}
-                  onChange={e => setContestId(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && contestId && onStart()}
-                  placeholder="e.g. 2232"
-                  className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/20 pr-12 font-mono text-[14px]"
+                  id="groupId"
+                  value={groupId}
+                  onChange={e => setGroupId(e.target.value)}
+                  placeholder="e.g. P1htAKU3hf"
+                  style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', height: 46, borderRadius: 12, fontSize: 15, fontFamily: 'ui-monospace, monospace' }}
+                  className="placeholder:text-white/20 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:border-red-500/50 transition-all"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 text-xs font-mono font-bold">#ID</span>
               </div>
-              <p className="text-[11px] text-white/30">
-                Group URL: codeforces.com/group/<span className="text-[#a78bfa]">GROUPCODE</span>/contest/<span className="text-[#60a5fa]">XXXXXX</span>
-              </p>
-            </div>
 
-            {/* Group ID */}
-            <div className="space-y-2">
-              <Label htmlFor="groupId" className="text-[#94a3b8] text-[13px] font-semibold flex justify-between">
-                <span>CF Group ID</span>
-                <span className="text-white/20 text-[10px] font-normal normal-case">optional — for private group contests</span>
-              </Label>
-              <Input
-                id="groupId"
-                value={groupId}
-                onChange={e => setGroupId(e.target.value)}
-                placeholder="e.g. P1htAKU3hf"
-                className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/20 font-mono text-[14px]"
-              />
-              <p className="text-[11px] text-white/30">Your default group: <span className="text-[#a78bfa]">P1htAKU3hf</span></p>
-            </div>
+              {/* Divider: Playback */}
+              <div className="flex items-center gap-3 py-0.5">
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.22em' }}>Playback</span>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+              </div>
 
-            {/* Divider */}
-            <div className="flex items-center gap-4">
-              <div className="h-[1px] flex-1 bg-white/[0.05]" />
-              <span className="text-white/20 text-[10px] font-bold uppercase tracking-[0.25em]">Playback Control</span>
-              <div className="h-[1px] flex-1 bg-white/[0.05]" />
-            </div>
+              {/* Mode + Speed */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-[#94a3b8] text-[13px] font-semibold block">Mode</Label>
+                  <Select value={mode} onValueChange={v => setMode(v as ContestMode)}>
+                    <SelectTrigger style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', height: 46, borderRadius: 12 }} className="focus:ring-2 focus:ring-red-500/40 transition-all">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#111115] border-white/[0.1] text-white">
+                      {modeOptions.map(o => <SelectItem key={o.value} value={o.value} className="hover:bg-white/5 cursor-pointer text-white">{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[#94a3b8] text-[13px] font-semibold block">Speed</Label>
+                  <Select value={String(speed)} onValueChange={v => setSpeed(Number(v))} disabled={mode === 'live'}>
+                    <SelectTrigger style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', height: 46, borderRadius: 12, opacity: mode === 'live' ? 0.42 : 1 }} className="focus:ring-2 focus:ring-red-500/40 transition-all">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#111115] border-white/[0.1] text-white">
+                      {speedOptions.map(o => <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-            {/* Mode + Speed */}
-            <div className="grid grid-cols-2 gap-4">
+              {/* Filter */}
               <div className="space-y-2">
-                <Label className="text-[#94a3b8] text-[13px] font-semibold block">Mode</Label>
-                <Select value={mode} onValueChange={v => setMode(v as ContestMode)}>
-                  <SelectTrigger className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus:ring-1 focus:ring-white/20">
-                    <SelectValue placeholder="Select mode" />
+                <Label className="text-[#94a3b8] text-[13px] font-semibold block">Participant Filter</Label>
+                <Select value={filter} onValueChange={v => setFilter(v as FilterMode)}>
+                  <SelectTrigger style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', height: 46, borderRadius: 12 }} className="focus:ring-2 focus:ring-red-500/40 transition-all">
+                    <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#161618] border-white/[0.12] text-white">
-                    {modeOptions.map(o => (
-                      <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">
-                        {o.label}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-[#111115] border-white/[0.1] text-white">
+                    {filterOptions.map(o => <SelectItem key={o.value} value={o.value} className="hover:bg-white/5 cursor-pointer text-white">{o.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="text-[#94a3b8] text-[13px] font-semibold block">Speed</Label>
-                <Select value={String(speed)} onValueChange={v => setSpeed(Number(v))} disabled={mode === 'live'}>
-                  <SelectTrigger className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus:ring-1 focus:ring-white/20">
-                    <SelectValue placeholder="Select speed" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#161618] border-white/[0.12] text-white">
-                    {speedOptions.map(o => (
-                      <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+              {/* ── THEME SELECTOR ── */}
+              <div>
+                {/* Divider */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.22em' }}>Scoreboard Theme</span>
+                  <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {/* ICPC Light Theme Card */}
+                  <motion.button
+                    onClick={() => setTheme('icpc')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      padding: '10px 10px 12px',
+                      borderRadius: 14,
+                      border: theme === 'icpc' ? '2px solid #3b82f6' : '2px solid rgba(255,255,255,0.08)',
+                      background: theme === 'icpc' ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      position: 'relative',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {theme === 'icpc' && (
+                      <div style={{ position: 'absolute', top: 8, right: 8, width: 16, height: 16, borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check style={{ width: 10, height: 10, color: '#fff' }} />
+                      </div>
+                    )}
+                    <div className="mb-2.5">
+                      <ICPCPreview />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Sun style={{ width: 11, height: 11, color: '#f59e0b' }} />
+                      <span style={{ color: theme === 'icpc' ? '#93c5fd' : 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 700 }}>ICPC Light</span>
+                    </div>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, marginTop: 2 }}>Official ICPC style</p>
+                  </motion.button>
+
+                  {/* Dark Theme Card */}
+                  <motion.button
+                    onClick={() => setTheme('dark')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      padding: '10px 10px 12px',
+                      borderRadius: 14,
+                      border: theme === 'dark' ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.08)',
+                      background: theme === 'dark' ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.03)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      position: 'relative',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {theme === 'dark' && (
+                      <div style={{ position: 'absolute', top: 8, right: 8, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check style={{ width: 10, height: 10, color: '#fff' }} />
+                      </div>
+                    )}
+                    <div className="mb-2.5">
+                      <DarkPreview />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Moon style={{ width: 11, height: 11, color: '#a78bfa' }} />
+                      <span style={{ color: theme === 'dark' ? '#fca5a5' : 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 700 }}>Dark Mode</span>
+                    </div>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, marginTop: 2 }}>Premium cinematic look</p>
+                  </motion.button>
+                </div>
               </div>
-            </div>
 
-            {/* Filter */}
-            <div className="space-y-2">
-              <Label className="text-[#94a3b8] text-[13px] font-semibold block">Participant Filter</Label>
-              <Select value={filter} onValueChange={v => setFilter(v as FilterMode)}>
-                <SelectTrigger className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus:ring-1 focus:ring-white/20">
-                  <SelectValue placeholder="Select filter" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#161618] border-white/[0.12] text-white">
-                  {filterOptions.map(o => (
-                    <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Error */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12 }}
+                    className="px-4 py-3 text-red-400 text-[13px] font-medium flex items-start gap-2.5 overflow-hidden"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                    <span>{error}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            {/* Error */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-semibold flex items-start gap-3"
+              {/* Launch button */}
+              <div className="pt-1">
+                <motion.button
+                  onClick={onStart}
+                  disabled={!btnActive}
+                  whileHover={btnActive ? { scale: 1.015 } : {}}
+                  whileTap={btnActive ? { scale: 0.985 } : {}}
+                  style={{
+                    width: '100%', height: 52, borderRadius: 14,
+                    background: btnActive ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 60%, #991b1b 100%)' : 'rgba(255,255,255,0.05)',
+                    color: btnActive ? '#fff' : 'rgba(255,255,255,0.28)',
+                    border: btnActive ? '1px solid rgba(239,68,68,0.45)' : '1px solid rgba(255,255,255,0.07)',
+                    boxShadow: btnActive ? '0 8px 28px -6px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.15)' : 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    fontWeight: 800, fontSize: 14, letterSpacing: '0.06em', textTransform: 'uppercase',
+                    cursor: btnActive ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s ease',
+                    position: 'relative', overflow: 'hidden',
+                  }}
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
-                  <span>{error}</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {btnActive && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 55%)', pointerEvents: 'none' }} />}
+                  {isLoading ? (
+                    <>
+                      <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.25)', borderTopColor: 'rgba(255,255,255,0.8)', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }} />
+                      <span>Initializing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play style={{ width: 16, height: 16, fill: 'currentColor' }} />
+                      <span>Launch Live Scoreboard</span>
+                      <ChevronRight style={{ width: 16, height: 16, opacity: 0.55 }} />
+                    </>
+                  )}
+                </motion.button>
+              </div>
 
-            {/* Start Button */}
-            <motion.button
-              onClick={onStart}
-              disabled={isLoading || !contestId}
-              whileHover={{ scale: 1.015 }}
-              whileTap={{ scale: 0.985 }}
-              className="w-full relative overflow-hidden bg-[#2563eb] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed group text-[13px] tracking-widest uppercase transition-all duration-200 hover:bg-[#1d4ed8] hover:shadow-[0_0_24px_rgba(37,99,235,0.3)] active:scale-95"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  <span>Fetching contest data...</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 fill-current text-white" />
-                  <span>Launch Broadcast</span>
-                  <ChevronRight className="w-4 h-4 absolute right-5 group-hover:translate-x-1.5 transition-transform text-white/70" />
-                </>
-              )}
-            </motion.button>
-          </div>
-
-          {/* Tips as alerts */}
-          <div className="mt-8 space-y-3">
-            <div className="flex items-start gap-3.5 p-3.5 bg-white/[0.01] border border-white/[0.03] rounded-xl text-xs text-white/35 backdrop-blur-sm">
-              <span className="bg-white/[0.04] border border-white/10 text-white/50 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider shrink-0 uppercase">Tip</span>
-              <span className="leading-relaxed">For public Codeforces contests, leave Group ID empty. For private group contests (Bootcamp), enter the Group ID too.</span>
-            </div>
-            <div className="flex items-start gap-3.5 p-3.5 bg-white/[0.01] border border-white/[0.03] rounded-xl text-xs text-white/35 backdrop-blur-sm">
-              <span className="bg-white/[0.04] border border-white/10 text-white/50 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider shrink-0 uppercase">Tip</span>
-              <span className="leading-relaxed">Use Replay + <span className="font-mono text-white/50">10x</span> for the best cinematic experience. Press <span className="font-mono text-white/50">Space</span> to pause mid-broadcast.</span>
             </div>
           </div>
 
+          {/* Keyboard hint */}
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 12, marginTop: 14 }}>
+            Press <kbd style={{ margin: '0 4px', padding: '1px 7px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 5, fontFamily: 'monospace', fontSize: 11 }}>Enter</kbd>
+            to launch · <kbd style={{ margin: '0 4px', padding: '1px 7px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 5, fontFamily: 'monospace', fontSize: 11 }}>Space</kbd> to pause
+          </p>
         </motion.div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Play, Pause, Settings, ChevronDown, Check } from 'lucide-react';
 import type { CFContest } from '@/types/codeforces';
-import type { ContestMode } from './types';
+import type { ContestMode, ScoreboardTheme } from './types';
 
 interface LiveHeaderProps {
   contest: CFContest | null;
@@ -12,9 +12,10 @@ interface LiveHeaderProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
   onSetup: () => void;
+  theme: ScoreboardTheme;
 }
 
-// --- CodeIIEST SVG Logo ---
+// CodeIIEST logo SVG — viewBox 600×495 → ratio 1.212
 function CodeIIESTLogo({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 600 495" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -33,11 +34,13 @@ function CodeIIESTLogo({ className = '' }: { className?: string }) {
 }
 
 export function LiveHeader({
-  contest, mode, speed, setSpeed, currentTime, isPaused, setIsPaused, onSetup
+  contest, mode, speed, setSpeed, currentTime, isPaused, setIsPaused, onSetup, theme,
 }: LiveHeaderProps) {
   const [isSpeedOpen, setIsSpeedOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const speeds = [1, 5, 10, 20, 60, 200];
+  const isLive = mode === 'live';
+  const isDark = theme === 'dark';
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -49,65 +52,161 @@ export function LiveHeader({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const formatTime = (secs: number) => {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = Math.floor(secs % 60);
-    if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  const fmt = (secs: number) => {
+    const s = Math.floor(secs);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+    return `${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
   };
 
   return (
-    <div className="h-16 bg-[#07080a]/80 border-b border-white/[0.06] backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-30 selection:bg-white/10">
-      
-      {/* Left: CodeIIEST Logo + Contest Name */}
-      <div className="flex items-center gap-4">
-        <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/[0.08] shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
-          <CodeIIESTLogo className="w-7 h-5.5" />
+    <div style={{
+      height: 60,
+      background: isDark
+        ? 'rgba(7,8,10,0.94)'
+        : 'linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%)',
+      borderBottom: isDark ? '1px solid rgba(255,255,255,0.07)' : '3px solid #0d47a1',
+      backdropFilter: isDark ? 'blur(24px)' : 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 20px',
+      flexShrink: 0,
+      zIndex: 30,
+      position: 'relative',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
+    }}>
+
+      {/* ── Left: Logo + Contest Name ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+        {/* Logo box — SVG 600:495 ≈ 1.21 → w=44 h=36 */}
+        <div style={{
+          padding: '6px 9px',
+          background: 'rgba(255,255,255,0.15)',
+          borderRadius: 8,
+          border: '1px solid rgba(255,255,255,0.25)',
+          flexShrink: 0,
+          backdropFilter: 'blur(4px)',
+        }}>
+          <CodeIIESTLogo className="w-11 h-9" />
         </div>
-        <div className="h-5 w-px bg-white/[0.08]" />
-        <div className="flex flex-col min-w-0">
-          <p className="text-[9px] text-white/30 tracking-[0.25em] uppercase font-bold leading-none">CodeIIEST Broadcast</p>
-          <h2 className="text-white font-extrabold text-[14px] leading-tight tracking-wide mt-1.5 truncate max-w-[240px] md:max-w-[380px] lg:max-w-[550px]" title={contest?.name || 'Contest'}>
+
+        {/* Separator */}
+        <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+
+        {/* Contest info */}
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: 9,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.24em',
+            lineHeight: 1,
+            marginBottom: 5,
+            fontFamily: 'Roboto, sans-serif',
+          }}>
+            CodeIIEST · Summer Bootcamp 2026
+          </p>
+          <h2
+            style={{
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: 15,
+              lineHeight: 1.1,
+              fontFamily: 'Roboto, sans-serif',
+            }}
+            className="truncate max-w-[180px] md:max-w-[320px] lg:max-w-[500px]"
+            title={contest?.name || 'Contest'}
+          >
             {contest?.name || 'Codeforces Contest'}
           </h2>
         </div>
       </div>
-      
-      {/* Right: Broadcast controls, clock, time status badge */}
-      <div className="flex items-center gap-5">
-        
-        {/* Status Badge */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm">
-          <span className="relative flex h-2 w-2">
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${mode === 'live' ? 'bg-red-500' : 'bg-amber-500'}`} />
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${mode === 'live' ? 'bg-red-500' : 'bg-amber-500'}`} />
+
+      {/* ── Right: Controls ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+
+        {/* Mode pill */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 7,
+          padding: '5px 13px',
+          borderRadius: 999,
+          background: isLive ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)',
+          border: `1px solid ${isLive ? 'rgba(255,100,100,0.6)' : 'rgba(245,200,11,0.6)'}`,
+        }}>
+          <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
+            <span style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              background: isLive ? '#ff6b6b' : '#fcd34d',
+              opacity: 0.8, animation: 'ping 1.2s cubic-bezier(0,0,0.2,1) infinite',
+            }} />
+            <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8, borderRadius: '50%', background: isLive ? '#ff6b6b' : '#fcd34d' }} />
           </span>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/60">
-            {mode === 'live' ? 'Live Standing' : 'Contest Replay'}
+          <span style={{
+            color: isLive ? '#ffb3b3' : '#fef3c7',
+            fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em',
+            fontFamily: 'Roboto, sans-serif',
+          }}>
+            {isLive ? 'Live' : 'Replay'}
           </span>
         </div>
 
-        {/* Speed Selector Dropdown for Replay */}
+        {/* Speed selector (replay only) */}
         {mode === 'replay' && (
-          <div className="relative" ref={dropdownRef}>
-            <button 
+          <div style={{ position: 'relative' }} ref={dropdownRef}>
+            <button
               onClick={() => setIsSpeedOpen(!isSpeedOpen)}
-              className="flex items-center gap-2 text-white/80 bg-white/[0.03] hover:bg-white/[0.06] px-3 py-1.5 rounded-lg border border-white/[0.06] text-xs font-semibold tracking-wide transition-all"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '6px 12px',
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                borderRadius: 8,
+                color: '#fff',
+                fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'Roboto, sans-serif',
+              }}
             >
-              <span>Speed: {speed}x</span> 
-              <ChevronDown className={`w-3.5 h-3.5 text-white/45 transition-transform duration-200 ${isSpeedOpen ? 'rotate-180' : ''}`} />
+              <span>{speed}×</span>
+              <ChevronDown style={{
+                width: 12, height: 12, color: 'rgba(255,255,255,0.6)',
+                transform: isSpeedOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.2s',
+              }} />
             </button>
+
             {isSpeedOpen && (
-              <div className="absolute top-[calc(100%+6px)] right-0 w-36 bg-[#0e0f12] border border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.6)] rounded-xl py-1.5 z-50 backdrop-blur-xl">
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 6px)', right: 0, width: 150,
+                background: '#fff',
+                border: '1px solid #dee2e6',
+                borderRadius: 10, padding: '4px',
+                zIndex: 50,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                fontFamily: 'Roboto, sans-serif',
+              }}>
                 {speeds.map(s => (
                   <button
                     key={s}
                     onClick={() => { setSpeed(s); setIsSpeedOpen(false); }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-white/70 hover:text-white hover:bg-white/[0.04] flex items-center justify-between transition-colors"
+                    style={{
+                      width: '100%', textAlign: 'left',
+                      padding: '8px 12px',
+                      fontSize: 13, fontWeight: speed === s ? 700 : 400,
+                      color: speed === s ? '#1a237e' : '#333',
+                      background: speed === s ? '#e8eaf6' : 'transparent',
+                      border: 'none', borderRadius: 7, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}
                   >
-                    <span>{s}x {s === 10 && <span className="text-[9px] text-white/30 font-normal ml-1">(Rec)</span>}</span> 
-                    {speed === s && <Check className="w-3.5 h-3.5 text-red-400" />}
+                    <span>
+                      {s}×
+                      {s === 10 && <span style={{ color: '#9e9e9e', fontSize: 11, fontWeight: 400, marginLeft: 6 }}>rec</span>}
+                    </span>
+                    {speed === s && <Check style={{ width: 13, height: 13, color: '#1a237e' }} />}
                   </button>
                 ))}
               </div>
@@ -115,31 +214,65 @@ export function LiveHeader({
           </div>
         )}
 
-        {/* Timeline Clock */}
-        <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.04] px-3 py-1.5 rounded-lg">
-          <span className="text-white/30 text-[10px] font-bold uppercase tracking-wider">Elapsed</span>
-          <span className="text-white font-mono text-base font-bold tabular-nums">
-            {formatTime(currentTime)}
+        {/* Clock — centrepiece */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '6px 16px',
+          background: 'rgba(0,0,0,0.25)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: 8,
+        }}>
+          <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', fontFamily: 'Roboto, sans-serif' }}>
+            Time
           </span>
+          <span style={{ color: '#fff', fontFamily: 'ui-monospace, monospace', fontSize: 20, fontWeight: 900, letterSpacing: '0.04em', lineHeight: 1 }}>
+            {fmt(currentTime)}
+          </span>
+          {contest?.durationSeconds ? (
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'ui-monospace, monospace', fontSize: 13, fontWeight: 600 }}>
+              / {fmt(contest.durationSeconds)}
+            </span>
+          ) : null}
         </div>
-        
-        {/* Play/Pause & Settings Buttons */}
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setIsPaused(!isPaused)}
-            title={isPaused ? 'Resume Broadcast' : 'Pause Broadcast'}
-            className="w-9 h-9 flex items-center justify-center text-white/80 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] active:scale-95 border border-white/[0.06] rounded-lg transition-all"
-          >
-            {isPaused ? <Play className="w-4 h-4 fill-current text-white/80" /> : <Pause className="w-4 h-4 fill-current text-white/80" />}
-          </button>
-          <button 
-            onClick={onSetup}
-            title="Exit to Setup Console"
-            className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white/80 bg-white/[0.03] hover:bg-white/[0.06] active:scale-95 border border-white/[0.06] rounded-lg transition-all"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-        </div>
+
+        {/* Play/Pause */}
+        <button
+          onClick={() => setIsPaused(!isPaused)}
+          title={isPaused ? 'Resume' : 'Pause'}
+          style={{
+            width: 38, height: 38,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: isPaused ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.12)',
+            border: isPaused ? '1px solid rgba(255,100,100,0.6)' : '1px solid rgba(255,255,255,0.25)',
+            borderRadius: 8,
+            color: '#fff',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+        >
+          {isPaused
+            ? <Play  style={{ width: 15, height: 15, fill: 'currentColor' }} />
+            : <Pause style={{ width: 15, height: 15, fill: 'currentColor' }} />
+          }
+        </button>
+
+        {/* Settings */}
+        <button
+          onClick={onSetup}
+          title="Back to Setup"
+          style={{
+            width: 38, height: 38,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            borderRadius: 8,
+            color: 'rgba(255,255,255,0.6)',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+        >
+          <Settings style={{ width: 14, height: 14 }} />
+        </button>
       </div>
     </div>
   );

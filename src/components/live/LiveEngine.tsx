@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { CFContest, CFProblem, CFSubmission } from '@/types/codeforces';
-import type { AppMode, ContestMode, FilterMode, UserMapInfo, ScoreRow } from './types';
+import type { AppMode, ContestMode, FilterMode, ScoreboardTheme, UserMapInfo, ScoreRow } from './types';
 import { SetupScreen } from './SetupScreen';
 import { LiveHeader } from './LiveHeader';
 import { LiveTable } from './LiveTable';
@@ -15,7 +15,8 @@ export default function LiveEngine() {
   const [mode, setMode] = useState<ContestMode>('replay');
   const [speed, setSpeed] = useState<number>(10);
   const [filter, setFilter] = useState<FilterMode>('bootcamp');
-  
+  const [theme, setTheme] = useState<ScoreboardTheme>('icpc');
+
   const [contest, setContest] = useState<CFContest | null>(null);
   const [problems, setProblems] = useState<CFProblem[]>([]);
   const [userMap, setUserMap] = useState<Record<string, UserMapInfo>>({});
@@ -173,14 +174,20 @@ export default function LiveEngine() {
         mode={mode} setMode={setMode}
         speed={speed} setSpeed={setSpeed}
         filter={filter} setFilter={setFilter}
+        theme={theme} setTheme={setTheme}
         error={error} isLoading={isLoading}
         onStart={fetchInit}
       />
     );
   }
 
+  const isDark = theme === 'dark';
+
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0d0d0d] font-sans selection:bg-white/20">
+    <div
+      className="flex-1 flex flex-col h-screen overflow-hidden font-sans"
+      style={{ background: isDark ? '#07080a' : '#f0f2f5' }}
+    >
       <LiveHeader 
         contest={contest}
         mode={mode}
@@ -189,11 +196,22 @@ export default function LiveEngine() {
         currentTime={currentTime}
         isPaused={isPaused}
         setIsPaused={setIsPaused}
+        theme={theme}
         onSetup={() => { setAppMode('setup'); setSubmissions([]); }}
       />
 
+      {/* Progress bar (replay mode) */}
       {mode === 'replay' && contest?.durationSeconds && (
-        <div className="h-1.5 w-full bg-white/[0.04] relative cursor-pointer group shrink-0 transition-all duration-300 hover:h-2.5">
+        <div
+          className="relative shrink-0 cursor-pointer group"
+          style={{
+            height: 4,
+            background: isDark ? 'rgba(255,255,255,0.06)' : '#dee2e6',
+            transition: 'height 0.2s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.height = '8px')}
+          onMouseLeave={e => (e.currentTarget.style.height = '4px')}
+        >
           <input 
             type="range"
             min={0}
@@ -203,10 +221,25 @@ export default function LiveEngine() {
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
           />
           <div 
-            className="h-full bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 transition-all relative"
-            style={{ width: `${(currentTime / contest.durationSeconds) * 100}%` }}
+            style={{
+              height: '100%',
+              background: isDark
+                ? 'linear-gradient(90deg, #dc2626, #f97316)'
+                : 'linear-gradient(90deg, #1a237e, #1565c0)',
+              width: `${(currentTime / contest.durationSeconds) * 100}%`,
+              transition: 'width 0.1s linear',
+              position: 'relative',
+            }}
           >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none translate-x-1/2 z-10" />
+            <div
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+              style={{
+                width: 14, height: 14,
+                background: '#fff',
+                border: isDark ? '2px solid #dc2626' : '2px solid #1a237e',
+                boxShadow: isDark ? '0 0 10px rgba(220,38,38,0.7)' : '0 0 10px rgba(26,35,126,0.5)',
+              }}
+            />
           </div>
         </div>
       )}
@@ -216,12 +249,14 @@ export default function LiveEngine() {
           scoreboard={scoreboard} 
           problems={problems} 
           firstSolves={firstSolves} 
-          userMap={userMap} 
+          userMap={userMap}
+          theme={theme}
         />
         <LiveQueue 
           recentEvents={recentEvents} 
           userMap={userMap} 
-          scoreboard={scoreboard} 
+          scoreboard={scoreboard}
+          theme={theme}
         />
       </div>
     </div>

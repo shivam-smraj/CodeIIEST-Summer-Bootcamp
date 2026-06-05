@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CFProblem } from '@/types/codeforces';
-import type { ScoreRow, UserMapInfo } from './types';
+import type { ScoreRow, UserMapInfo, ScoreboardTheme } from './types';
 import { CFHandle } from './CFHandle';
 
 interface LiveTableProps {
@@ -9,173 +9,381 @@ interface LiveTableProps {
   problems: CFProblem[];
   firstSolves: Record<string, number>;
   userMap: Record<string, UserMapInfo>;
+  theme: ScoreboardTheme;
 }
 
-// Premium color palettes
-const ROW_BG_DARK = '#0a0b0e';
-const ROW_BG_LIGHT = '#0e0f13';
-const BORDER_COLOR = 'rgba(255,255,255,0.03)';
+// ICPC-exact colors (from DOMjudge / ICPC World Finals live scoreboards)
+const ICPC = {
+  // Problem cell backgrounds
+  firstSolve:  '#1DAA1D', // darker green — "score_first"
+  accepted:    '#60E760', // bright green  — "score_correct"
+  wrong:       '#E87272', // pink-red      — "score_incorrect"
+  pending:     '#6666FF', // blue          — "score_pending"
 
-export function LiveTable({ scoreboard, problems, firstSolves, userMap }: LiveTableProps) {
-  
-  const getRankBadgeStyle = (index: number) => {
-    if (index === 0) {
-      return {
-        background: 'linear-gradient(135deg, #fde047 0%, #eab308 50%, #ca8a04 100%)',
-        color: '#000000',
-        textShadow: '0 1px 1px rgba(255,255,255,0.4)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3)'
-      };
-    }
-    if (index === 1) {
-      return {
-        background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
-        color: '#000000',
-        textShadow: '0 1px 1px rgba(255,255,255,0.4)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3)'
-      };
-    }
-    if (index === 2) {
-      return {
-        background: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)',
-        color: '#ffffff',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3)'
-      };
-    }
-    return {
-      background: 'transparent',
-      color: '#ffffff'
-    };
-  };
+  // Medal rank cell backgrounds
+  gold:        '#EEC710', // gold   ranks 1–4
+  silver:      '#AAAAAA', // silver ranks 5–8
+  bronze:      '#C08E55', // bronze ranks 9–12
+
+  // Table structure
+  rowBorder:   '1px solid #dee2e6',
+  colBorder:   '1px solid silver',
+  headerBg:    '#f8f9fa',
+  bodyBg:      '#ffffff',
+  rowBg:       '#ffffff',
+};
+
+// Problem header badge colors — same sequence as ICPC (per-problem letter hue)
+const PROB_COLORS = [
+  '#9e9e9e', '#4caf50', '#2196f3', '#ffeb3b', '#ff5722',
+  '#9c27b0', '#795548', '#e91e63', '#3f51b5', '#ff9800',
+  '#00bcd4', '#8bc34a',
+];
+
+const ROW_H = 46;
+
+function getMedalStyle(rank: number): React.CSSProperties {
+  if (rank <= 4)  return { background: ICPC.gold,   color: '#000', fontWeight: 900 };
+  if (rank <= 8)  return { background: ICPC.silver, color: '#000', fontWeight: 900 };
+  if (rank <= 12) return { background: ICPC.bronze, color: '#000', fontWeight: 900 };
+  return { background: 'transparent', color: '#555', fontWeight: 600 };
+}
+
+function MedalIcon({ rank }: { rank: number }) {
+  if (rank <= 4)  return <span style={{ fontSize: 16 }}>🥇</span>;
+  if (rank <= 8)  return <span style={{ fontSize: 16 }}>🥈</span>;
+  if (rank <= 12) return <span style={{ fontSize: 16 }}>🥉</span>;
+  return null;
+}
+
+export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }: LiveTableProps) {
+  const isDark = theme === 'dark';
+
+  // ─── DARK THEME ───────────────────────────────────────────────────
+  if (isDark) {
+    const ROW_H_DARK = 52;
+    const RANK_ACCENT: Record<number, string> = { 0: '#fde047', 1: '#94a3b8', 2: '#cd7c3f' };
+    const MEDAL_DARK: Record<number, string> = { 0: '🥇', 1: '🥈', 2: '🥉' };
+
+    return (
+      <div className="flex-1 overflow-auto bg-[#07080a] relative scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <div className="min-w-max w-full">
+          {/* Dark header */}
+          <div className="flex items-stretch text-white/40 text-[10.5px] font-bold uppercase tracking-wider sticky top-0 z-20"
+            style={{ background: 'rgba(10,11,14,0.97)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+            <div style={{ width: 56, padding: '14px 0', textAlign: 'center' }}>#</div>
+            <div style={{ flex: 1, minWidth: 220, padding: '14px 20px' }}>Contestant</div>
+            <div style={{ width: 64, padding: '14px 0', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>Σ</div>
+            <div style={{ width: 80, padding: '14px 0', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>Pen.</div>
+            <div style={{ display: 'flex', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>
+              {problems.map(p => (
+                <div key={p.index} style={{ width: 58, padding: '14px 0', textAlign: 'center', position: 'relative', cursor: 'help' }} className="group/tip hover:text-white transition-colors">
+                  {p.index}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tip:block whitespace-nowrap"
+                    style={{ background: '#0e0f13', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '5px 10px', borderRadius: 9, boxShadow: '0 8px 24px rgba(0,0,0,0.7)', zIndex: 60, textTransform: 'none', letterSpacing: '0.02em' }}>
+                    {p.index}. {p.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <AnimatePresence>
+              {scoreboard.map((row, index) => {
+                const isEven = index % 2 === 0;
+                const isTop3 = index < 3;
+                const accent = RANK_ACCENT[index];
+                const mapped = userMap[row.handle.toLowerCase()];
+                return (
+                  <motion.div key={row.handle} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 130, damping: 20 }}
+                    className="flex items-stretch absolute w-full group"
+                    style={{ top: index * ROW_H_DARK, height: ROW_H_DARK, backgroundColor: isEven ? '#0a0b0e' : '#0c0d11', borderBottom: '1px solid rgba(255,255,255,0.03)', borderLeft: isTop3 ? `3px solid ${accent}` : '3px solid transparent' }}>
+                    {/* Rank */}
+                    <div style={{ width: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isTop3 ? 18 : 12, fontWeight: 800, color: isTop3 ? accent : 'rgba(255,255,255,0.3)', flexShrink: 0 }}>
+                      {isTop3 ? MEDAL_DARK[index] : index + 1}
+                    </div>
+                    {/* Name */}
+                    <div className="transition-colors group-hover:bg-white/[0.015]" style={{ flex: 1, minWidth: 220, display: 'flex', alignItems: 'center', padding: '0 20px', overflow: 'hidden', gap: 8 }}>
+                      <div style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <CFHandle handle={row.displayName} rating={mapped?.rating} rank={mapped?.rank} />
+                      </div>
+                      {isTop3 && (
+                        <div style={{ padding: '1px 7px', borderRadius: 999, background: `${accent}18`, border: `1px solid ${accent}35`, color: accent, fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>#{index + 1}</div>
+                      )}
+                    </div>
+                    {/* Solved */}
+                    <div className="transition-colors group-hover:bg-white/[0.015]" style={{ width: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(255,255,255,0.03)', fontSize: 15, fontWeight: 900, color: row.points > 0 ? '#fff' : 'rgba(255,255,255,0.2)' }}>{row.points}</div>
+                    {/* Penalty */}
+                    <div className="transition-colors group-hover:bg-white/[0.015]" style={{ width: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid rgba(255,255,255,0.03)', fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.35)' }}>{row.penalty || '—'}</div>
+                    {/* Problems */}
+                    <div style={{ display: 'flex', borderLeft: '1px solid rgba(255,255,255,0.03)' }}>
+                      {problems.map((p, pi) => {
+                        const pr = row.problemResults[p.index];
+                        if (!pr) return <div key={p.index} className="transition-colors group-hover:bg-white/[0.01]" style={{ width: 58, borderLeft: '1px solid rgba(255,255,255,0.025)' }} />;
+                        if (pr.isAC) {
+                          const isFirst = pr.timeSeconds === firstSolves[p.index];
+                          return (
+                            <div key={p.index} style={{ width: 58, borderLeft: '1px solid rgba(255,255,255,0.025)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: isFirst ? 'linear-gradient(160deg,#064e3b,#022c22)' : 'linear-gradient(160deg,#14532d,#0d3b20)', boxShadow: isFirst ? 'inset 0 0 0 1px rgba(253,224,71,0.2)' : 'inset 0 0 0 1px rgba(255,255,255,0.04)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                                <span style={{ fontWeight: 800, fontSize: 11, color: '#fff' }}>+{pr.attempts > 0 ? pr.attempts : ''}</span>
+                                {isFirst && <svg className="w-3 h-3 text-yellow-300 fill-current animate-pulse" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>}
+                              </div>
+                              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.65)', fontWeight: 600, marginTop: 1 }}>{Math.floor((pr.timeSeconds || 0) / 60)}m</span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={p.index} style={{ width: 58, borderLeft: '1px solid rgba(255,255,255,0.025)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(160deg,#7f1d1d,#450a0a)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)' }}>
+                            <span style={{ fontWeight: 800, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>-{pr.attempts}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+          <div style={{ height: scoreboard.length * ROW_H_DARK }} />
+          {scoreboard.length === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', gap: 16, color: 'rgba(255,255,255,0.25)' }}>
+              <div style={{ position: 'relative', width: 48, height: 48 }}>
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.06)' }} />
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#ef4444', animation: 'spin 1s linear infinite' }} />
+              </div>
+              <p style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)' }}>Waiting for submissions</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
 
   return (
-    <div className="flex-1 overflow-auto bg-[#07080a] relative scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-      <div className="min-w-max w-full">
-        
-        {/* Table Header */}
-        <div className="flex items-stretch bg-[#0c0d11] text-white/50 text-[11px] font-bold uppercase tracking-wider sticky top-0 z-20 shadow-[0_4px_16px_rgba(0,0,0,0.4)] border-b border-white/[0.05]">
-          <div className="w-12 py-4 text-center">#</div>
-          <div className="flex-1 min-w-[220px] py-4 px-5">Contestant</div>
-          <div className="w-16 py-4 text-center border-l border-white/[0.03]">Σ</div>
-          <div className="w-20 py-4 text-center border-l border-white/[0.03]">Penalty</div>
-          <div className="flex border-l border-white/[0.03]">
-            {problems.map(p => (
-              <div key={p.index} className="w-14 py-4 text-center relative group/tooltip cursor-help hover:text-white transition-colors">
-                {p.index}
-                {/* Custom Tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/tooltip:block bg-[#0e0f13] border border-white/[0.08] text-white text-[10px] px-2.5 py-1.5 rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.6)] whitespace-nowrap z-50 font-semibold tracking-wide normal-case">
-                  {p.index}. {p.name}
-                </div>
-              </div>
-            ))}
+    <div
+      style={{ flex: 1, overflow: 'auto', background: ICPC.bodyBg, fontFamily: 'Roboto, sans-serif' }}
+      className="scrollbar-thin scrollbar-thumb-black/10 scrollbar-track-transparent"
+    >
+      <div style={{ minWidth: 'max-content', width: '100%' }}>
+
+        {/* ── Sticky Header ── */}
+        <div
+          style={{
+            display: 'flex', alignItems: 'stretch',
+            background: ICPC.headerBg,
+            borderBottom: '2px solid #dee2e6',
+            position: 'sticky', top: 0, zIndex: 20,
+          }}
+        >
+          {/* Rank */}
+          <div style={{ width: 70, padding: '12px 8px', textAlign: 'center', fontWeight: 700, fontSize: 12, color: '#333', textTransform: 'uppercase', letterSpacing: '0.08em', borderRight: ICPC.colBorder, flexShrink: 0 }}>
+            Rank
           </div>
+          {/* Team */}
+          <div style={{ flex: 1, minWidth: 260, padding: '12px 20px', fontWeight: 700, fontSize: 12, color: '#333', textTransform: 'uppercase', letterSpacing: '0.08em', borderRight: ICPC.colBorder }}>
+            Team
+          </div>
+          {/* Score */}
+          <div style={{ width: 110, padding: '12px 8px', textAlign: 'center', fontWeight: 700, fontSize: 12, color: '#333', textTransform: 'uppercase', letterSpacing: '0.08em', borderRight: ICPC.colBorder, flexShrink: 0 }}>
+            Score
+          </div>
+          {/* Problems */}
+          {problems.map((p, i) => (
+            <div
+              key={p.index}
+              style={{
+                width: 65, padding: '6px 0',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRight: i < problems.length - 1 ? ICPC.colBorder : 'none',
+                flexShrink: 0,
+              }}
+            >
+              <div style={{
+                width: 32, height: 32, borderRadius: 6,
+                background: PROB_COLORS[i % PROB_COLORS.length],
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontWeight: 800, fontSize: 13,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+              }}>
+                {p.index}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Table Body */}
-        <div className="relative">
+        {/* ── Body ── */}
+        <div style={{ position: 'relative' }}>
           <AnimatePresence>
             {scoreboard.map((row, index) => {
-              const isEven = index % 2 === 0;
-              const rowBg = isEven ? ROW_BG_LIGHT : ROW_BG_DARK;
+              const rank   = index + 1;
               const mapped = userMap[row.handle.toLowerCase()];
-              
+              const medalStyle = getMedalStyle(rank);
+
               return (
                 <motion.div
                   key={row.handle}
                   layout
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 140, damping: 20 }}
-                  className="flex items-stretch absolute w-full border-b group"
-                  style={{ top: index * 40, height: 40, backgroundColor: rowBg, borderColor: BORDER_COLOR }}
+                  transition={{ type: 'spring', stiffness: 140, damping: 22 }}
+                  style={{
+                    position: 'absolute', top: index * ROW_H, width: '100%',
+                    display: 'flex', alignItems: 'stretch',
+                    height: ROW_H,
+                    background: ICPC.rowBg,
+                    borderBottom: ICPC.rowBorder,
+                  }}
+                  className="group hover:bg-[#f0f4ff] transition-colors"
                 >
-                  {/* Rank Cell */}
-                  <div 
-                    className="w-12 flex items-center justify-center font-bold text-xs"
-                    style={getRankBadgeStyle(index)}
+
+                  {/* Rank cell */}
+                  <div
+                    style={{
+                      width: 70, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      gap: 4,
+                      borderRight: ICPC.colBorder,
+                      ...medalStyle,
+                    }}
                   >
-                    {index + 1}
-                  </div>
-                  
-                  {/* Display Name */}
-                  <div className="flex-1 min-w-[220px] flex items-center px-5 overflow-hidden transition-colors group-hover:bg-white/[0.01]">
-                    <div className="text-[13px] truncate">
-                      <CFHandle 
-                        handle={row.displayName} 
-                        rating={mapped?.rating} 
-                        rank={mapped?.rank} 
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Solved Count */}
-                  <div className="w-16 flex items-center justify-center font-black text-white text-[14px] border-l border-white/[0.02] group-hover:bg-white/[0.01]">
-                    {row.points}
+                    <MedalIcon rank={rank} />
+                    <span style={{ fontSize: 14, lineHeight: 1 }}>{rank}</span>
                   </div>
 
-                  {/* Penalty */}
-                  <div className="w-20 flex items-center justify-center font-mono text-white/40 text-xs border-l border-white/[0.02] group-hover:bg-white/[0.01]">
-                    {row.penalty}
+                  {/* Team name + university */}
+                  <div
+                    style={{
+                      flex: 1, minWidth: 260,
+                      display: 'flex', alignItems: 'center',
+                      padding: '0 16px',
+                      borderRight: ICPC.colBorder,
+                      overflow: 'hidden', gap: 10,
+                    }}
+                  >
+                    <div style={{ overflow: 'hidden' }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <CFHandle handle={row.displayName} rating={mapped?.rating} rank={mapped?.rank} />
+                      </div>
+                      {mapped?.university && (
+                        <div style={{ fontSize: 11, color: '#888', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {mapped.university}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  
-                  {/* Problem Results */}
-                  <div className="flex border-l border-white/[0.02]">
-                    {problems.map(p => {
-                      const pr = row.problemResults[p.index];
-                      
-                      if (!pr) {
-                        return <div key={p.index} className="w-14 border-l border-white/[0.02] group-hover:bg-white/[0.01]" />;
-                      }
-                      
-                      if (pr.isAC) {
-                        const isFirst = pr.timeSeconds === firstSolves[p.index];
-                        return (
-                          <div 
-                            key={p.index} 
-                            className="w-14 border-l border-white/[0.02] flex flex-col items-center justify-center text-white"
-                            style={{ 
-                              background: isFirst 
-                                ? 'linear-gradient(135deg, #0f5132 0%, #003c00 100%)' 
-                                : 'linear-gradient(135deg, #198754 0%, #146c43 100%)',
-                              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                              border: isFirst ? '1px solid rgba(234,179,8,0.2)' : 'none'
-                            }}
-                          >
-                            <div className="flex items-center gap-0.5">
-                              <span className="font-extrabold text-[11px]">+{pr.attempts > 0 ? pr.attempts : ''}</span>
-                              {isFirst && (
-                                <svg className="w-2.5 h-2.5 text-yellow-400 fill-current shrink-0 animate-pulse" viewBox="0 0 24 24">
-                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                                </svg>
-                              )}
-                            </div>
-                            <span className="text-[9px] text-white/75 font-semibold mt-0.5">{Math.floor((pr.timeSeconds || 0)/60)}</span>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div 
-                            key={p.index} 
-                            className="w-14 border-l border-white/[0.02] flex flex-col items-center justify-center text-white"
-                            style={{ 
-                              background: 'linear-gradient(135deg, #a71d1d 0%, #821010 100%)',
-                              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                            }}
-                          >
-                            <span className="font-extrabold text-[11px] text-white/90">-{pr.attempts}</span>
-                          </div>
-                        );
-                      }
-                    })}
+
+                  {/* Score: solved + penalty */}
+                  <div
+                    style={{
+                      width: 110, flexShrink: 0,
+                      display: 'flex', flexDirection: 'column',
+                      alignItems: 'center', justifyContent: 'center',
+                      borderRight: ICPC.colBorder,
+                      gap: 1,
+                    }}
+                  >
+                    <span style={{ fontSize: 18, fontWeight: 900, color: '#111', lineHeight: 1 }}>{row.points}</span>
+                    <span style={{ fontSize: 11, color: '#888', fontFamily: 'ui-monospace, monospace' }}>{row.penalty} pen</span>
                   </div>
+
+                  {/* Problem cells */}
+                  {problems.map((p, pi) => {
+                    const pr = row.problemResults[p.index];
+
+                    if (!pr) {
+                      return (
+                        <div
+                          key={p.index}
+                          style={{
+                            width: 65, flexShrink: 0,
+                            borderRight: pi < problems.length - 1 ? ICPC.colBorder : 'none',
+                          }}
+                        />
+                      );
+                    }
+
+                    if (pr.isAC) {
+                      const isFirst = pr.timeSeconds === firstSolves[p.index];
+                      const bg = isFirst ? ICPC.firstSolve : ICPC.accepted;
+                      const mins = Math.floor((pr.timeSeconds || 0) / 60);
+                      return (
+                        <div
+                          key={p.index}
+                          style={{
+                            width: 65, flexShrink: 0,
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center',
+                            background: bg,
+                            borderRight: pi < problems.length - 1 ? ICPC.colBorder : 'none',
+                            gap: 1,
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: isFirst ? '#fff' : '#000', lineHeight: 1 }}>{mins}</span>
+                            {isFirst && (
+                              <svg style={{ width: 9, height: 9, fill: '#fff', flexShrink: 0 }} viewBox="0 0 24 24">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                            )}
+                          </div>
+                          <span style={{ fontSize: 10, color: isFirst ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.6)', lineHeight: 1 }}>
+                            {pr.attempts > 1 ? `${pr.attempts} tries` : '1 try'}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    // Wrong answer
+                    const mins = pr.timeSeconds ? Math.floor(pr.timeSeconds / 60) : null;
+                    return (
+                      <div
+                        key={p.index}
+                        style={{
+                          width: 65, flexShrink: 0,
+                          display: 'flex', flexDirection: 'column',
+                          alignItems: 'center', justifyContent: 'center',
+                          background: ICPC.wrong,
+                          borderRight: pi < problems.length - 1 ? ICPC.colBorder : 'none',
+                          gap: 1,
+                        }}
+                      >
+                        {mins !== null && (
+                          <span style={{ fontSize: 14, fontWeight: 800, color: '#000', lineHeight: 1 }}>{mins}</span>
+                        )}
+                        <span style={{ fontSize: 10, color: 'rgba(0,0,0,0.65)', lineHeight: 1 }}>
+                          {pr.attempts > 0 ? `${pr.attempts} ${pr.attempts === 1 ? 'try' : 'tries'}` : '—'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </motion.div>
               );
             })}
           </AnimatePresence>
         </div>
-        
-        {/* Spacer for absolute positioned rows */}
-        <div style={{ height: scoreboard.length * 40 }} />
+
+        {/* Spacer */}
+        <div style={{ height: scoreboard.length * ROW_H }} />
+
+        {/* Empty state */}
+        {scoreboard.length === 0 && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '80px 24px', gap: 16,
+            color: '#999', background: '#fff',
+          }}>
+            <div style={{ position: 'relative', width: 40, height: 40 }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid #eee' }} />
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid transparent', borderTopColor: '#1DAA1D', animation: 'spin 1s linear infinite' }} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#666', marginBottom: 4 }}>Waiting for submissions</p>
+              <p style={{ fontSize: 12, color: '#aaa' }}>Scoreboard will update automatically</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

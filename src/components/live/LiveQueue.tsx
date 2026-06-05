@@ -1,142 +1,218 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CFSubmission } from '@/types/codeforces';
-import type { UserMapInfo, ScoreRow } from './types';
+import type { UserMapInfo, ScoreRow, ScoreboardTheme } from './types';
 import { CFHandle } from './CFHandle';
 
 interface LiveQueueProps {
   recentEvents: CFSubmission[];
   userMap: Record<string, UserMapInfo>;
   scoreboard: ScoreRow[];
+  theme: ScoreboardTheme;
 }
 
-export function LiveQueue({ recentEvents, userMap, scoreboard }: LiveQueueProps) {
-  
+// ICPC-exact verdict colors (from DOMjudge)
+const VERDICT: Record<string, { bg: string; label: string; short: string; textColor: string }> = {
+  OK:                   { bg: '#60E760', label: 'Accepted',     short: 'AC',  textColor: '#000' },
+  WRONG_ANSWER:         { bg: '#E87272', label: 'Wrong Answer', short: 'WA',  textColor: '#000' },
+  TIME_LIMIT_EXCEEDED:  { bg: '#ff9800', label: 'Time Limit',   short: 'TLE', textColor: '#000' },
+  RUNTIME_ERROR:        { bg: '#9c27b0', label: 'Runtime Err',  short: 'RE',  textColor: '#fff' },
+  MEMORY_LIMIT_EXCEEDED:{ bg: '#7b1fa2', label: 'Memory Limit', short: 'MLE', textColor: '#fff' },
+  COMPILATION_ERROR:    { bg: '#607d8b', label: 'Compile Err',  short: 'CE',  textColor: '#fff' },
+  PENDING:              { bg: '#6666FF', label: 'Pending',      short: '...',  textColor: '#fff' },
+};
+
+function fmtTime(secs: number) {
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+export function LiveQueue({ recentEvents, userMap, scoreboard, theme }: LiveQueueProps) {
+  const isDark = theme === 'dark';
+
   const getTeamStats = (handle: string) => {
     const idx = scoreboard.findIndex(r => r.handle === handle);
-    if (idx === -1) return { rank: '-', points: '-' };
+    if (idx === -1) return { rank: null, points: 0 };
     return { rank: idx + 1, points: scoreboard[idx].points };
   };
 
+  const acCount  = recentEvents.filter(e => e.verdict === 'OK').length;
+  const waCount  = recentEvents.filter(e => e.verdict === 'WRONG_ANSWER').length;
+
   return (
-    <div className="w-80 bg-[#0a0f18]/85 border-l border-white/[0.06] backdrop-blur-xl flex flex-col z-20 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] selection:bg-white/10">
-      
-      {/* Queue Header */}
-      <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+    <div
+      style={{
+        width: 288,
+        background: isDark ? 'rgba(9,10,14,0.92)' : '#f8f9fa',
+        borderLeft: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid #dee2e6',
+        backdropFilter: isDark ? 'blur(20px)' : 'none',
+        boxShadow: isDark ? '-12px 0 40px rgba(0,0,0,0.5)' : '0 0 0 rgba(0,0,0,0)',
+        display: 'flex', flexDirection: 'column',
+        zIndex: 20, flexShrink: 0,
+        fontFamily: 'Roboto, sans-serif',
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '12px 16px',
+        background: 'linear-gradient(135deg, #1a237e 0%, #1565c0 100%)',
+        borderBottom: '2px solid #0d47a1',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#ff6b6b', opacity: 0.75, animation: 'ping 1.2s cubic-bezier(0,0,0.2,1) infinite' }} />
+              <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8, borderRadius: '50%', background: '#ff6b6b' }} />
+            </span>
+            <h3 style={{ color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+              Live Feed
+            </h3>
+          </div>
+          <span style={{
+            background: 'rgba(255,255,255,0.15)',
+            border: '1px solid rgba(255,255,255,0.25)',
+            color: '#fff',
+            fontSize: 11, fontWeight: 700,
+            padding: '2px 8px', borderRadius: 999, fontFamily: 'ui-monospace, monospace',
+          }}>
+            {recentEvents.length}
           </span>
-          <h3 className="font-bold text-xs text-white/90 uppercase tracking-[0.2em]">Broadcast Feed</h3>
         </div>
-        <span className="text-[10px] bg-white/[0.03] text-white/40 border border-white/[0.06] px-2 py-0.5 rounded-full font-bold">
-          {recentEvents.length} Active
-        </span>
+
+        {/* Mini stats */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{
+            flex: 1, background: '#60E760', borderRadius: 6, padding: '4px 8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#000' }}>AC</span>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#000' }}>{acCount}</span>
+          </div>
+          <div style={{
+            flex: 1, background: '#E87272', borderRadius: 6, padding: '4px 8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#000' }}>WA</span>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#000' }}>{waCount}</span>
+          </div>
+          <div style={{
+            flex: 1, background: 'rgba(255,255,255,0.15)', borderRadius: 6, padding: '4px 8px',
+            border: '1px solid rgba(255,255,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>Total</span>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#fff' }}>{recentEvents.length}</span>
+          </div>
+        </div>
       </div>
-      
-      {/* Queue List */}
-      <div className="flex-1 overflow-y-auto flex flex-col scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+
+      {/* List */}
+      <div
+        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-black/10 scrollbar-track-transparent"
+        style={{ display: 'flex', flexDirection: 'column', background: isDark ? '#09090c' : '#fff' }}
+      >
         <AnimatePresence initial={false}>
           {recentEvents.map(event => {
-            const handle = event.author.members[0].handle;
-            const mapped = userMap[handle.toLowerCase()];
-            const name = mapped ? mapped.firstName : handle;
-            const isAC = event.verdict === 'OK';
-            
-            let bgColor = '#444';
-            let darkColor = '#222';
-            let accentColor = 'rgba(255,255,255,0.1)';
-            let verdictText = '??';
-            
-            if (isAC) {
-              bgColor = '#198754';
-              darkColor = '#146c43';
-              accentColor = '#198754';
-              verdictText = 'AC';
-            } else if (event.verdict === 'WRONG_ANSWER') {
-              bgColor = '#dc3545';
-              darkColor = '#a71d1d';
-              accentColor = '#dc3545';
-              verdictText = 'WA';
-            } else if (event.verdict === 'TIME_LIMIT_EXCEEDED') {
-              bgColor = '#fd7e14';
-              darkColor = '#ca6510';
-              accentColor = '#fd7e14';
-              verdictText = 'TLE';
-            } else if (event.verdict === 'RUNTIME_ERROR') {
-              bgColor = '#6f42c1';
-              darkColor = '#563396';
-              accentColor = '#6f42c1';
-              verdictText = 'RE';
-            } else if (event.verdict === 'MEMORY_LIMIT_EXCEEDED') {
-              bgColor = '#6f42c1';
-              darkColor = '#563396';
-              accentColor = '#6f42c1';
-              verdictText = 'MLE';
-            } else if (event.verdict === 'COMPILATION_ERROR') {
-              bgColor = '#6c757d';
-              darkColor = '#495057';
-              accentColor = '#6c757d';
-              verdictText = 'CE';
-            }
-
-            const stats = getTeamStats(handle);
+            const handle  = event.author.members[0].handle;
+            const mapped  = userMap[handle.toLowerCase()];
+            const name    = mapped ? mapped.firstName : handle;
+            const vd      = VERDICT[event.verdict ?? ''] || { bg: '#9e9e9e', label: 'Unknown', short: '??', textColor: '#fff' };
+            const stats   = getTeamStats(handle);
+            const isAC    = event.verdict === 'OK';
+            const timeStr = fmtTime(event.relativeTimeSeconds);
 
             return (
               <motion.div
                 key={event.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, height: 0, padding: 0 }}
-                transition={{ type: "spring", stiffness: 150, damping: 18 }}
-                className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.03] text-white font-sans text-xs hover:bg-white/[0.02] transition-colors relative"
-                style={{ borderLeft: `3px solid ${accentColor}` }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                style={{
+                  padding: '9px 12px 9px 0',
+                  borderBottom: '1px solid #f0f0f0',
+                  display: 'flex', alignItems: 'center', gap: 0,
+                  borderLeft: `4px solid ${vd.bg}`,
+                  background: isAC ? 'rgba(96,231,96,0.06)' : '#fff',
+                }}
+                className="hover:bg-blue-50 transition-colors"
               >
-                {/* Team Rank */}
-                <div className="w-5 text-right font-bold text-white/30 shrink-0">{stats.rank}</div>
-                
-                {/* Name */}
-                <div className="flex-1 truncate pr-1">
-                  <CFHandle 
-                    handle={name} 
-                    rating={mapped?.rating} 
-                    rank={mapped?.rank} 
-                  />
+                {/* Verdict badge */}
+                <div style={{
+                  width: 42, flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 4px',
+                }}>
+                  <div style={{
+                    padding: '3px 5px',
+                    borderRadius: 5,
+                    background: vd.bg,
+                    color: vd.textColor,
+                    fontSize: 9, fontWeight: 900,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    textAlign: 'center',
+                    lineHeight: 1.2,
+                    minWidth: 28,
+                  }}>
+                    {vd.short}
+                  </div>
                 </div>
-                
-                {/* Solved Count Badge */}
-                <div className="text-[11px] font-bold text-white/40 bg-white/[0.03] border border-white/[0.05] w-5 h-5 rounded flex items-center justify-center shrink-0">
-                  {stats.points}
-                </div>
-                
-                {/* Problem Code block */}
-                <div 
-                  className="w-6 h-6 flex items-center justify-center text-[10px] font-extrabold rounded shadow-sm text-white shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${bgColor} 0%, ${darkColor} 100%)`, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)' }}
-                >
-                  {event.problem.index}
-                </div>
-                
-                {/* Verdict block */}
-                <div 
-                  className="w-10 h-6 flex items-center justify-center text-[9px] font-black rounded shadow-sm text-white shrink-0 uppercase tracking-wide"
-                  style={{ background: `linear-gradient(135deg, ${bgColor} 0%, ${darkColor} 100%)`, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)' }}
-                >
-                  {verdictText}
+
+                {/* Content */}
+                <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
+                  {/* Name + problem */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12.5, fontWeight: 600 }}>
+                      <CFHandle handle={name} rating={mapped?.rating} rank={mapped?.rank} />
+                    </div>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: 5, flexShrink: 0,
+                      background: '#1a237e',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontSize: 10, fontWeight: 800,
+                    }}>
+                      {event.problem.index}
+                    </div>
+                  </div>
+
+                  {/* Rank + solved + time */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {stats.rank !== null && (
+                      <span style={{ color: '#888', fontSize: 10.5, fontWeight: 600 }}>
+                        #{stats.rank}
+                      </span>
+                    )}
+                    <span style={{ color: '#aaa', fontSize: 10 }}>·</span>
+                    <span style={{ color: '#888', fontSize: 10.5 }}>
+                      {stats.points} solved
+                    </span>
+                    <span style={{ marginLeft: 'auto', color: '#aaa', fontSize: 10.5, fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}>
+                      {timeStr}
+                    </span>
+                  </div>
                 </div>
               </motion.div>
             );
           })}
         </AnimatePresence>
-        
+
+        {/* Empty state */}
         {recentEvents.length === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-center text-white/30 p-6">
-            <div className="relative w-8 h-8 mb-4">
-              <div className="absolute inset-0 rounded-full border-2 border-white/5" />
-              <div className="absolute inset-0 rounded-full border-2 border-t-red-500 animate-spin" />
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '40px 20px', gap: 12, color: '#bbb',
+          }}>
+            <div style={{ position: 'relative', width: 36, height: 36 }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid #eee' }} />
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid transparent', borderTopColor: '#60E760', animation: 'spin 1s linear infinite' }} />
             </div>
-            <span className="text-[10px] uppercase tracking-widest font-bold">Waiting for broadcasts...</span>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#999', marginBottom: 3 }}>Waiting for submissions</p>
+              <p style={{ fontSize: 11, color: '#bbb' }}>Events appear here in real-time</p>
+            </div>
           </div>
         )}
       </div>

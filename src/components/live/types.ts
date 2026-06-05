@@ -3,6 +3,7 @@ import type { CFContest, CFProblem, CFSubmission } from '@/types/codeforces';
 export type AppMode = 'setup' | 'playing' | 'finished';
 export type ContestMode = 'replay' | 'live';
 export type FilterMode = 'bootcamp' | 'all';
+export type ScoreboardTheme = 'icpc' | 'dark';
 
 export interface UserMapInfo {
   firstName: string;
