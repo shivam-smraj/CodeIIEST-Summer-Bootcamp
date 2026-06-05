@@ -266,11 +266,6 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap, theme }:
                       <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         <CFHandle handle={row.displayName} rating={mapped?.rating} rank={mapped?.rank} />
                       </div>
-                      {mapped?.university && (
-                        <div style={{ fontSize: 11, color: '#888', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {mapped.university}
-                        </div>
-                      )}
                     </div>
                   </div>
 
