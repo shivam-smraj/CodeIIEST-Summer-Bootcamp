@@ -13,6 +13,8 @@ interface LiveHeaderProps {
   setIsPaused: (v: boolean) => void;
   onSetup: () => void;
   theme: ScoreboardTheme;
+  lastUpdated: Date | null;
+  isPolling: boolean;
 }
 
 // CodeIIEST logo SVG — viewBox 600×495 → ratio 1.212
@@ -34,13 +36,21 @@ function CodeIIESTLogo({ className = '' }: { className?: string }) {
 }
 
 export function LiveHeader({
-  contest, mode, speed, setSpeed, currentTime, isPaused, setIsPaused, onSetup, theme,
+  contest, mode, speed, setSpeed, currentTime, isPaused, setIsPaused, onSetup, theme, lastUpdated, isPolling,
 }: LiveHeaderProps) {
   const [isSpeedOpen, setIsSpeedOpen] = React.useState(false);
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const speeds = [1, 5, 10, 20, 60, 200];
   const isLive = mode === 'live';
   const isDark = theme === 'dark';
+
+  // Re-render every 10s to keep "last synced X seconds ago" label fresh
+  React.useEffect(() => {
+    if (!isLive) return;
+    const id = setInterval(forceUpdate, 10_000);
+    return () => clearInterval(id);
+  }, [isLive]);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -211,6 +221,37 @@ export function LiveHeader({
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Live sync indicator */}
+        {isLive && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '5px 11px',
+            background: 'rgba(0,0,0,0.2)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 8,
+            flexShrink: 0,
+          }}>
+            {/* Animated dot: spins while polling, solid when idle */}
+            {isPolling ? (
+              <svg style={{ width: 12, height: 12, animation: 'spin 0.9s linear infinite', flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke="#60d394" strokeWidth="3">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            ) : (
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#60d394', flexShrink: 0, display: 'inline-block' }} />
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 8.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', lineHeight: 1, fontFamily: 'Roboto, sans-serif' }}>
+                {isPolling ? 'Syncing…' : 'Live Data'}
+              </span>
+              {lastUpdated && !isPolling && (
+                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 8.5, lineHeight: 1, fontFamily: 'ui-monospace, monospace' }}>
+                  {Math.floor((Date.now() - lastUpdated.getTime()) / 1000)}s ago
+                </span>
+              )}
+            </div>
           </div>
         )}
 

@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { CFContest, CFProblem, CFSubmission } from '@/types/codeforces';
 import type { AppMode, ContestMode, FilterMode, ScoreboardTheme, UserMapInfo, ScoreRow } from './types';
 import { SetupScreen } from './SetupScreen';
 import { LiveHeader } from './LiveHeader';
 import { LiveTable } from './LiveTable';
 import { LiveQueue } from './LiveQueue';
+
+const LIVE_POLL_INTERVAL_MS = 30_000;   // re-fetch submissions every 30 s
+const RANKS_POLL_INTERVAL_MS = 120_000; // re-fetch official ranks every 2 min
 
 export default function LiveEngine() {
   const [appMode, setAppMode] = useState<AppMode>('setup');
@@ -29,6 +32,40 @@ export default function LiveEngine() {
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // ── Live-mode polling state ──────────────────────────────────────────
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const pollSubsRef = useRef<NodeJS.Timeout | null>(null);
+  const pollRanksRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ── Fetch fresh submissions (used at startup + polled in live mode) ──
+  const fetchSubmissions = useCallback(async (cId: string, gId?: string): Promise<CFSubmission[] | null> => {
+    try {
+      let sUrl = `/api/live/status?contestId=${cId}`;
+      if (gId) sUrl += `&groupId=${gId}`;
+      const sRes = await fetch(sUrl);
+      const sData = await sRes.json();
+      if (!sRes.ok) throw new Error(sData.error);
+      return sData.submissions as CFSubmission[];
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // ── Fetch fresh official ranks (used at startup + polled in live mode) ──
+  const fetchOfficialRanks = useCallback(async (cId: string, gId?: string): Promise<Record<string, number> | null> => {
+    try {
+      let url = `/api/live/init?contestId=${cId}`;
+      if (gId) url += `&groupId=${gId}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!res.ok) return null;
+      return (data.officialRanks || {}) as Record<string, number>;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const fetchInit = async () => {
     setIsLoading(true);
     setError(null);
@@ -44,13 +81,11 @@ export default function LiveEngine() {
       setUserMap(data.userMap);
       setOfficialRanks(data.officialRanks || {});
 
-      let sUrl = `/api/live/status?contestId=${contestId}`;
-      if (groupId) sUrl += `&groupId=${groupId}`;
-      const sRes = await fetch(sUrl);
-      const sData = await sRes.json();
-      if (!sRes.ok) throw new Error(sData.error);
+      const subs = await fetchSubmissions(contestId, groupId || undefined);
+      if (!subs) throw new Error('Failed to fetch submissions');
       
-      setSubmissions(sData.submissions);
+      setSubmissions(subs);
+      setLastUpdated(new Date());
       setCurrentTime(0);
       setAppMode('playing');
     } catch (err: any) {
@@ -60,6 +95,7 @@ export default function LiveEngine() {
     }
   };
 
+  // ── Clock tick effect ────────────────────────────────────────────────
   useEffect(() => {
     if (appMode !== 'playing' || isPaused) {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -81,6 +117,7 @@ export default function LiveEngine() {
         });
       }, TICK_MS);
     } else {
+      // Live mode: track real elapsed time
       timerRef.current = setInterval(() => {
         setCurrentTime(Math.floor(Date.now() / 1000) - (contest?.startTimeSeconds || 0));
       }, 1000);
@@ -90,6 +127,47 @@ export default function LiveEngine() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [appMode, isPaused, mode, speed, contest]);
+
+  // ── Live-mode polling: re-fetch submissions every 30s ────────────────
+  useEffect(() => {
+    // Clear any existing poller
+    if (pollSubsRef.current) clearInterval(pollSubsRef.current);
+    if (pollRanksRef.current) clearInterval(pollRanksRef.current);
+
+    if (appMode !== 'playing' || mode !== 'live') return;
+
+    const pollSubs = async () => {
+      setIsPolling(true);
+      const subs = await fetchSubmissions(contestId, groupId || undefined);
+      if (subs) {
+        setSubmissions(subs);
+        setLastUpdated(new Date());
+      }
+      setIsPolling(false);
+    };
+
+    const pollRanks = async () => {
+      const ranks = await fetchOfficialRanks(contestId, groupId || undefined);
+      if (ranks) setOfficialRanks(ranks);
+    };
+
+    // Start polling loops
+    pollSubsRef.current = setInterval(pollSubs, LIVE_POLL_INTERVAL_MS);
+    pollRanksRef.current = setInterval(pollRanks, RANKS_POLL_INTERVAL_MS);
+
+    return () => {
+      if (pollSubsRef.current) clearInterval(pollSubsRef.current);
+      if (pollRanksRef.current) clearInterval(pollRanksRef.current);
+    };
+  }, [appMode, mode, contestId, groupId, fetchSubmissions, fetchOfficialRanks]);
+
+  // ── Cleanup polling when leaving playing state ───────────────────────
+  useEffect(() => {
+    if (appMode !== 'playing') {
+      if (pollSubsRef.current) clearInterval(pollSubsRef.current);
+      if (pollRanksRef.current) clearInterval(pollRanksRef.current);
+    }
+  }, [appMode]);
 
   const { scoreboard, recentEvents, firstSolves } = useMemo(() => {
     if (!contest) return { scoreboard: [], recentEvents: [], firstSolves: {} as Record<string, number> };
@@ -208,7 +286,9 @@ export default function LiveEngine() {
         isPaused={isPaused}
         setIsPaused={setIsPaused}
         theme={theme}
-        onSetup={() => { setAppMode('setup'); setSubmissions([]); }}
+        onSetup={() => { setAppMode('setup'); setSubmissions([]); setLastUpdated(null); }}
+        lastUpdated={lastUpdated}
+        isPolling={isPolling}
       />
 
       {/* Progress bar (replay mode) */}
