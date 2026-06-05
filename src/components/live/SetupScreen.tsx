@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CustomSelect } from './CustomSelect';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CodeiiestLogo } from '@/components/ui/codeiiest-logo';
 import type { ContestMode, FilterMode } from './types';
 import { Play, Zap, Users, Clock, Trophy, Radio, ChevronRight, Globe } from 'lucide-react';
 
@@ -20,24 +23,6 @@ interface SetupScreenProps {
   error: string | null;
   isLoading: boolean;
   onStart: () => void;
-}
-
-// --- CodeIIEST SVG Logo as a component ---
-function CodeIIESTLogo({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 600 495" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <rect width="425" height="40" fill="#F60000" />
-      <rect x="110" y="60" width="315" height="40" fill="#FF0000" />
-      <rect x="165" y="400" width="260" height="40" fill="#F60000" />
-      <rect x="55" y="455" width="370" height="40" fill="#671616" />
-      <rect x="55" y="60" width="40" height="435" fill="#671616" />
-      <rect x="110" y="60" width="40" height="380" fill="#FF0000" />
-      <rect width="40" height="495" fill="#F60000" />
-      <rect x="445" width="37" height="495" fill="#A6A6A6" />
-      <rect x="502" width="37" height="495" fill="#D9D9D9" />
-      <rect x="559" width="37" height="495" fill="#D9D9D9" />
-    </svg>
-  );
 }
 
 // --- Live pulse dot ---
@@ -128,7 +113,7 @@ export function SetupScreen({
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-12">
             <div className="p-2.5 bg-white/[0.03] rounded-xl border border-white/[0.08] backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-              <CodeIIESTLogo className="w-10 h-8" />
+              <CodeiiestLogo size="md" />
             </div>
             <div>
               <p className="text-[11px] text-white/40 tracking-[0.25em] uppercase font-bold">CodeIIEST</p>
@@ -195,7 +180,7 @@ export function SetupScreen({
         {/* Mobile logo header */}
         <div className="lg:hidden flex items-center gap-3 mb-10 self-start">
           <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/[0.08]">
-            <CodeIIESTLogo className="w-8 h-6.5" />
+            <CodeiiestLogo size="sm" />
           </div>
           <div>
             <p className="text-[10px] text-white/40 tracking-[0.2em] uppercase font-bold">CodeIIEST</p>
@@ -225,37 +210,40 @@ export function SetupScreen({
             <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-red-500/0 via-red-500/30 to-red-500/0" />
 
             {/* Contest ID */}
-            <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
-                <span>Contest ID</span>
-                <span className="text-red-500 text-[10px]">*</span>
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="contestId" className="text-[#94a3b8] text-[13px] font-semibold block">
+                Codeforces Contest ID <span className="text-red-500">*</span>
+              </Label>
               <div className="relative">
-                <input
-                  type="text"
+                <Input
+                  id="contestId"
                   value={contestId}
                   onChange={e => setContestId(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && contestId && onStart()}
                   placeholder="e.g. 2232"
-                  className="w-full bg-[#07080a] border border-white/[0.06] rounded-xl px-4 py-3.5 text-white font-mono text-[15px] transition-all duration-300 focus:outline-none focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5 placeholder-white/10 pr-10 hover:border-white/10"
+                  className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/20 pr-12 font-mono text-[14px]"
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 text-xs font-mono font-bold">#ID</div>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 text-xs font-mono font-bold">#ID</span>
               </div>
+              <p className="text-[11px] text-white/30">
+                Group URL: codeforces.com/group/<span className="text-[#a78bfa]">GROUPCODE</span>/contest/<span className="text-[#60a5fa]">XXXXXX</span>
+              </p>
             </div>
 
             {/* Group ID */}
-            <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] flex items-center justify-between">
-                <span>Group ID</span>
-                <span className="text-white/20 text-[9px] normal-case font-normal">optional — for private group contests</span>
-              </label>
-              <input
-                type="text"
+            <div className="space-y-2">
+              <Label htmlFor="groupId" className="text-[#94a3b8] text-[13px] font-semibold flex justify-between">
+                <span>CF Group ID</span>
+                <span className="text-white/20 text-[10px] font-normal normal-case">optional — for private group contests</span>
+              </Label>
+              <Input
+                id="groupId"
                 value={groupId}
                 onChange={e => setGroupId(e.target.value)}
                 placeholder="e.g. P1htAKU3hf"
-                className="w-full bg-[#07080a] border border-white/[0.06] rounded-xl px-4 py-3.5 text-white font-mono text-[15px] transition-all duration-300 focus:outline-none focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5 placeholder-white/10 hover:border-white/10"
+                className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/20 font-mono text-[14px]"
               />
+              <p className="text-[11px] text-white/30">Your default group: <span className="text-[#a78bfa]">P1htAKU3hf</span></p>
             </div>
 
             {/* Divider */}
@@ -267,20 +255,53 @@ export function SetupScreen({
 
             {/* Mode + Speed */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2.5">
-                <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] block">Mode</label>
-                <CustomSelect options={modeOptions} value={mode} onChange={v => setMode(v as ContestMode)} />
+              <div className="space-y-2">
+                <Label className="text-[#94a3b8] text-[13px] font-semibold block">Mode</Label>
+                <Select value={mode} onValueChange={v => setMode(v as ContestMode)}>
+                  <SelectTrigger className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus:ring-1 focus:ring-white/20">
+                    <SelectValue placeholder="Select mode" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#161618] border-white/[0.12] text-white">
+                    {modeOptions.map(o => (
+                      <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="space-y-2.5">
-                <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] block">Speed</label>
-                <CustomSelect options={speedOptions} value={speed} onChange={v => setSpeed(v as number)} disabled={mode === 'live'} />
+              <div className="space-y-2">
+                <Label className="text-[#94a3b8] text-[13px] font-semibold block">Speed</Label>
+                <Select value={String(speed)} onValueChange={v => setSpeed(Number(v))} disabled={mode === 'live'}>
+                  <SelectTrigger className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus:ring-1 focus:ring-white/20">
+                    <SelectValue placeholder="Select speed" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#161618] border-white/[0.12] text-white">
+                    {speedOptions.map(o => (
+                      <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {/* Filter */}
-            <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] block">Participant Filter</label>
-              <CustomSelect options={filterOptions} value={filter} onChange={v => setFilter(v as FilterMode)} />
+            <div className="space-y-2">
+              <Label className="text-[#94a3b8] text-[13px] font-semibold block">Participant Filter</Label>
+              <Select value={filter} onValueChange={v => setFilter(v as FilterMode)}>
+                <SelectTrigger className="bg-white/[0.05] border-white/[0.12] text-white h-11 rounded-xl focus:ring-1 focus:ring-white/20">
+                  <SelectValue placeholder="Select filter" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#161618] border-white/[0.12] text-white">
+                  {filterOptions.map(o => (
+                    <SelectItem key={o.value} value={String(o.value)} className="hover:bg-white/5 cursor-pointer text-white">
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Error */}
@@ -302,9 +323,9 @@ export function SetupScreen({
             <motion.button
               onClick={onStart}
               disabled={isLoading || !contestId}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-amber-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed group text-[13px] tracking-[0.2em] uppercase transition-all duration-300 hover:shadow-[0_0_30px_rgba(239,68,68,0.35)] active:scale-95"
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
+              className="w-full relative overflow-hidden bg-[#2563eb] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed group text-[13px] tracking-widest uppercase transition-all duration-200 hover:bg-[#1d4ed8] hover:shadow-[0_0_24px_rgba(37,99,235,0.3)] active:scale-95"
             >
               {isLoading ? (
                 <>
