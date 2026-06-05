@@ -132,12 +132,14 @@ export function LiveQueue({ recentEvents, userMap, scoreboard, theme }: LiveQueu
                 transition={{ type: 'spring', stiffness: 200, damping: 25 }}
                 style={{
                   padding: '9px 12px 9px 0',
-                  borderBottom: '1px solid #f0f0f0',
+                  borderBottom: isDark ? '1px solid rgba(255,255,255,0.03)' : '1px solid #f0f0f0',
                   display: 'flex', alignItems: 'center', gap: 0,
                   borderLeft: `4px solid ${vd.bg}`,
-                  background: isAC ? 'rgba(96,231,96,0.06)' : '#fff',
+                  background: isDark 
+                    ? (isAC ? 'rgba(96,231,96,0.04)' : 'transparent')
+                    : (isAC ? 'rgba(96,231,96,0.06)' : '#fff'),
                 }}
-                className="hover:bg-blue-50 transition-colors"
+                className={isDark ? 'hover:bg-white/[0.02] transition-colors' : 'hover:bg-blue-50 transition-colors'}
               >
                 {/* Verdict badge */}
                 <div style={{
@@ -170,7 +172,7 @@ export function LiveQueue({ recentEvents, userMap, scoreboard, theme }: LiveQueu
                     </div>
                     <div style={{
                       width: 22, height: 22, borderRadius: 5, flexShrink: 0,
-                      background: '#1a237e',
+                      background: isDark ? 'rgba(255,255,255,0.08)' : '#1a237e',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: '#fff', fontSize: 10, fontWeight: 800,
                     }}>
@@ -181,15 +183,15 @@ export function LiveQueue({ recentEvents, userMap, scoreboard, theme }: LiveQueu
                   {/* Rank + solved + time */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {stats.rank !== null && (
-                      <span style={{ color: '#888', fontSize: 10.5, fontWeight: 600 }}>
+                      <span style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#666', fontSize: 10.5, fontWeight: 600 }}>
                         #{stats.rank}
                       </span>
                     )}
-                    <span style={{ color: '#aaa', fontSize: 10 }}>·</span>
-                    <span style={{ color: '#888', fontSize: 10.5 }}>
+                    <span style={{ color: isDark ? 'rgba(255,255,255,0.2)' : '#ccc', fontSize: 10 }}>·</span>
+                    <span style={{ color: isDark ? 'rgba(255,255,255,0.45)' : '#666', fontSize: 10.5 }}>
                       {stats.points} solved
                     </span>
-                    <span style={{ marginLeft: 'auto', color: '#aaa', fontSize: 10.5, fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}>
+                    <span style={{ marginLeft: 'auto', color: isDark ? 'rgba(255,255,255,0.3)' : '#888', fontSize: 10.5, fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}>
                       {timeStr}
                     </span>
                   </div>
