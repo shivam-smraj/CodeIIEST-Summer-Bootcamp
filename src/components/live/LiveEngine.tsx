@@ -149,7 +149,16 @@ export default function LiveEngine() {
       }
     }
 
+    const isReplayFinished = mode === 'replay' && currentTime >= (contest?.durationSeconds || 0);
+
     const sorted = Array.from(rows.values()).sort((a, b) => {
+      if (isReplayFinished) {
+        const rankA = officialRanks[a.handle.toLowerCase()] ?? Infinity;
+        const rankB = officialRanks[b.handle.toLowerCase()] ?? Infinity;
+        if (rankA !== rankB) {
+          return rankA - rankB;
+        }
+      }
       if (a.points !== b.points) return b.points - a.points;
       return a.penalty - b.penalty; 
     });
@@ -165,7 +174,7 @@ export default function LiveEngine() {
       .reverse();
 
     return { scoreboard: sorted, recentEvents: visibleFeed, firstSolves: firstAcTime };
-  }, [submissions, currentTime, userMap, filter, contest]);
+  }, [submissions, currentTime, userMap, filter, contest, mode, officialRanks]);
 
 
   if (appMode === 'setup') {
