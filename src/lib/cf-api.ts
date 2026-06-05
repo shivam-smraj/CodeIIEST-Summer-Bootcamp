@@ -19,6 +19,7 @@ import type {
   CFUserInfoResponse,
   CFStandingsResponse,
   CFUser,
+  CFStatusResponse,
 } from '@/types/codeforces';
 
 // ── Credentials from environment ──────────────────────────────────────────────
@@ -136,23 +137,20 @@ export async function getCFStandings(
 
   const params: Record<string, string> = {
     contestId,
-    from:          '1',
-    count:         '10000',   // Fetch all participants
-    showUnofficial: 'false',  // Only CONTESTANT rows
   };
 
-  // Private group contests need groupId
+  // Private group contests need groupId, and we can use extra params
   if (groupId) {
+    params.from = '1';
+    params.count = '10000';
+    params.showUnofficial = 'false';
     params.groupId = groupId;
   }
 
-  // Always use authenticated URL if credentials are available,
-  // because it also works for public contests and gives manager-level access
   let url: string;
-  if (hasCFAuth()) {
+  if (groupId && hasCFAuth()) {
     url = buildAuthUrl('contest.standings', params);
   } else {
-    // Fallback: unauthenticated (only works for public/finished contests)
     url = buildPublicUrl('contest.standings', params);
   }
 
@@ -194,7 +192,67 @@ export async function getCFStandings(
     throw new Error(`CF API contest.standings error: ${data.comment ?? 'Unknown error'}`);
   }
 
+  // If public contest, filter out unofficial rows manually since we couldn't send showUnofficial=false
+  if (!groupId) {
+    data.result.rows = data.result.rows.filter(row => row.party.participantType === 'CONTESTANT');
+  }
+
   return data.result;
+}
+
+/**
+ * Fetch full contest status (all submissions) from Codeforces.
+ *
+ * Supports:
+ *   - Public CF contests  (auth optional)
+ *   - Private group contests (groupId required + auth required)
+ *
+ * @param contestId  Numeric CF contest ID
+ * @param groupId    Optional: CF group code for private group contests
+ */
+export async function getCFStatus(
+  contestId: string,
+  groupId?: string,
+): Promise<CFStatusResponse['result']> {
+
+  const params: Record<string, string> = {
+    contestId,
+    from: '1',
+    count: '100000', // Fetch max possible to get full timeline
+  };
+
+  if (groupId) {
+    params.groupId = groupId;
+  }
+
+  let url: string;
+  if (groupId && hasCFAuth()) {
+    url = buildAuthUrl('contest.status', params);
+  } else {
+    url = buildPublicUrl('contest.status', params);
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      cache: 'no-store',
+      headers: { 'User-Agent': 'CodeIIEST-Bootcamp/1.0' },
+    });
+  } catch (err) {
+    throw new Error(`Network error reaching CF API for status: ${err instanceof Error ? err.message : 'Unknown'}`);
+  }
+
+  if (!res.ok) {
+    throw new Error(`CF API contest.status failed: HTTP ${res.status} for contest ${contestId}`);
+  }
+
+  const data = (await res.json()) as CFStatusResponse;
+  if (data.status !== 'OK') {
+    throw new Error(`CF API contest.status error: ${data.comment ?? 'Unknown error'}`);
+  }
+
+  // Return chronologically (oldest first)
+  return data.result.reverse();
 }
 
 /**
