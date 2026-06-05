@@ -220,7 +220,7 @@ export function SetupScreen({
           </div>
 
           {/* Form Card */}
-          <div className="bg-[#0c0d11]/60 border border-white/[0.05] rounded-2xl p-8 backdrop-blur-xl space-y-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] relative overflow-hidden">
+          <div className="bg-[#0c0d11]/60 border border-white/[0.05] rounded-2xl p-8 backdrop-blur-xl space-y-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] relative">
             {/* Inner glowing top accent border */}
             <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-red-500/0 via-red-500/30 to-red-500/0" />
 

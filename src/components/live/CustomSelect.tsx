@@ -47,7 +47,7 @@ export function CustomSelect({ options, value, onChange, disabled = false }: Cus
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute top-[calc(100%+6px)] left-0 right-0 bg-[#13141a] border border-white/[0.1] rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.8)] z-50 max-h-60 overflow-y-auto py-1.5 backdrop-blur-xl">
+        <div className="absolute top-[calc(100%+6px)] left-0 right-0 bg-[#14151b] border border-white/[0.12] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 max-h-60 overflow-y-auto py-1.5 backdrop-blur-xl">
           {options.map((option) => (
             <button
               key={option.value}
