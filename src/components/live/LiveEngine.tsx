@@ -193,19 +193,21 @@ export default function LiveEngine() {
       />
 
       {mode === 'replay' && contest?.durationSeconds && (
-        <div className="h-1 w-full bg-[#111] relative cursor-pointer group shrink-0">
+        <div className="h-1.5 w-full bg-white/[0.04] relative cursor-pointer group shrink-0 transition-all duration-300 hover:h-2.5">
           <input 
             type="range"
             min={0}
             max={contest.durationSeconds}
             value={currentTime}
             onChange={e => setCurrentTime(Number(e.target.value))}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
           />
           <div 
-            className="h-full bg-white transition-all"
+            className="h-full bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 transition-all relative"
             style={{ width: `${(currentTime / contest.durationSeconds) * 100}%` }}
-          />
+          >
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none translate-x-1/2 z-10" />
+          </div>
         </div>
       )}
 

@@ -59,6 +59,15 @@ const FEATURES = [
   { icon: Globe, label: 'CF Rating Colors', desc: 'Authentic Codeforces rank colors per user' },
 ];
 
+const FEATURE_COLORS = [
+  'from-red-500 to-rose-600',
+  'from-blue-500 to-indigo-600',
+  'from-amber-500 to-orange-600',
+  'from-emerald-500 to-teal-600',
+  'from-purple-500 to-violet-600',
+  'from-cyan-500 to-sky-600'
+];
+
 export function SetupScreen({
   contestId, setContestId,
   groupId, setGroupId,
@@ -100,28 +109,30 @@ export function SetupScreen({
     <div className="flex-1 min-h-screen bg-[#07080a] flex items-stretch overflow-hidden font-sans">
 
       {/* ─── LEFT PANEL: branding + feature list ─── */}
-      <div className="hidden lg:flex flex-col justify-between w-[42%] bg-[#0c0d10] border-r border-white/[0.06] px-12 py-14 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-[42%] bg-[#0a0b0e] border-r border-white/[0.05] px-12 py-14 relative overflow-hidden shrink-0">
 
-        {/* background grid lines */}
-        <div className="absolute inset-0 opacity-[0.04]"
+        {/* Background grid lines */}
+        <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 39px, #fff 39px, #fff 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, #fff 39px, #fff 40px)',
+            backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
+            backgroundSize: '40px 40px'
           }}
         />
 
-        {/* Ambient glow */}
-        <div className="absolute -top-40 -left-20 w-[500px] h-[500px] bg-red-700/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-indigo-700/10 rounded-full blur-[80px] pointer-events-none" />
+        {/* Ambient glows */}
+        <div className="absolute -top-40 -left-20 w-[600px] h-[600px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[350px] h-[350px] bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-100px] right-[-50px] w-[400px] h-[400px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         {/* Logo + wordmark */}
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-12">
-            <div className="p-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+            <div className="p-2.5 bg-white/[0.03] rounded-xl border border-white/[0.08] backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
               <CodeIIESTLogo className="w-10 h-8" />
             </div>
             <div>
-              <p className="text-[11px] text-white/40 tracking-[0.2em] uppercase font-semibold">CodeIIEST</p>
-              <p className="text-white font-bold text-lg leading-tight tracking-wide">Summer Bootcamp</p>
+              <p className="text-[11px] text-white/40 tracking-[0.25em] uppercase font-bold">CodeIIEST</p>
+              <p className="text-white font-extrabold text-xl leading-tight tracking-wide">Summer Bootcamp</p>
             </div>
           </div>
 
@@ -129,10 +140,10 @@ export function SetupScreen({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-4xl xl:text-5xl font-black text-white leading-tight mb-4"
+            className="text-4xl xl:text-5xl font-black text-white leading-tight mb-4 tracking-tight"
           >
             ICPC Live<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-400 to-orange-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-amber-500">
               Leaderboard
             </span>
           </motion.h1>
@@ -141,47 +152,55 @@ export function SetupScreen({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.25 }}
-            className="text-white/50 text-base leading-relaxed max-w-xs"
+            className="text-white/50 text-sm xl:text-base leading-relaxed max-w-sm"
           >
             Broadcast cinematic, animated standings for any Codeforces contest — live or replay.
           </motion.p>
         </div>
 
         {/* Feature Pills */}
-        <div className="relative z-10 space-y-3">
+        <div className="relative z-10 space-y-3.5 my-8">
           {FEATURES.map((f, i) => (
             <motion.div
               key={f.label}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 + i * 0.08 }}
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.01] border border-white/[0.03] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-300 group cursor-default"
             >
-              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
-                <f.icon className="w-4 h-4 text-white/60" />
+              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${FEATURE_COLORS[i % FEATURE_COLORS.length]} flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                <f.icon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-white/80 text-sm font-semibold leading-tight">{f.label}</p>
-                <p className="text-white/30 text-xs leading-tight">{f.desc}</p>
+                <p className="text-white/90 text-sm font-bold leading-tight group-hover:text-white transition-colors">{f.label}</p>
+                <p className="text-white/40 text-xs mt-0.5 leading-relaxed">{f.desc}</p>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Footer note */}
-        <div className="relative z-10 flex items-center gap-2 mt-6">
+        <div className="relative z-10 flex items-center gap-2.5 mt-4">
           <PulseDot color="#22c55e" />
-          <span className="text-white/30 text-xs">Engine ready</span>
+          <span className="text-white/40 text-xs font-semibold uppercase tracking-wider">Engine ready</span>
         </div>
       </div>
 
       {/* ─── RIGHT PANEL: config form ─── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-14 py-14 relative overflow-y-auto">
+        
+        {/* Glow effect on the form side */}
+        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-red-950/20 rounded-full blur-[150px] pointer-events-none" />
 
         {/* Mobile logo header */}
         <div className="lg:hidden flex items-center gap-3 mb-10 self-start">
-          <CodeIIESTLogo className="w-9 h-7" />
-          <span className="text-white font-bold tracking-wide text-lg">CodeIIEST</span>
+          <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/[0.08]">
+            <CodeIIESTLogo className="w-8 h-6.5" />
+          </div>
+          <div>
+            <p className="text-[10px] text-white/40 tracking-[0.2em] uppercase font-bold">CodeIIEST</p>
+            <span className="text-white font-black tracking-wide text-md">Summer Bootcamp</span>
+          </div>
         </div>
 
         <motion.div
@@ -194,18 +213,20 @@ export function SetupScreen({
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-3">
               <PulseDot color="#ef4444" />
-              <span className="text-red-400 text-xs font-bold tracking-widest uppercase">Broadcast Console</span>
+              <span className="text-red-400 text-[11px] font-extrabold tracking-[0.2em] uppercase">Broadcast Console</span>
             </div>
             <h2 className="text-3xl font-black text-white tracking-tight">Configure Session</h2>
-            <p className="text-white/40 text-sm mt-1.5">Enter your Codeforces contest details below to launch the live leaderboard.</p>
+            <p className="text-white/40 text-sm mt-2">Enter your Codeforces contest details below to launch the live leaderboard.</p>
           </div>
 
           {/* Form Card */}
-          <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-7 backdrop-blur-sm space-y-6 shadow-[0_32px_64px_rgba(0,0,0,0.6)]">
+          <div className="bg-[#0c0d11]/60 border border-white/[0.05] rounded-2xl p-8 backdrop-blur-xl space-y-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] relative overflow-hidden">
+            {/* Inner glowing top accent border */}
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-red-500/0 via-red-500/30 to-red-500/0" />
 
             {/* Contest ID */}
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
                 <span>Contest ID</span>
                 <span className="text-red-500 text-[10px]">*</span>
               </label>
@@ -216,49 +237,49 @@ export function SetupScreen({
                   onChange={e => setContestId(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && contestId && onStart()}
                   placeholder="e.g. 2232"
-                  className="w-full bg-[#0d0e11] border border-white/[0.1] rounded-xl px-4 py-3.5 text-white font-mono text-[15px] transition-all duration-200 focus:outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10 placeholder-white/15 pr-10"
+                  className="w-full bg-[#07080a] border border-white/[0.06] rounded-xl px-4 py-3.5 text-white font-mono text-[15px] transition-all duration-300 focus:outline-none focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5 placeholder-white/10 pr-10 hover:border-white/10"
                 />
-                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 text-xs font-mono">#ID</div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 text-xs font-mono font-bold">#ID</div>
               </div>
             </div>
 
             {/* Group ID */}
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] flex items-center justify-between">
                 <span>Group ID</span>
-                <span className="text-white/20 text-[10px] normal-case font-normal ml-1">optional — for private group contests</span>
+                <span className="text-white/20 text-[9px] normal-case font-normal">optional — for private group contests</span>
               </label>
               <input
                 type="text"
                 value={groupId}
                 onChange={e => setGroupId(e.target.value)}
                 placeholder="e.g. P1htAKU3hf"
-                className="w-full bg-[#0d0e11] border border-white/[0.1] rounded-xl px-4 py-3.5 text-white font-mono text-[15px] transition-all duration-200 focus:outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10 placeholder-white/15"
+                className="w-full bg-[#07080a] border border-white/[0.06] rounded-xl px-4 py-3.5 text-white font-mono text-[15px] transition-all duration-300 focus:outline-none focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5 placeholder-white/10 hover:border-white/10"
               />
             </div>
 
             {/* Divider */}
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/[0.06]" />
-              <span className="text-white/20 text-[11px] font-semibold uppercase tracking-widest">Playback</span>
-              <div className="h-px flex-1 bg-white/[0.06]" />
+            <div className="flex items-center gap-4">
+              <div className="h-[1px] flex-1 bg-white/[0.05]" />
+              <span className="text-white/20 text-[10px] font-bold uppercase tracking-[0.25em]">Playback Control</span>
+              <div className="h-[1px] flex-1 bg-white/[0.05]" />
             </div>
 
             {/* Mode + Speed */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest block">Mode</label>
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] block">Mode</label>
                 <CustomSelect options={modeOptions} value={mode} onChange={v => setMode(v as ContestMode)} />
               </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest block">Speed</label>
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] block">Speed</label>
                 <CustomSelect options={speedOptions} value={speed} onChange={v => setSpeed(v as number)} disabled={mode === 'live'} />
               </div>
             </div>
 
             {/* Filter */}
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest block">Participant Filter</label>
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] block">Participant Filter</label>
               <CustomSelect options={filterOptions} value={filter} onChange={v => setFilter(v as FilterMode)} />
             </div>
 
@@ -269,7 +290,7 @@ export function SetupScreen({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm font-medium flex items-start gap-3"
+                  className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-semibold flex items-start gap-3"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5" />
                   <span>{error}</span>
@@ -281,34 +302,34 @@ export function SetupScreen({
             <motion.button
               onClick={onStart}
               disabled={isLoading || !contestId}
-              whileHover={{ scale: 1.015 }}
-              whileTap={{ scale: 0.985 }}
-              className="w-full relative overflow-hidden bg-white text-black font-black py-4 rounded-xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed group text-[13px] tracking-widest uppercase transition-colors hover:bg-gray-100"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-amber-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed group text-[13px] tracking-[0.2em] uppercase transition-all duration-300 hover:shadow-[0_0_30px_rgba(239,68,68,0.35)] active:scale-95"
             >
               {isLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                   <span>Fetching contest data...</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current" />
+                  <Play className="w-4 h-4 fill-current text-white" />
                   <span>Launch Broadcast</span>
-                  <ChevronRight className="w-4 h-4 absolute right-5 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-4 h-4 absolute right-5 group-hover:translate-x-1.5 transition-transform text-white/70" />
                 </>
               )}
             </motion.button>
           </div>
 
-          {/* Tips */}
-          <div className="mt-6 space-y-2">
-            <div className="flex items-start gap-2.5 text-xs text-white/25">
-              <span className="text-white/40 shrink-0 font-bold">TIP</span>
-              <span>For public Codeforces contests, leave Group ID empty. For private group contests (Bootcamp), enter the Group ID too.</span>
+          {/* Tips as alerts */}
+          <div className="mt-8 space-y-3">
+            <div className="flex items-start gap-3.5 p-3.5 bg-white/[0.01] border border-white/[0.03] rounded-xl text-xs text-white/35 backdrop-blur-sm">
+              <span className="bg-white/[0.04] border border-white/10 text-white/50 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider shrink-0 uppercase">Tip</span>
+              <span className="leading-relaxed">For public Codeforces contests, leave Group ID empty. For private group contests (Bootcamp), enter the Group ID too.</span>
             </div>
-            <div className="flex items-start gap-2.5 text-xs text-white/25">
-              <span className="text-white/40 shrink-0 font-bold">TIP</span>
-              <span>Use Replay + <span className="font-mono text-white/40">10x</span> for the best cinematic experience. Press <span className="font-mono text-white/40">Space</span> to pause mid-broadcast.</span>
+            <div className="flex items-start gap-3.5 p-3.5 bg-white/[0.01] border border-white/[0.03] rounded-xl text-xs text-white/35 backdrop-blur-sm">
+              <span className="bg-white/[0.04] border border-white/10 text-white/50 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider shrink-0 uppercase">Tip</span>
+              <span className="leading-relaxed">Use Replay + <span className="font-mono text-white/50">10x</span> for the best cinematic experience. Press <span className="font-mono text-white/50">Space</span> to pause mid-broadcast.</span>
             </div>
           </div>
 

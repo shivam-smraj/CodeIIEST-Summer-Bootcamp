@@ -11,42 +11,61 @@ interface LiveTableProps {
   userMap: Record<string, UserMapInfo>;
 }
 
-const ICPC_BG_DARK = '#242424';
-const ICPC_BG_LIGHT = '#2c2c2c';
-const ICPC_GREEN = '#26a65b';
-const ICPC_DARK_GREEN = '#004d00';
-const ICPC_GOLD = '#FAD000';
-const ICPC_SILVER = '#D3D3D3';
-const ICPC_BRONZE = '#CD7F32';
+// Premium color palettes
+const ROW_BG_DARK = '#0a0b0e';
+const ROW_BG_LIGHT = '#0e0f13';
+const BORDER_COLOR = 'rgba(255,255,255,0.03)';
 
 export function LiveTable({ scoreboard, problems, firstSolves, userMap }: LiveTableProps) {
   
-  const getRankColor = (index: number) => {
-    if (index === 0) return ICPC_GOLD;
-    if (index === 1) return ICPC_SILVER;
-    if (index === 2) return ICPC_BRONZE;
-    return 'transparent';
-  };
-  
-  const getRankTextColor = (index: number) => {
-    if (index <= 2) return '#000000';
-    return '#ffffff';
+  const getRankBadgeStyle = (index: number) => {
+    if (index === 0) {
+      return {
+        background: 'linear-gradient(135deg, #fde047 0%, #eab308 50%, #ca8a04 100%)',
+        color: '#000000',
+        textShadow: '0 1px 1px rgba(255,255,255,0.4)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3)'
+      };
+    }
+    if (index === 1) {
+      return {
+        background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
+        color: '#000000',
+        textShadow: '0 1px 1px rgba(255,255,255,0.4)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3)'
+      };
+    }
+    if (index === 2) {
+      return {
+        background: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)',
+        color: '#ffffff',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3)'
+      };
+    }
+    return {
+      background: 'transparent',
+      color: '#ffffff'
+    };
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-[#1a1a1a] relative">
+    <div className="flex-1 overflow-auto bg-[#07080a] relative scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
       <div className="min-w-max w-full">
         
         {/* Table Header */}
-        <div className="flex items-stretch bg-[#222] text-white text-xs font-bold uppercase sticky top-0 z-20 shadow-md">
-          <div className="w-12 py-3 text-center">#</div>
-          <div className="flex-1 min-w-[200px] py-3 px-4">Name</div>
-          <div className="w-16 py-3 text-center">Σ</div>
-          <div className="w-20 py-3 text-center">Penalty</div>
-          <div className="flex">
+        <div className="flex items-stretch bg-[#0c0d11] text-white/50 text-[11px] font-bold uppercase tracking-wider sticky top-0 z-20 shadow-[0_4px_16px_rgba(0,0,0,0.4)] border-b border-white/[0.05]">
+          <div className="w-12 py-4 text-center">#</div>
+          <div className="flex-1 min-w-[220px] py-4 px-5">Contestant</div>
+          <div className="w-16 py-4 text-center border-l border-white/[0.03]">Σ</div>
+          <div className="w-20 py-4 text-center border-l border-white/[0.03]">Penalty</div>
+          <div className="flex border-l border-white/[0.03]">
             {problems.map(p => (
-              <div key={p.index} className="w-14 py-3 text-center">
+              <div key={p.index} className="w-14 py-4 text-center relative group/tooltip cursor-help hover:text-white transition-colors">
                 {p.index}
+                {/* Custom Tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/tooltip:block bg-[#0e0f13] border border-white/[0.08] text-white text-[10px] px-2.5 py-1.5 rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.6)] whitespace-nowrap z-50 font-semibold tracking-wide normal-case">
+                  {p.index}. {p.name}
+                </div>
               </div>
             ))}
           </div>
@@ -57,28 +76,30 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap }: LiveTa
           <AnimatePresence>
             {scoreboard.map((row, index) => {
               const isEven = index % 2 === 0;
-              const rowBg = isEven ? ICPC_BG_LIGHT : ICPC_BG_DARK;
+              const rowBg = isEven ? ROW_BG_LIGHT : ROW_BG_DARK;
               const mapped = userMap[row.handle.toLowerCase()];
               
               return (
                 <motion.div
                   key={row.handle}
                   layout
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  className="flex items-stretch absolute w-full border-b border-[#1a1a1a]"
-                  style={{ top: index * 40, height: 40, backgroundColor: rowBg }}
+                  transition={{ type: "spring", stiffness: 140, damping: 20 }}
+                  className="flex items-stretch absolute w-full border-b group"
+                  style={{ top: index * 40, height: 40, backgroundColor: rowBg, borderColor: BORDER_COLOR }}
                 >
+                  {/* Rank Cell */}
                   <div 
-                    className="w-12 flex items-center justify-center font-bold text-sm"
-                    style={{ backgroundColor: getRankColor(index), color: getRankTextColor(index) }}
+                    className="w-12 flex items-center justify-center font-bold text-xs"
+                    style={getRankBadgeStyle(index)}
                   >
                     {index + 1}
                   </div>
                   
-                  <div className="flex-1 min-w-[200px] flex items-center px-4 overflow-hidden">
-                    <div className="text-[14px] truncate">
+                  {/* Display Name */}
+                  <div className="flex-1 min-w-[220px] flex items-center px-5 overflow-hidden transition-colors group-hover:bg-white/[0.01]">
+                    <div className="text-[13px] truncate">
                       <CFHandle 
                         handle={row.displayName} 
                         rating={mapped?.rating} 
@@ -87,19 +108,23 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap }: LiveTa
                     </div>
                   </div>
                   
-                  <div className="w-16 flex items-center justify-center font-bold text-white text-[15px]">
+                  {/* Solved Count */}
+                  <div className="w-16 flex items-center justify-center font-black text-white text-[14px] border-l border-white/[0.02] group-hover:bg-white/[0.01]">
                     {row.points}
                   </div>
-                  <div className="w-20 flex items-center justify-center font-mono text-[#aaa] text-sm">
+
+                  {/* Penalty */}
+                  <div className="w-20 flex items-center justify-center font-mono text-white/40 text-xs border-l border-white/[0.02] group-hover:bg-white/[0.01]">
                     {row.penalty}
                   </div>
                   
-                  <div className="flex">
+                  {/* Problem Results */}
+                  <div className="flex border-l border-white/[0.02]">
                     {problems.map(p => {
                       const pr = row.problemResults[p.index];
                       
                       if (!pr) {
-                        return <div key={p.index} className="w-14 border-l border-[#1a1a1a]" />;
+                        return <div key={p.index} className="w-14 border-l border-white/[0.02] group-hover:bg-white/[0.01]" />;
                       }
                       
                       if (pr.isAC) {
@@ -107,19 +132,37 @@ export function LiveTable({ scoreboard, problems, firstSolves, userMap }: LiveTa
                         return (
                           <div 
                             key={p.index} 
-                            className="w-14 border-l border-[#1a1a1a] flex flex-col items-center justify-center text-white"
-                            style={{ backgroundColor: isFirst ? ICPC_DARK_GREEN : ICPC_GREEN }}
+                            className="w-14 border-l border-white/[0.02] flex flex-col items-center justify-center text-white"
+                            style={{ 
+                              background: isFirst 
+                                ? 'linear-gradient(135deg, #0f5132 0%, #003c00 100%)' 
+                                : 'linear-gradient(135deg, #198754 0%, #146c43 100%)',
+                              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                              border: isFirst ? '1px solid rgba(234,179,8,0.2)' : 'none'
+                            }}
                           >
-                            <div className="flex items-center gap-1">
-                              <span className="font-bold text-xs">+{pr.attempts > 0 ? pr.attempts : ''}</span>
+                            <div className="flex items-center gap-0.5">
+                              <span className="font-extrabold text-[11px]">+{pr.attempts > 0 ? pr.attempts : ''}</span>
+                              {isFirst && (
+                                <svg className="w-2.5 h-2.5 text-yellow-400 fill-current shrink-0 animate-pulse" viewBox="0 0 24 24">
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              )}
                             </div>
-                            <span className="text-[10px] opacity-90">{Math.floor((pr.timeSeconds || 0)/60)}</span>
+                            <span className="text-[9px] text-white/75 font-semibold mt-0.5">{Math.floor((pr.timeSeconds || 0)/60)}</span>
                           </div>
                         );
                       } else {
                         return (
-                          <div key={p.index} className="w-14 border-l border-[#1a1a1a] flex flex-col items-center justify-center bg-[#d91e18] text-white">
-                            <span className="font-bold text-xs">-{pr.attempts}</span>
+                          <div 
+                            key={p.index} 
+                            className="w-14 border-l border-white/[0.02] flex flex-col items-center justify-center text-white"
+                            style={{ 
+                              background: 'linear-gradient(135deg, #a71d1d 0%, #821010 100%)',
+                              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                            }}
+                          >
+                            <span className="font-extrabold text-[11px] text-white/90">-{pr.attempts}</span>
                           </div>
                         );
                       }
