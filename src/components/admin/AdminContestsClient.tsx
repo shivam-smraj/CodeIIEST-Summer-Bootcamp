@@ -48,11 +48,31 @@ export function AdminContestsClient() {
   const [isLoading,    setIsLoading]    = useState(true);
   const [expandedId,   setExpandedId]   = useState<string | null>(null);
   const [loadingStand, setLoadingStand] = useState<string | null>(null);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
   const [revertingId,  setRevertingId]  = useState<string | null>(null);
   const [confirmId,    setConfirmId]    = useState<string | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [formData, setFormData] = useState({ cfContestId: '', groupId: '', contestName: '', weekNumber: '1' });
+
+  const handleArchive = async (contest: any) => {
+    try {
+      setArchivingId(contest._id);
+      const res = await fetch('/api/admin/archive-contest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contestId: contest.cfContestId, groupId: contest.groupId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to archive');
+      alert(`Success: ${data.message}\nSize reduced from ${data.sizeBefore} to ${data.sizeAfter}`);
+      window.location.reload();
+    } catch (err) {
+      alert(`Archive failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setArchivingId(null);
+    }
+  };
 
   useEffect(() => {
     fetch('/api/admin/contests')
@@ -284,21 +304,35 @@ export function AdminContestsClient() {
                 </div>
               </div>
 
-              {/* Expand button */}
+              {/* Expand button & Archive Button */}
               {c.status === 'SCHEDULED' ? (
                 <div style={{ background: 'transparent', padding: '7px 14px', color: '#64748b', fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
                   Awaiting Sync
                 </div>
               ) : (
-                <button onClick={() => loadStandings(c)}
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
-                  {isLoadingSt
-                    ? <RefreshCw style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} />
-                    : isExpanded
-                      ? <ChevronDown style={{ width: 13, height: 13 }} />
-                      : <ChevronRight style={{ width: 13, height: 13 }} />}
-                  Full Standings
-                </button>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button onClick={() => loadStandings(c)}
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600 }}>
+                    {isLoadingSt
+                      ? <RefreshCw style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} />
+                      : isExpanded
+                        ? <ChevronDown style={{ width: 13, height: 13 }} />
+                        : <ChevronRight style={{ width: 13, height: 13 }} />}
+                    Full Standings
+                  </button>
+                  
+                  {/* Archive Button */}
+                  {c.replayUrl ? (
+                     <a href={c.replayUrl} target="_blank" rel="noreferrer" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#34d399', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+                       Archived (R2)
+                     </a>
+                  ) : (
+                     <button onClick={() => handleArchive(c)} disabled={archivingId === c._id}
+                       style={{ background: archivingId === c._id ? '#475569' : '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 14px', cursor: archivingId === c._id ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700 }}>
+                       {archivingId === c._id ? <RefreshCw style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} /> : 'Archive to CDN'}
+                     </button>
+                  )}
+                </div>
               )}
 
               {/* Revert button */}

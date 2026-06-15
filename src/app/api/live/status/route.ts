@@ -12,9 +12,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch chronological submissions (oldest first)
-    const submissions = await getCFStatus(contestId, groupId);
+    const allSubmissions = await getCFStatus(contestId, groupId);
+    
+    // DELTA POLLING: Only return submissions starting from this index
+    const fromIndex = parseInt(searchParams.get('fromIndex') || '0', 10);
+    const submissions = fromIndex > 0 ? allSubmissions.slice(fromIndex) : allSubmissions;
 
-    return NextResponse.json({ submissions });
+    return NextResponse.json({ submissions, total: allSubmissions.length });
   } catch (error) {
     console.error('[LIVE API STATUS ERROR]', error);
     return NextResponse.json(

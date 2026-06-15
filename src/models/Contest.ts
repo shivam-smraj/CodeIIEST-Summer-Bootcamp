@@ -30,6 +30,7 @@ export interface IContest extends Document {
   syncedBy: string;       // email of admin who triggered the sync
   participantCount: number;
   updatedUserCount: number;
+  replayUrl?: string;
 
   // Scoring
   scoreType: 'cf-rules' | 'icpc-rules'; // how scores were calculated
@@ -62,6 +63,7 @@ const ContestSchema = new Schema<IContest>(
     syncedBy:         { type: String, required: true },
     participantCount: { type: Number, default: 0 },
     updatedUserCount: { type: Number, default: 0 },
+    replayUrl:        { type: String },
     scoreType:        { type: String, enum: ['cf-rules', 'icpc-rules'], default: 'cf-rules' },
     standings:        { type: [ContestStandingSchema], default: [] },
   },

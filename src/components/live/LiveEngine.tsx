@@ -34,6 +34,8 @@ export default function LiveEngine() {
   const [problems, setProblems] = useState<CFProblem[]>([]);
   const [userMap, setUserMap] = useState<Record<string, UserMapInfo>>({});
   const [officialRanks, setOfficialRanks] = useState<Record<string, number>>({});
+  
+  const submissionsLenRef = useRef<number>(0);
   const [submissions, setSubmissions] = useState<CFSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,9 +51,16 @@ export default function LiveEngine() {
   const pollRanksRef = useRef<NodeJS.Timeout | null>(null);
 
   // ── Fetch fresh submissions (used at startup + polled in live mode) ──
-  const fetchSubmissions = useCallback(async (cId: string, gId?: string): Promise<CFSubmission[] | null> => {
+  const fetchSubmissions = useCallback(async (cId: string, gId?: string, fromIndex: number = 0, replayUrl?: string): Promise<CFSubmission[] | null> => {
     try {
-      let sUrl = `/api/live/status?contestId=${cId}`;
+      if (replayUrl) {
+        // FAST PATH: Download entire static JSON directly from Cloudflare R2!
+        const rRes = await fetch(replayUrl);
+        if (!rRes.ok) throw new Error('Failed to load replay from CDN');
+        return (await rRes.json()) as CFSubmission[];
+      }
+      
+      let sUrl = `/api/live/status?contestId=${cId}&fromIndex=${fromIndex}`;
       if (gId) sUrl += `&groupId=${gId}`;
       const sRes = await fetch(sUrl);
       const sData = await sRes.json();
@@ -93,9 +102,10 @@ export default function LiveEngine() {
       setUserMap(data.userMap);
       setOfficialRanks(data.officialRanks || {});
 
-      const subs = await fetchSubmissions(contestId, groupId || undefined);
+      const subs = await fetchSubmissions(contestId, groupId || undefined, 0, data.contest.replayUrl);
       if (!subs) throw new Error('Failed to fetch submissions');
       
+      submissionsLenRef.current = subs.length;
       setSubmissions(subs);
       setLastUpdated(new Date());
       setCurrentTime(0);
@@ -154,12 +164,17 @@ export default function LiveEngine() {
     if (pollRanksRef.current) clearInterval(pollRanksRef.current);
 
     if (appMode !== 'playing' || mode !== 'live') return;
+    if (contest?.replayUrl) return; // Do not poll for finished static replays!
 
     const pollSubs = async () => {
       setIsPolling(true);
-      const subs = await fetchSubmissions(contestId, groupId || undefined);
-      if (subs) {
-        setSubmissions(subs);
+      const subs = await fetchSubmissions(contestId, groupId || undefined, submissionsLenRef.current);
+      if (subs && subs.length > 0) {
+        setSubmissions(prev => {
+          const updated = [...prev, ...subs];
+          submissionsLenRef.current = updated.length; // Ensure immediate sync
+          return updated;
+        });
         setLastUpdated(new Date());
       }
       setIsPolling(false);

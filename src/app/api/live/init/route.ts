@@ -58,6 +58,11 @@ export async function GET(req: NextRequest) {
     // By passing targetHandles, Codeforces API filters the payload directly on their server!
     const standings = await getCFStandings(contestId, groupId, targetHandles);
 
+    // Fetch dbContest for replayUrl
+    const { Contest } = await import('@/models/Contest');
+    const dbContest = await Contest.findOne({ cfContestId: contestId }).lean();
+    const replayUrl = dbContest?.replayUrl || null;
+
     // 3. Map participant handles to official Codeforces ranks
     const officialRanks: Record<string, number> = {};
     if (standings.rows && Array.isArray(standings.rows)) {
@@ -70,7 +75,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      contest: standings.contest,
+      contest: { ...standings.contest, replayUrl },
       problems: standings.problems,
       userMap,
       officialRanks,

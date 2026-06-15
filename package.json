@@ -12,6 +12,7 @@
     "reset:contest": "npx tsx --env-file=.env.local scripts/reset-contest.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1068.0",
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
