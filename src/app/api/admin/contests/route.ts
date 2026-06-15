@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       : {
           cfContestId: 1, contestName: 1, weekNumber: 1,
           syncedAt: 1, syncedBy: 1, participantCount: 1,
-          updatedUserCount: 1, scoreType: 1,
+          updatedUserCount: 1, scoreType: 1, status: 1, groupId: 1,
           'standings.cfHandle': 1, 'standings.rank': 1, 'standings.points': 1,
         };
 

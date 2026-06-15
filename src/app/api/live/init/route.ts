@@ -13,22 +13,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'contestId is required' }, { status: 400 });
     }
 
-    // 1. Fetch CF Standings just to get Contest metadata and Problems
-    // We don't care about the rows here.
-    const standings = await getCFStandings(contestId, groupId);
-
-    // 2. Fetch User map from DB
+    // 1. Fetch User map from DB first
     await connectToDatabase();
     const users = await User.find({ cfHandle: { $exists: true, $ne: '' } }).lean();
     
+    const targetHandles: string[] = [];
     const userMap: Record<string, { firstName: string; fullName: string; rollId: string; rating?: number; rank?: string }> = {};
+
     users.forEach((u: any) => {
       if (u.cfHandle) {
-        // Extract first name
+        const handleLow = u.cfHandle.toLowerCase();
+        targetHandles.push(u.cfHandle);
         const nameParts = (u.displayName || u.name || '').split(' ');
         const firstName = nameParts[0] || u.cfHandle;
         
-        userMap[u.cfHandle.toLowerCase()] = {
+        userMap[handleLow] = {
           firstName,
           fullName: u.displayName || u.name || u.cfHandle,
           rollId: u.rollId || 'UNKNOWN',
@@ -37,6 +36,27 @@ export async function GET(req: NextRequest) {
         };
       }
     });
+
+    // Add friends from URL
+    const friendsParam = searchParams.get('friends');
+    if (friendsParam) {
+      const friends = friendsParam.split(',').map(f => f.trim()).filter(Boolean);
+      friends.forEach(f => {
+        const handleLow = f.toLowerCase();
+        if (!userMap[handleLow]) {
+          targetHandles.push(f);
+          userMap[handleLow] = {
+            firstName: f,
+            fullName: `${f} (Friend)`,
+            rollId: 'FRIEND',
+          };
+        }
+      });
+    }
+
+    // 2. Fetch CF Standings
+    // By passing targetHandles, Codeforces API filters the payload directly on their server!
+    const standings = await getCFStandings(contestId, groupId, targetHandles);
 
     // 3. Map participant handles to official Codeforces ranks
     const officialRanks: Record<string, number> = {};

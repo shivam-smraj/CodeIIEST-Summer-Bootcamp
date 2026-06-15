@@ -173,6 +173,7 @@ export function SyncContestClient() {
         body: JSON.stringify({
           contestId:    preview.contest.id,
           weekNumber:   preview.weekNumber,
+          groupId:      isPrivate && groupId.trim() ? groupId.trim() : undefined,
           contestName:  preview.contest.name,
           contestType:  preview.contest.type,
           scoreType:    preview.scoreType,

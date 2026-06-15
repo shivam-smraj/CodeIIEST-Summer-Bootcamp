@@ -19,6 +19,11 @@ export interface IContest extends Document {
   cfContestId: string;    // Codeforces contest ID (numeric string, e.g. "1923")
   contestName: string;    // From CF API: contest.name
   weekNumber: number;     // 1-8, which bootcamp week this corresponds to
+  groupId?: string;       // Optional CF group code if it's a private group contest
+  
+  // State
+  status: 'SCHEDULED' | 'SYNCED'; // SCHEDULED = upcoming/live, SYNCED = finished & scores processed
+  startTimeSeconds?: number;      // When the contest starts (used for upcoming sorting)
 
   // Sync metadata
   syncedAt: Date;
@@ -50,6 +55,9 @@ const ContestSchema = new Schema<IContest>(
     cfContestId:      { type: String, required: true, unique: true },
     contestName:      { type: String, required: true },
     weekNumber:       { type: Number, required: true, min: 1, max: 8 },
+    groupId:          { type: String, required: false },
+    status:           { type: String, enum: ['SCHEDULED', 'SYNCED'], default: 'SYNCED' },
+    startTimeSeconds: { type: Number, required: false },
     syncedAt:         { type: Date, default: Date.now },
     syncedBy:         { type: String, required: true },
     participantCount: { type: Number, default: 0 },
@@ -64,6 +72,7 @@ const ContestSchema = new Schema<IContest>(
 
 ContestSchema.index({ weekNumber: 1 });
 ContestSchema.index({ syncedAt: -1 });
+ContestSchema.index({ status: 1 });
 
 export const Contest: Model<IContest> =
   (mongoose.models.Contest as Model<IContest>) ??

@@ -1,5 +1,6 @@
 import LiveEngine from '@/components/live/LiveEngine';
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Live Leaderboard | CodeIIEST Bootcamp',
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
 export default function LiveLeaderboardPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-slate-100 flex flex-col">
-      <LiveEngine />
+      <Suspense fallback={<div className="p-8 text-white">Loading Scoreboard Engine...</div>}>
+        <LiveEngine />
+      </Suspense>
     </div>
   );
 }

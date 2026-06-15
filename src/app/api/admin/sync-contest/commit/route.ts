@@ -145,6 +145,7 @@ export async function POST(req: NextRequest) {
       cfContestId:      contestId,
       contestName,
       weekNumber,
+      groupId:          groupId || undefined,
       syncedAt:         new Date(),
       syncedBy:         session.user.email ?? 'unknown',
       participantCount: includedParticipants.length,

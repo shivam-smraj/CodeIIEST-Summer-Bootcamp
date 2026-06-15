@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { ExternalLink, ChevronDown, ChevronRight, Trophy, RefreshCw, Trash2, AlertTriangle } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronRight, Trophy, RefreshCw, Trash2, AlertTriangle, CalendarPlus, X } from 'lucide-react';
 import { WEEK_TOPICS } from '@/lib/constants';
 
 const TOPICS = [...WEEK_TOPICS];
@@ -39,6 +39,8 @@ interface ContestLog {
   updatedUserCount: number;
   scoreType: 'cf-rules' | 'icpc-rules';
   standings?: ContestStanding[];
+  status?: 'SCHEDULED' | 'SYNCED';
+  groupId?: string;
 }
 
 export function AdminContestsClient() {
@@ -48,6 +50,9 @@ export function AdminContestsClient() {
   const [loadingStand, setLoadingStand] = useState<string | null>(null);
   const [revertingId,  setRevertingId]  = useState<string | null>(null);
   const [confirmId,    setConfirmId]    = useState<string | null>(null);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [formData, setFormData] = useState({ cfContestId: '', groupId: '', contestName: '', weekNumber: '1' });
 
   useEffect(() => {
     fetch('/api/admin/contests')
@@ -98,6 +103,31 @@ export function AdminContestsClient() {
     }
   };
 
+  const handleScheduleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsScheduling(true);
+    try {
+      const res = await fetch('/api/admin/contests/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Contest scheduled successfully!');
+        setContests(prev => [...prev, data.contest].sort((a, b) => a.weekNumber - b.weekNumber));
+        setShowSchedule(false);
+        setFormData({ cfContestId: '', groupId: '', contestName: '', weekNumber: '1' });
+      } else {
+        toast.error(data.error || 'Failed to schedule contest');
+      }
+    } catch (err) {
+      toast.error('Network error while scheduling');
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -136,7 +166,63 @@ export function AdminContestsClient() {
             <p style={{ color: '#fff', fontWeight: 900, fontSize: 22, fontFamily: 'monospace' }}>{value}</p>
           </div>
         ))}
+        
+        {/* Schedule Button */}
+        <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+          <button onClick={() => setShowSchedule(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+            <CalendarPlus style={{ width: 18, height: 18 }} />
+            Schedule Upcoming Contest
+          </button>
+        </div>
       </div>
+
+      {/* Schedule Modal */}
+      {showSchedule && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, padding: 32, width: '100%', maxWidth: 450, position: 'relative' }}>
+            <button onClick={() => setShowSchedule(false)} style={{ position: 'absolute', top: 24, right: 24, background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+              <X style={{ width: 24, height: 24 }} />
+            </button>
+            <h2 style={{ color: '#fff', fontSize: 24, fontWeight: 900, marginBottom: 8 }}>Schedule Contest</h2>
+            <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>Add an upcoming or live contest to the dashboard before syncing it.</p>
+            
+            <form onSubmit={handleScheduleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>CF Contest ID *</label>
+                <input required type="text" value={formData.cfContestId} onChange={e => setFormData({ ...formData, cfContestId: e.target.value })}
+                  placeholder="e.g. 696557"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 16px', color: '#fff', fontSize: 14 }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Contest Name *</label>
+                <input required type="text" value={formData.contestName} onChange={e => setFormData({ ...formData, contestName: e.target.value })}
+                  placeholder="e.g. CodeIIEST Week 1"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 16px', color: '#fff', fontSize: 14 }} />
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Week Number *</label>
+                  <select required value={formData.weekNumber} onChange={e => setFormData({ ...formData, weekNumber: e.target.value })}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 16px', color: '#fff', fontSize: 14 }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(w => <option key={w} value={w} style={{ background: '#0f172a' }}>Week {w}</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Group ID (Optional)</label>
+                  <input type="text" value={formData.groupId} onChange={e => setFormData({ ...formData, groupId: e.target.value })}
+                    placeholder="e.g. P1htAKU3hf"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 16px', color: '#fff', fontSize: 14 }} />
+                </div>
+              </div>
+              <button disabled={isScheduling} type="submit"
+                style={{ background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 10, padding: '14px', fontWeight: 700, fontSize: 16, cursor: isScheduling ? 'not-allowed' : 'pointer', marginTop: 8 }}>
+                {isScheduling ? 'Scheduling...' : 'Schedule Contest'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Contest cards */}
       {contests.map((c) => {
@@ -163,6 +249,15 @@ export function AdminContestsClient() {
                     {c.contestName}
                     <ExternalLink style={{ width: 12, height: 12, opacity: 0.4 }} />
                   </a>
+                  {c.status === 'SCHEDULED' ? (
+                    <span style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 20, padding: '1px 8px', fontSize: 10, fontWeight: 700, color: '#fbbf24' }}>
+                      SCHEDULED
+                    </span>
+                  ) : (
+                    <span style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 20, padding: '1px 8px', fontSize: 10, fontWeight: 700, color: '#34d399' }}>
+                      SYNCED
+                    </span>
+                  )}
                   <span style={{ background: c.scoreType === 'icpc-rules' ? 'rgba(167,139,250,0.12)' : 'rgba(96,165,250,0.12)', border: `1px solid ${c.scoreType === 'icpc-rules' ? 'rgba(167,139,250,0.3)' : 'rgba(96,165,250,0.3)'}`, borderRadius: 20, padding: '1px 8px', fontSize: 10, fontWeight: 700, color: c.scoreType === 'icpc-rules' ? '#c4b5fd' : '#60a5fa' }}>
                     {c.scoreType === 'icpc-rules' ? 'ICPC' : 'CF'}
                   </span>
@@ -190,15 +285,21 @@ export function AdminContestsClient() {
               </div>
 
               {/* Expand button */}
-              <button onClick={() => loadStandings(c)}
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
-                {isLoadingSt
-                  ? <RefreshCw style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} />
-                  : isExpanded
-                    ? <ChevronDown style={{ width: 13, height: 13 }} />
-                    : <ChevronRight style={{ width: 13, height: 13 }} />}
-                Full Standings
-              </button>
+              {c.status === 'SCHEDULED' ? (
+                <div style={{ background: 'transparent', padding: '7px 14px', color: '#64748b', fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
+                  Awaiting Sync
+                </div>
+              ) : (
+                <button onClick={() => loadStandings(c)}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
+                  {isLoadingSt
+                    ? <RefreshCw style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} />
+                    : isExpanded
+                      ? <ChevronDown style={{ width: 13, height: 13 }} />
+                      : <ChevronRight style={{ width: 13, height: 13 }} />}
+                  Full Standings
+                </button>
+              )}
 
               {/* Revert button */}
               {isConfirming ? (

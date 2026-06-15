@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { CFContest, CFProblem, CFSubmission } from '@/types/codeforces';
 import type { AppMode, ContestMode, FilterMode, ScoreboardTheme, UserMapInfo, ScoreRow } from './types';
 import { SetupScreen } from './SetupScreen';
@@ -12,13 +13,22 @@ const LIVE_POLL_INTERVAL_MS = 30_000;   // re-fetch submissions every 30 s
 const RANKS_POLL_INTERVAL_MS = 120_000; // re-fetch official ranks every 2 min
 
 export default function LiveEngine() {
+  const searchParams = useSearchParams();
+  const initContestId = searchParams.get('contestId') || '';
+  const initGroupId = searchParams.get('groupId') || '';
+  const initMode = (searchParams.get('mode') as ContestMode) || 'replay';
+  const initFriends = searchParams.get('friends') || '';
+
   const [appMode, setAppMode] = useState<AppMode>('setup');
-  const [contestId, setContestId] = useState('');
-  const [groupId, setGroupId] = useState('');
-  const [mode, setMode] = useState<ContestMode>('replay');
+  const [contestId, setContestId] = useState(initContestId);
+  const [groupId, setGroupId] = useState(initGroupId);
+  const [mode, setMode] = useState<ContestMode>(initMode);
+  const [friends, setFriends] = useState(initFriends);
   const [speed, setSpeed] = useState<number>(10);
   const [filter, setFilter] = useState<FilterMode>('bootcamp');
   const [theme, setTheme] = useState<ScoreboardTheme>('icpc');
+
+  const [hasAutoInit, setHasAutoInit] = useState(false);
 
   const [contest, setContest] = useState<CFContest | null>(null);
   const [problems, setProblems] = useState<CFProblem[]>([]);
@@ -57,6 +67,7 @@ export default function LiveEngine() {
     try {
       let url = `/api/live/init?contestId=${cId}`;
       if (gId) url += `&groupId=${gId}`;
+      if (friends) url += `&friends=${encodeURIComponent(friends)}`;
       const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) return null;
@@ -72,6 +83,7 @@ export default function LiveEngine() {
     try {
       let url = `/api/live/init?contestId=${contestId}`;
       if (groupId) url += `&groupId=${groupId}`;
+      if (friends) url += `&friends=${encodeURIComponent(friends)}`;
       const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -94,6 +106,13 @@ export default function LiveEngine() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (initContestId && !hasAutoInit) {
+      setHasAutoInit(true);
+      fetchInit();
+    }
+  }, [initContestId, hasAutoInit]);
 
   // ── Clock tick effect ────────────────────────────────────────────────
   useEffect(() => {
@@ -332,6 +351,26 @@ export default function LiveEngine() {
               }}
             />
           </div>
+        </div>
+      )}
+      
+      {/* "Jump to Final 30 Mins" button for Replay mode */}
+      {mode === 'replay' && contest?.durationSeconds && (
+        <div className="flex justify-end px-4 py-2" style={{ background: isDark ? '#07080a' : '#f0f2f5' }}>
+          <button 
+            onClick={() => {
+              const skipTo = Math.max(0, contest.durationSeconds - 1800);
+              setCurrentTime(skipTo);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors"
+            style={{ 
+              background: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              color: isDark ? '#fca5a5' : '#ef4444',
+              border: isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'
+            }}
+          >
+            ▶ Jump to Final 30 Mins
+          </button>
         </div>
       )}
 

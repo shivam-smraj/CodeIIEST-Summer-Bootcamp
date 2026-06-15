@@ -129,15 +129,23 @@ export async function getSingleCFUser(handle: string): Promise<CFUser | null> {
  *
  * @param contestId  Numeric CF contest ID
  * @param groupId    Optional: CF group code for private group contests (e.g. "P1htAKU3hf")
+ * @param targetHandles Optional array of specific handles to fetch, massively reducing response size
  */
 export async function getCFStandings(
   contestId: string,
   groupId?: string,
+  targetHandles?: string[],
 ): Promise<CFStandingsResponse['result']> {
 
   const params: Record<string, string> = {
     contestId,
   };
+
+  // Only use handles filter for private group contests, 
+  // as CF rejects extra parameters for public anonymous requests.
+  if (targetHandles && targetHandles.length > 0 && groupId) {
+    params.handles = targetHandles.map(encodeURIComponent).join(';');
+  }
 
   // Private group contests need groupId, and we can use extra params
   if (groupId) {
@@ -157,7 +165,7 @@ export async function getCFStandings(
   let res: Response;
   try {
     res = await fetch(url, {
-      cache: 'no-store',
+      next: { revalidate: 15 }, // 15-second high-speed cache lock
       headers: { 'User-Agent': 'CodeIIEST-Bootcamp/1.0' },
     });
   } catch (err) {
@@ -235,7 +243,7 @@ export async function getCFStatus(
   let res: Response;
   try {
     res = await fetch(url, {
-      cache: 'no-store',
+      next: { revalidate: 15 }, // 15-second high-speed cache lock
       headers: { 'User-Agent': 'CodeIIEST-Bootcamp/1.0' },
     });
   } catch (err) {

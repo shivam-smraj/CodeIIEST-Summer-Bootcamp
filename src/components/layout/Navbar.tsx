@@ -19,6 +19,7 @@ import { Menu, X, LogIn, LogOut, User, Shield, LayoutDashboard } from 'lucide-re
 const NAV_LINKS = [
   { href: '/',            label: 'Home' },
   { href: '/leaderboard', label: 'Leaderboard' },
+  // { href: '/standing',    label: 'Live Contests' }, // Temporarily hidden
   { href: '/sessions',    label: 'Sessions' },
   { href: '/team',        label: 'Team' },
 ];
@@ -62,6 +63,11 @@ export function Navbar() {
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  // Hide the global modern navbar on the Standing dashboard to allow the classic Codeforces theme
+  if (pathname === '/standing') {
+    return null;
+  }
 
   return (
     <>
