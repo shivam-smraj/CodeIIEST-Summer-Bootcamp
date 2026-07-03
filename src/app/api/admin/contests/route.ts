@@ -41,16 +41,16 @@ export async function GET(req: NextRequest) {
         const user = userByHandle.get(s.cfHandle.toLowerCase());
         return {
           ...s,
-          displayName:  user?.displayName ?? null,
-          rollId:       user?.rollId ?? null,
-          department:   user?.department ?? null,
-          batch:        user?.batch ?? null,
-          email:        user?.email ?? null,
-          cfRating:     user?.cfRating ?? null,
-          cfRank:       user?.cfRank ?? null,
-          allScores:    user?.scores ?? [],
-          totalPoints:  user?.totalPoints ?? 0,
-          weekScore:    user?.scores?.[(contest.weekNumber - 1)] ?? s.points,
+          displayName: user?.displayName ?? null,
+          rollId: user?.rollId ?? null,
+          department: user?.department ?? null,
+          batch: user?.batch ?? null,
+          email: user?.email ?? null,
+          cfRating: user?.cfRating ?? null,
+          cfRank: user?.cfRank ?? null,
+          allScores: user?.scores ?? [],
+          totalPoints: user?.totalPoints ?? 0,
+          weekScore: user?.scores?.[(contest.weekNumber - 1)] ?? s.points,
         };
       });
 
@@ -69,11 +69,12 @@ export async function GET(req: NextRequest) {
     const projection = full
       ? {} // include everything
       : {
-          cfContestId: 1, contestName: 1, weekNumber: 1,
-          syncedAt: 1, syncedBy: 1, participantCount: 1,
-          updatedUserCount: 1, scoreType: 1, status: 1, groupId: 1,
-          'standings.cfHandle': 1, 'standings.rank': 1, 'standings.points': 1,
-        };
+        cfContestId: 1, contestName: 1, weekNumber: 1,
+        syncedAt: 1, syncedBy: 1, participantCount: 1,
+        updatedUserCount: 1, scoreType: 1, status: 1, groupId: 1,
+        replayUrl: 1,
+        'standings.cfHandle': 1, 'standings.rank': 1, 'standings.points': 1,
+      };
 
     const contests = await Contest.find({}, projection)
       .sort({ weekNumber: 1 })
@@ -103,13 +104,13 @@ export async function GET(req: NextRequest) {
           return {
             ...s,
             displayName: u?.displayName ?? null,
-            rollId:      u?.rollId ?? null,
-            department:  u?.department ?? null,
-            batch:       u?.batch ?? null,
-            cfRating:    u?.cfRating ?? null,
-            cfRank:      u?.cfRank ?? null,
+            rollId: u?.rollId ?? null,
+            department: u?.department ?? null,
+            batch: u?.batch ?? null,
+            cfRating: u?.cfRating ?? null,
+            cfRank: u?.cfRank ?? null,
             totalPoints: u?.totalPoints ?? 0,
-            weekScore:   u?.scores?.[(c.weekNumber - 1)] ?? s.points,
+            weekScore: u?.scores?.[(c.weekNumber - 1)] ?? s.points,
           };
         }),
       }));
