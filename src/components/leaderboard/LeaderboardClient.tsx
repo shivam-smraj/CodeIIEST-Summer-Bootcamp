@@ -185,7 +185,8 @@ function PodiumCard({ user, place }: { user: LeaderboardUser; place: 1 | 2 | 3 }
   return (
     <div
       title={`${firstName} : ${user.rollId || 'N/A'}`}
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+      onClick={() => window.open(`https://codeforces.com/profile/${user.cfHandle}`, '_blank')}
     >
       <div style={{ position: 'relative' }}>
         <div style={{
@@ -253,7 +254,9 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
           borderBottom: '1px solid rgba(255,255,255,0.04)',
           background: isTop3 ? 'rgba(234,179,8,0.02)' : 'transparent',
           transition: 'background 0.15s ease',
+          cursor: 'pointer',
         }}
+        onClick={() => window.open(`https://codeforces.com/profile/${user.cfHandle}`, '_blank')}
         onMouseEnter={e => { e.currentTarget.style.background = isTop3 ? 'rgba(234,179,8,0.05)' : 'rgba(255,255,255,0.03)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = isTop3 ? 'rgba(234,179,8,0.02)' : 'transparent'; }}
       >
@@ -295,7 +298,9 @@ function LeaderboardRow({ user }: { user: LeaderboardUser }) {
           padding: '12px 14px',
           borderBottom: '1px solid rgba(255,255,255,0.04)',
           background: isTop3 ? 'rgba(234,179,8,0.02)' : 'transparent',
+          cursor: 'pointer',
         }}
+        onClick={() => window.open(`https://codeforces.com/profile/${user.cfHandle}`, '_blank')}
       >
         {/* Top row: rank + avatar + name + total */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

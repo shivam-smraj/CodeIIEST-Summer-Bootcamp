@@ -223,9 +223,9 @@ export default function TeamPage() {
         <div style={{ marginBottom: 64 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 28 }}>
             <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 22 }}>Mentors &amp; Team</h2>
-            <span style={{ color: '#6b7280', fontSize: 13 }}>
+            {/* <span style={{ color: '#6b7280', fontSize: 13 }}>
               Real IIEST Shibpur students — no placeholders
-            </span>
+            </span> */}
           </div>
 
           <div style={{
