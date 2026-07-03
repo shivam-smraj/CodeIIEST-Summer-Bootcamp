@@ -41,6 +41,7 @@ interface ContestLog {
   standings?: ContestStanding[];
   status?: 'SCHEDULED' | 'SYNCED';
   groupId?: string;
+  replayUrl?: string;
 }
 
 export function AdminContestsClient() {

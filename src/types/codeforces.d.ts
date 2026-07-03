@@ -51,6 +51,7 @@ export interface CFContest {
   country?: string;
   city?: string;
   season?: string;
+  replayUrl?: string;
 }
 
 export interface CFContestListResponse {

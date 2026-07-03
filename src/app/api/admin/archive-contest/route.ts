@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAdmin, handleAuthError } from '@/lib/auth-helpers';
 import { getCFStatus } from '@/lib/cf-api';
 import { connectToDatabase } from '@/lib/mongoose';
 import { Contest } from '@/models/Contest';
@@ -21,10 +20,7 @@ const s3 = new S3Client({
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    await requireAdmin();
 
     const { contestId, groupId } = await req.json();
     if (!contestId) {
@@ -75,6 +71,9 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
+    if (error instanceof Error && error.name === 'AuthError') {
+      return handleAuthError(error);
+    }
     console.error('[ARCHIVE CONTEST ERROR]', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error occurred' },
